@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Layout from "../components/Layout/Layout";
 
 const USERS = Array.from({ length: 25 }).map((_, i) => ({
@@ -48,9 +48,9 @@ export default function Users() {
               Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             </p>
           </div>
-          <button className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm">
-            + View Join Requests
-          </button>
+          {/* <button className="bg-gray-900 text-white py-[10px] px-[16px]flex align-center gap-2 rounded-lg text-sm">
+            <img src="/icons/folderback.svg" /> View Join Requests
+          </button> */}
         </div>
 
         {/* Card */}
@@ -109,7 +109,9 @@ export default function Users() {
                     <td className="p-3">{u.clicks.toLocaleString()}</td>
                     <td className="p-3">{u.conversion}</td>
                     <td className="p-3 text-xs text-gray-500">{u.joinedOn}</td>
-                    <td className="p-3 text-gray-400 cursor-pointer">•••</td>
+                    <td className="p-3 relative">
+                      <ActionMenu />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -156,5 +158,51 @@ export default function Users() {
         </div>
       </div>
     </Layout>
+  );
+}
+
+function ActionMenu() {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  // close on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative inline-block" ref={menuRef}>
+      {/* 3 dots */}
+      <button
+        onClick={() => setOpen(!open)}
+        className="text-gray-400 text-start hover:text-gray-700 text-xl"
+      >
+        ⋯
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
+          <button className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50">
+            <img src="/icons/ic-veiw.svg" />
+            View
+          </button>
+          <button className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50">
+            <img src="/icons/ic-edit.svg" />
+            Edit
+          </button>
+          <button className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50">
+            <img src="/icons/ic-cancel.svg" />
+            De-activate Affiliate
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

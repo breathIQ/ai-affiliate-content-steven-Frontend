@@ -9,26 +9,26 @@ export default function PublishingSuccess() {
         {/* Cards */}
         <div className="flex gap-6">
           {/* Posts Published */}
-          <div className="flex-1 border-2 border-dashed border-gray-200 rounded-xl p-6 text-center">
-            <p className="text-3xl font-bold text-gray-900">245</p>
+          <div className="flex-1 border-2 border-dotted border-gray-200 rounded-xl py-[8px] px-[16px]">
+            <p className="text-[22px] font-bold text-gray-900">245</p>
             <p className="text-sm text-gray-500 mt-2">Posts Published</p>
           </div>
 
           {/* Posts Generated */}
-          <div className="flex-1 border-2 border-dashed border-gray-200 rounded-xl p-6 text-center">
-            <p className="text-3xl font-bold text-gray-900">250</p>
+          <div className="flex-1 border-2 border-dotted border-gray-200 rounded-xl py-[8px] px-[16px]">
+            <p className="text-[22px] font-bold text-gray-900">250</p>
             <p className="text-sm text-gray-500 mt-2">Posts Generated</p>
           </div>
         </div>
 
         <div className="my-4">
-          <p className="text-xs text-gray-500 mt-2">92%</p>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-purple-600 h-2 rounded-full w-[92%]" />
+          <p className="text-[16px] py-2 text-gray-500 mt-2">92%</p>
+          <div className="w-full bg-gray-200 rounded-full h-[16px]">
+            <div className="bg-purple-600 h-[16px] rounded-full w-[92%]" />
           </div>
         </div>
       </div>
-      <div className="bg-white rounded-xl shadow p-5 mt-4">
+      {/* <div className="bg-white rounded-xl shadow p-5 mt-4">
         <div className="">
           <p className="text-lg font-semibold">357</p>
           <p className="text-xs text-gray-500 mb-2">Affiliate Join Requests</p>
@@ -47,7 +47,7 @@ export default function PublishingSuccess() {
             </span>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

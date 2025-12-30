@@ -11,13 +11,13 @@ function Dashboard() {
   return (
     <Layout>
       <div className=" bg-gray-100">
-        <div className="max-w-7xl mx-auto  min-h-screen pt-4">
+        <div className="max-w-7xl mx-auto  min-h-screen pt-10">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <UsersCard />
             <PublishingSuccess />
             <ClicksConversion />
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid pb-10 grid-cols-1 lg:grid-cols-2 gap-6">
             <TopAffiliates />
             <ChapterBubbleChart />
           </div>

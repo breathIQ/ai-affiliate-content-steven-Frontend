@@ -28,10 +28,10 @@ const affiliates = [
 ];
 
 const tabs = [
-  { id: "generated", label: "Generated", icon: "/icons/ic-generate.svg" },
   { id: "published", label: "Published", icon: "/icons/ic-posts.svg" },
+  { id: "generated", label: "Generated", icon: "/icons/ic-generate.svg" },
   { id: "clicks", label: "Clicks", icon: "/icons/ic-click.svg" },
-  { id: "conversion", label: "Conversion", icon:"/icons/ic-conversion.svg" },
+  // { id: "conversion", label: "Conversion", icon:"/icons/ic-conversion.svg" },
 ];
 
 export default function TopAffiliates() {

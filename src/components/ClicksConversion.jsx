@@ -18,11 +18,11 @@ export default function ClicksConversion() {
         borderColor: "#EC4899",
         tension: 0.4,
       },
-      {
-        data: [15, 18, 16, 20, 19, 22],
-        borderColor: "#FACC15",
-        tension: 0.4,
-      },
+      // {
+      //   data: [15, 18, 16, 20, 19, 22],
+      //   borderColor: "#FACC15",
+      //   tension: 0.4,
+      // },
     ],
   };
 
@@ -33,30 +33,17 @@ export default function ClicksConversion() {
 
   return (
     <div className="bg-white rounded-xl shadow p-5">
-      <h2 className="text-sm font-semibold mb-3">Clicks & Conversion</h2>
-      <hr className="py-6 my-4"/>
-
-      <Line data={data} options={options} height={120} />
-
-      <hr className="pt-4 my-3"/>
-
+      {/* <h2 className="text-sm font-semibold mb-3">Clicks & Conversion</h2> */}
       <div className="flex justify-between border-top">
         <div>
-          <p className="text-lg font-semibold  flex gap-2">
+          <p className="text-xs text-gray-500">Affiliate Clicks</p>
+          <p className="text-[32px] font-semibold pt-2 flex gap-2">
             <img src="/icons/ic-click.svg" />
-            155</p>
-          <p className="text-xs text-gray-500">
-            Affiliate Clicks
+            155
           </p>
-        </div>
-        <div>
-          <p className="text-lg font-semibold  flex gap-2 ">
-            <img src="/icons/ic-conversion.svg" />
-            78
-          </p>
-          <p className="text-xs text-gray-500 ">Conversion</p>
         </div>
       </div>
+      <Line data={data} options={options} height={120} />
     </div>
   );
 }

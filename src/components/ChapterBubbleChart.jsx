@@ -68,7 +68,7 @@ export default function ChapterBubbleChart() {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow p-5 w-full h-[300px]">
+    <div className="bg-white rounded-xl shadow p-5 w-full h">
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-sm font-semibold">Most Used Chapters</h2>
         <div className="flex gap-2 text-xs">
@@ -77,8 +77,10 @@ export default function ChapterBubbleChart() {
         </div>
 
       </div>
+      <div className="h-[300px]">
       <Bubble data={data} options={options} />
-      <div className="flex flex-wrap gap-x-10 gap-y-4 mt-4 text-sm text-gray-600">
+      </div>
+      <div className="flex flex-wrap gap-x-10 gap-y-4 pt-4 mt-0 text-sm text-gray-600">
         {legends.map((item, index) => (
           <div key={index} className="flex items-center gap-2">
             <span className={`w-3 h-3 rounded-full ${item.color}`} />

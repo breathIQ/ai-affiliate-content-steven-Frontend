@@ -1,0 +1,1 @@
+export const apibase= "https://aiaffiliate.betacvinfotech.com/ai-affiliate-content-steven/public/api/v1"
