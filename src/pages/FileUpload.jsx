@@ -1,32 +1,43 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Layout from "../components/Layout/Layout";
+import API from "../services/api";
 
 const FileUpload = () => {
-  const [files, setFiles] = useState([]);
+  // const [files, setFiles] = useState([]);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [filePriview, setFile] = useState({});
+  const [uploading, setUploading] = useState(false);
 
-  const handleFiles = (selectedFiles) => {
-    const newFiles = Array.from(selectedFiles).map((file) => ({
-      id: Date.now() + Math.random(),
-      name: file.name,
-      type: file.type,
-      pages: Math.floor(Math.random() * 300) + 1,
-      words: Math.floor(Math.random() * 200000) + 1000,
-      status: "Processing",
-    }));
+  const handleFiles = async (selectedFiles) => {
+    try {
+      setUploading(true);
 
-    setFiles((prev) => [...newFiles, ...prev]);
+      const formData = new FormData();
 
-    // simulate processing
-    newFiles.forEach((f) => {
-      setTimeout(() => {
-        setFiles((prev) =>
-          prev.map((p) => (p.id === f.id ? { ...p, status: "Processed" } : p))
-        );
-      }, 2000);
+      formData.append("file", selectedFiles[0]);
+      // append multiple files
+     console.log("selectedFiles" ,selectedFiles[0]);
+     
+
+      const res = await API.post("/admin/file/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
     });
+
+      console.log("res" ,res);
+      
+      // backend response (example: uploaded files info)
+      setFile(res.data);
+
+      console.log("Upload success:", res.data);
+    } catch (error) {
+      console.error("File upload failed:", error);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const onDrop = useCallback((e) => {
@@ -34,18 +45,12 @@ const FileUpload = () => {
     handleFiles(e.dataTransfer.files);
   }, []);
 
-  const filteredFiles = files.filter((f) =>
-    f.name.toLowerCase().includes(search.toLowerCase())
-  );
+ 
 
   const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedFiles = filteredFiles.slice(
-    startIndex,
-    startIndex + rowsPerPage
-  );
-
+ 
   const deleteFile = (id) => {
-    setFiles((prev) => prev.filter((f) => f.id !== id));
+    setFile((prev) => prev.filter((f) => f.id !== id));
   };
   const [isOpen, setIsOpen] = useState(false);
 
@@ -139,47 +144,46 @@ const FileUpload = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedFiles.length === 0 && (
+                  {filePriview?.original_name && (
                     <tr>
                       <td colSpan="5" className="p-4 text-center text-gray-400">
                         No files uploaded
                       </td>
                     </tr>
                   )}
-                  {paginatedFiles.map((file) => (
-                    <tr key={file.id} className="border-b">
+                    <tr key={filePriview.id} className="border-b">
                       <td className="p-3 flex items-center gap-2">
                         <span className="text-red-500 font-semibold">
                           <img src="/icons/pdf.svg" />
                         </span>
-                        {file.name}
+                        {filePriview.original_name}
                       </td>
                       <td className="p-3">
                         <div>
                           <p
                             className={`px-3 py-1 flex align-items-center justify-center gap-2 w-[100px] rounded-full text-xs font-medium ${
-                              file.status === "Processed"
+                              filePriview.status === 0
                                 ? "bg-green-100 text-green-700"
                                 : "bg-yellow-100 text-yellow-700"
                             }`}
                           >
                             <img src="/icons/tick.svg" />
-                            {file.status}
+                            {filePriview.status == 1 ?"Processed":"Processing"}
                           </p>
                         </div>
                       </td>
-                      <td className="p-3">{file.pages}</td>
-                      <td className="p-3">{file.words.toLocaleString()}</td>
+                      <td className="p-3">{filePriview.pages || "0"}</td>
+                      <td className="p-3">{filePriview.words || "0"}</td>
                       <td className="p-3">
                         <button
-                          onClick={() => deleteFile(file.id)}
+                          onClick={() => deleteFile(filePriview.id)}
                           className="text-red-500 hover:underline"
                         >
                           <img src="/icons/ic-bin" />
                         </button>
                       </td>
                     </tr>
-                  ))}
+                 
                 </tbody>
               </table>
             </div>

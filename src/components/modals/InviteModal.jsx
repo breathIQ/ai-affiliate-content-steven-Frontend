@@ -1,36 +1,46 @@
 import { useState } from "react";
+import API from "../../services/api";
 
 export default function InviteModal({ isOpen, onClose, onSend }) {
   const [emails, setEmails] = useState("");
 
   if (!isOpen) return null;
 
-  const handleSend = () => {
-    const emailList = emails
-      .split("\n")
-      .map((e) => e.trim())
-      .filter(Boolean);
+  const handleSend = async () => {
+    try {
+      const emailList = emails
+        .split("\n")
+        .map((e) => e.trim())
+        .filter(Boolean);
 
-    onSend(emailList);
-    setEmails("");
-    onClose();
+      if (emailList.length === 0) return;
+
+      const res = await API.post("admin/affiliate/invite", {
+        emails: emailList,
+      });
+
+      console.log(res ,"<<<<<<ASDf");
+      
+      // optional callback if needed
+      onSend?.(emailList);
+
+      setEmails("");
+      onClose();
+    } catch (error) {
+      console.error("Invite failed:", error);
+    }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/40"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       {/* Modal */}
       <div className="relative w-full max-w-md bg-white rounded-xl shadow-lg z-10">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b">
-          <h2 className="font-semibold text-gray-800">
-            Invite Affiliate User
-          </h2>
+          <h2 className="font-semibold text-gray-800">Invite Affiliate User</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-xl"
@@ -54,8 +64,8 @@ export default function InviteModal({ isOpen, onClose, onSend }) {
           />
 
           <p className="text-xs text-gray-400 mt-2">
-            Enter multiple emails to invite more than one user, enter
-            email(s) separated by enter.
+            Enter multiple emails to invite more than one user, enter email(s)
+            separated by enter.
           </p>
         </div>
 
