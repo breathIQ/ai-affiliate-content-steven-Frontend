@@ -44,6 +44,10 @@ const allRoutes = [
     },
     {
         component:<Login/> ,
+        path:"/admin/login"
+    },
+    {
+        component:<Login/> ,
         path:"/login"
     },
     {

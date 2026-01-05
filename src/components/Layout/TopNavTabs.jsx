@@ -4,14 +4,17 @@ import { useLocation, useNavigate } from "react-router-dom";
 export default function TopNavTabs() {
   const location = useLocation();
   const navigate = useNavigate();
+  const user = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : {};
 
-  const defaultTabs =[
+  const defaultTabs = [
     { name: "Dashboard", path: "/u/dashboard" },
     { name: "Users", path: "/u/users" },
     { name: "Files", path: "/u/files" },
   ];
 
-  const userTabs =  [
+  const userTabs = [
     { name: "Dashboard", path: "/u/dashboard" },
     { name: "Library", path: "/u/library" },
     { name: "Schedule", path: "/u/schedule" },
@@ -22,17 +25,17 @@ export default function TopNavTabs() {
 
   /* Sync tabs + active state with URL */
   useEffect(() => {
-    const isUserRoute = location.pathname.startsWith("/u/");
+    // const isUserRoute = location.pathname.startsWith("/u/");
+    if (user?.role_id) {
+      const currentTabs = user?.role_id == 2 ? userTabs : defaultTabs;
+      setTabs(currentTabs);
+      const currentActive = currentTabs.find(
+        (tab) => tab.path === location.pathname
+      );
 
-    const currentTabs = isUserRoute ? userTabs : defaultTabs;
-    setTabs(currentTabs);
-
-    const currentActive = currentTabs.find(
-      (tab) => tab.path === location.pathname
-    );
-
-    setActive(currentActive || null);
-  }, [location.pathname]);
+      setActive(currentActive || null);
+    }
+  }, [user?.role_id]);
 
   return (
     <div className="w-full bg-black px-6 py-3">

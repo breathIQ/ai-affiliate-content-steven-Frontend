@@ -1,6 +1,7 @@
 import { useState } from "react";
 // import Modal from "./Modal";
 import Layout from "../../components/Layout/Layout";
+import PublishModal from "../../components/modals/PublishModal";
 
 export default function DraftPostPage() {
   const [mediaType, setMediaType] = useState("carousel");
@@ -8,6 +9,8 @@ export default function DraftPostPage() {
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState([0, 1, 2, 3]);
+  const [open, setOpen] = useState(false);
+
   const [caption, setCaption] = useState("");
   const [hashtags, setHashtags] = useState([
     "Hashtag #01",
@@ -75,12 +78,12 @@ export default function DraftPostPage() {
               <h1 className="font-semibold">Draft Post</h1>
             </div>
             <div className="flex gap-2">
-              <button
+              {/* <button
                 onClick={() => setScheduleOpen(true)}
                 className="bg-gray-900 text-white py-[10px] px-[16px] rounded-lg flex align-center gap-2"
               >
                 <img src="/icons/ic-add.svg" /> Schedule
-              </button>
+              </button> */}
               <button
                 onClick={() => setPublishOpen(true)}
                 className="bg-pink-500 text-white py-[10px] px-[16px] rounded-lg flex align-center gap-2"
@@ -224,23 +227,6 @@ export default function DraftPostPage() {
           </div>
         </div>
 
-        {/* SCHEDULE MODAL */}
-        <Modal
-          open={scheduleOpen}
-          onClose={() => setScheduleOpen(false)}
-          title="Schedule Post"
-        >
-          <input
-            type="datetime-local"
-            className="w-full border rounded-lg p-2 mb-4"
-          />
-          <button
-            onClick={() => setScheduleOpen(false)}
-            className="bg-gray-900 text-white w-full py-2 rounded-lg"
-          >
-            Schedule
-          </button>
-        </Modal>
 
         {/* PUBLISH MODAL */}
         <Modal
@@ -262,6 +248,12 @@ export default function DraftPostPage() {
           </button>
         </Modal>
       </div>
+      <PublishModal
+        isOpen={publishOpen}
+        onClose={() => setPublishOpen(false)}
+        onSubmit={(data) => console.log(data)}
+      />
+      ;
     </Layout>
   );
 }
