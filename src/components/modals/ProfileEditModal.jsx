@@ -1,72 +1,132 @@
-import { useRef, useState } from "react";
-import { CheckmarkIcon } from "react-hot-toast";
+import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import toast, { CheckmarkIcon } from "react-hot-toast";
+import { getProfileByRole, updateProfileByRole } from "../../services/profile.service";
 
-export function ProfileEditModal({ isOpen, onClose, onSave }) {
-  const [copied, setCopied] = useState(false);
-  const [form, setForm] = useState({
-    name: "John Doe",
-    email: "johndoe@gmail.com",
-    affiliate: "johndoe",
-  });
+const DEFAULT_IMAGE = "https://i.pravatar.cc/80";
+
+export function ProfileEditModal({ isOpen, onClose }) {
   const fileRef = useRef(null);
-  const [image, setImage] = useState("https://i.pravatar.cc/80");
+
+  const [image, setImage] = useState(DEFAULT_IMAGE);
+  const [imageFile, setImageFile] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [social, setSocial] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm();
+
+  const affiliate = watch("affiliate");
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const loadProfile = async () => {
+      try {
+        const profile = await getProfileByRole();
+
+        reset({
+          name: profile.name,
+          email: profile.email,
+          affiliate: profile.affiliate,
+        });
+
+        setImage(profile.avatar || DEFAULT_IMAGE);
+        setImageFile(null);
+        setSocial(profile.social_accounts);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadProfile();
+  }, [isOpen, reset]);
 
   if (!isOpen) return null;
 
   const copyLink = () => {
-    navigator.clipboard.writeText(`https://www.co2book.com/${form.affiliate}`);
+    navigator.clipboard.writeText(
+      `https://www.co2book.com/${affiliate}`
+    );
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
 
-  // Upload image
   const handleUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Optional validation
     if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file");
+      alert("Please upload a valid image");
       return;
     }
 
-    const previewUrl = URL.createObjectURL(file);
-    setImage(previewUrl);
-
-    // 👉 API upload logic goes here
-    // const formData = new FormData();
-    // formData.append("image", file);
-    // axios.post("/api/upload-profile", formData)
+    setImageFile(file);
+    setImage(URL.createObjectURL(file));
   };
 
-  // Remove image
   const handleRemove = () => {
-    setImage("DEFAULT_IMAGE");
+    setImage(DEFAULT_IMAGE);
+    setImageFile(null);
+  };
 
-    // 👉 API remove logic here
-    // axios.delete("/api/remove-profile")
+  const onSubmit = async(data) => {
+    const formData = new FormData();
+
+    // ✅ Only allowed field
+    formData.append("name", data.name);
+
+    // ✅ New avatar
+    if (imageFile) {
+      formData.append("avatar", imageFile);
+    }
+
+    // ✅ Remove avatar
+    if (!imageFile && image === DEFAULT_IMAGE) {
+      formData.append("remove_avatar", 1);
+    }
+
+    console.log(
+      "Submitting FormData:",
+      Object.fromEntries(formData.entries())
+    );
+
+    try {
+      setLoading(true);
+
+      const res = await updateProfileByRole(formData);
+
+      toast.success(res?.message || "Profile updated successfully");
+      onClose();
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to update profile"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white w-[550px] rounded-xl shadow-lg p-5 relative">
-        <button onClick={onClose} className="absolute right-4 top-4">
-          <img src="/icons/ic-close-circle.svg" />
-        </button>
-
         <h2 className="font-semibold text-lg mb-4">Profile</h2>
 
         {/* Avatar */}
-        <div className="flex items-center gap-6 mb-4">
-          <div className="relative w-40 ">
-            {/* Profile Image */}
+        <div className="flex gap-6 items-center mb-4">
+          <div className="relative" style={{ width: "12rem", height: "8rem" }}>
             <img
               src={image}
               alt="Profile"
-              className="w-full h-full rounded-lg object-cover border"
+              className="w-full h-full rounded-lg object-contain border"
             />
 
-            {/* Hidden File Input */}
             <input
               type="file"
               ref={fileRef}
@@ -75,57 +135,59 @@ export function ProfileEditModal({ isOpen, onClose, onSave }) {
               onChange={handleUpload}
             />
 
-            {/* Edit Icon */}
+            {/* Edit */}
             <button
+              type="button"
               onClick={() => fileRef.current.click()}
               className="absolute -top-2 -right-2 bg-white border rounded-full w-7 h-7 flex items-center justify-center shadow hover:bg-gray-100"
-              title="Change photo"
             >
               <img src="/icons/ic-edit.svg" className="w-4 h-4" />
             </button>
 
-            {/* Remove Icon */}
-            {image !== "DEFAULT_IMAGE" && (
+            {/* Remove */}
+            {image !== DEFAULT_IMAGE && (
               <button
+                type="button"
                 onClick={handleRemove}
-                className="absolute -bottom-2 -right-2 bg-white border rounded-full w-7 h-7 flex items-center justify-center shadow hover:bg-red-100 text-sm"
-                title="Remove photo"
+                className="absolute -bottom-2 -right-2 bg-white border rounded-full w-7 h-7 flex items-center justify-center shadow hover:bg-red-100"
               >
                 ✕
               </button>
             )}
           </div>
-          <div>
-            {/* Name */}
-            <label className="text-sm font-medium">Name</label>
-            <input
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full border rounded-md px-3 py-2 mt-1 mb-3"
-            />
 
-            {/* Email */}
-            <label className="text-sm font-medium">Email</label>
+          {/* Fields */}
+          <div className="w-full">
+            <label className="text-sm">Name</label>
             <input
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full border rounded-md px-3 py-2 mt-1 mb-3"
+              {...register("name", { required: "Name is required" })}
+              className="w-full border px-3 py-2 rounded-md"
+            />
+            {errors.name && (
+              <p className="text-xs text-red-500">{errors.name.message}</p>
+            )}
+
+            <label className="text-sm mt-4 block">Email</label>
+            <input
+              {...register("email")}
+              disabled
+              className="w-full border px-3 py-2 rounded-md bg-gray-100 cursor-not-allowed"
             />
           </div>
         </div>
 
         {/* Affiliate */}
-        <label className="text-sm font-medium">Affiliate ID</label>
-        <div className="flex border rounded-md overflow-hidden mt-1 mb-4">
-          <span className="px-3 py-2 text-sm bg-gray-100">
+        <label className="text-sm">Affiliate ID</label>
+        <div className="flex border rounded-md mb-4 bg-gray-100">
+          <span className="px-3 py-2 text-sm">
             https://www.co2book.com/
           </span>
           <input
-            value={form.affiliate}
-            onChange={(e) => setForm({ ...form, affiliate: e.target.value })}
-            className="flex-1 px-2 py-2 text-sm outline-none"
+            {...register("affiliate")}
+            disabled
+            className="flex-1 px-2 py-2 bg-gray-100 cursor-not-allowed"
           />
-          <button onClick={copyLink} className="px-3">
+          <button type="button" onClick={copyLink} className="px-3">
             {copied ? (
               <img src="/icons/ic-check.svg" />
             ) : (
@@ -135,36 +197,58 @@ export function ProfileEditModal({ isOpen, onClose, onSave }) {
         </div>
 
         {/* Social */}
-        <p className="text-sm font-medium mb-2">Social Accounts</p>
-        <div className="flex justify-between gap-3 mb-4">
-          <div className="flex items-center w-[100%] gap-2 border rounded-md px-3 py-2 text-sm">
-            <img src="/icons/insta.svg" />
-            @johndoe
-            <CheckmarkIcon className="text-green-500" size={14} />
-          </div>
-          <button className="flex items-center w-[100%] gap-2 border rounded-md px-3 py-2 text-sm">
-            <img src="/icons/tiktok.svg" />
-            Connect TikTok
-          </button>
-        </div>
+        {social && (
+          <>
+            <p className="text-sm font-medium mb-2">Social Accounts</p>
+            <div className="flex gap-3 mb-4">
+              <div className="flex items-center w-full justify-center gap-2 border rounded-md px-3 py-2 text-sm">
+                <img src="/icons/insta.svg" />
+                {social.instagram?.connected ? (
+                  <span>
+                    {social.instagram.username}
+                    <CheckmarkIcon size={14} className="ml-1 text-green-500" />
+                  </span>
+                ) : (
+                  "Connect Instagram"
+                )}
+              </div>
+
+              <div className="flex items-center w-full justify-center gap-2 border rounded-md px-3 py-2 text-sm">
+                <img src="/icons/tiktok.svg" />
+                {social.tiktok?.connected ? (
+                  <span>
+                    {social.tiktok.username}
+                    <CheckmarkIcon size={14} className="ml-1 text-green-500" />
+                  </span>
+                ) : (
+                  "Connect TikTok"
+                )}
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Footer */}
         <div className="flex justify-between items-center py-[14px]">
           <button className="text-sm bg-red-500 text-white px-3 py-2 rounded-md">
             Logout
           </button>
+
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-200 rounded-md text-sm"
+              className="bg-gray-200 px-4 py-2 rounded-md"
             >
               Cancel
             </button>
+
             <button
-              onClick={() => onSave(form)}
-              className="px-4 py-2 bg-purple-600 text-white rounded-md text-sm"
+              onClick={handleSubmit(onSubmit)}
+              disabled={loading}
+              className="bg-purple-600 text-white px-4 py-2 rounded-md"
             >
-              Save
+              {loading ? "Saving..." : "Save"}
             </button>
           </div>
         </div>
