@@ -3,7 +3,7 @@ import { apibase } from "./contants";
 
 const API = axios.create({
   baseURL: apibase || "http://localhost:5000/api",
-  timeout: 10000,
+  // timeout: 10000,
   headers: {
     "Content-Type": "application/json",
   },
