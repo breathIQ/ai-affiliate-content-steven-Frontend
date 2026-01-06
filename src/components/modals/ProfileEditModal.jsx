@@ -30,7 +30,6 @@ export function ProfileEditModal({ isOpen, onClose }) {
     const loadProfile = async () => {
       try {
         const profile = await getProfileByRole();
-
         reset({
           name: profile.name,
           email: profile.email,

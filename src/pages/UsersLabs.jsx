@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Layout from "../components/Layout/Layout";
-import API from "../services/api";
 import RecentPostsTable from "../components/RecentPostsTable";
 import { useLocation } from "react-router-dom";
 import { getPost } from "../services/post.api";
@@ -14,6 +13,8 @@ export default function UsersLabs() {
   const [totalPages, settotalPages] = useState(0);
   const { state } = useLocation();
  
+  // useEffect()
+
   const loadPost = async () => {
     try {
       const response = await getPost(rowsPerPage,page,search);
@@ -25,6 +26,7 @@ export default function UsersLabs() {
       console.log(error);
     }
   };
+
 
   return (
     <Layout>
@@ -38,7 +40,6 @@ export default function UsersLabs() {
             </p>
           </div>
         </div>
-
         <div className="">
           <RecentPostsTable />
         </div>

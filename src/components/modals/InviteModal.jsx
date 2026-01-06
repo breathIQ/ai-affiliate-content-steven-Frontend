@@ -2,7 +2,7 @@ import { useState } from "react";
 import API from "../../services/api";
 import toast from "react-hot-toast";
 
-export default function InviteModal({ isOpen, onClose, onSend }) {
+export default function InviteModal({ isOpen, onClose }) {
   const [emails, setEmails] = useState("");
  const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))

@@ -6,10 +6,7 @@ import { ChangePasswordModal } from "../modals/ChangePasswordModal";
 const Header = () => {
   const [open, setOpen] = useState(false);
   const access_token = localStorage.getItem("access_token")
-  const handleSend = (emails) => {
-    console.log("Inviting:", emails);
-    // API call here
-  };
+
    const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : {};
@@ -100,7 +97,7 @@ const Header = () => {
       <InviteModal
         isOpen={open}
         onClose={() => setOpen(false)}
-        onSend={handleSend}
+        // onSend={handleSend}
       />
 
       <ProfileEditModal
