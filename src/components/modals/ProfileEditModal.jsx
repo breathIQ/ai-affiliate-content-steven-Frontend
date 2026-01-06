@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import toast, { CheckmarkIcon } from "react-hot-toast";
 import { getProfileByRole, updateProfileByRole } from "../../services/profile.service";
 
-const DEFAULT_IMAGE = "https://i.pravatar.cc/80";
+const DEFAULT_IMAGE = "/images/defaultImage.png";
 
 export function ProfileEditModal({ isOpen, onClose }) {
   const fileRef = useRef(null);

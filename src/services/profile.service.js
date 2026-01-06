@@ -1,5 +1,5 @@
 // src/services/profile.service.js
-import { getUserProfile, getAdminProfile, updateAdminProfile, updateUserProfile } from "./profile.api";
+import { getUserProfile, getAdminProfile, updateAdminProfile, updateUserProfile, updateAdminPassword, updateUserPassword } from "./profile.api";
 import { mapProfileResponse } from "./profile.mapper";
 
 export const getProfileByRole = async () => {
@@ -29,6 +29,24 @@ export const updateProfileByRole = async (formData) => {
 
   if (user?.role_id === 2) {
     return updateUserProfile(formData);
+  }
+
+  throw new Error("Invalid role");
+};
+
+export const updatePasswordByRole = async (payload) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  if (!user?.role_id) {
+    throw new Error("User role not found");
+  }
+
+  if (user.role_id === 1) {
+    return updateAdminPassword(payload);
+  }
+
+  if (user.role_id === 2) {
+    return updateUserPassword(payload);
   }
 
   throw new Error("Invalid role");
