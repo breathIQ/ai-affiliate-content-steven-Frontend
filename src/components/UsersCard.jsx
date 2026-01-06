@@ -16,7 +16,7 @@ ChartJS.register(
   Filler
 );
 
-export default function UsersCard() {
+export default function UsersCard({details}) {
   const data = {
     labels: ["", "", "", "", "", ""],
     datasets: [
@@ -51,6 +51,9 @@ export default function UsersCard() {
     ],
   };
 
+  console.log("details" ,details);
+  
+
   const options = {
     responsive: true,
     plugins: {
@@ -71,9 +74,9 @@ export default function UsersCard() {
             <p className="text-sm text-gray-500">Total Users</p>
           </div>
           <div className="flex items-center gap-2">
-            <p className="text-[32px] font-bold text-gray-900">884</p>
+            <p className="text-[32px] font-bold text-gray-900">{details?.total_users?.count||0}</p>
             <span className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
-              ↑ 18%
+              ↑ {details?.total_users?.growth_percent}%
             </span>
           </div>
         </div>

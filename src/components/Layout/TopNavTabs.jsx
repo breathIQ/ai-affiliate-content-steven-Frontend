@@ -9,15 +9,15 @@ export default function TopNavTabs() {
     : {};
 
   const defaultTabs = [
-    { name: "Dashboard", path: "/u/dashboard" },
-    { name: "Users", path: "/u/users" },
-    { name: "Files", path: "/u/files" },
+    { name: "Dashboard", path: "/dashboard" },
+    { name: "Users", path: "/users" },
+    { name: "Files", path: "/files" },
   ];
 
   const userTabs = [
     { name: "Dashboard", path: "/u/dashboard" },
     { name: "Library", path: "/u/library" },
-    { name: "Schedule", path: "/u/schedule" },
+    // { name: "Schedule", path: "/u/schedule" },
   ];
 
   const [tabs, setTabs] = useState(defaultTabs);

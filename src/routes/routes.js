@@ -5,8 +5,9 @@ import Dashboard from "../pages/Dashboard"
 import FileUpload from "../pages/FileUpload"
 import Users from "../pages/Users"
 import UserDashboard from "../pages/user/UserDashboard"
-import UserSchedule from "../pages/user/UserSchedule"
+// import UserSchedule from "../pages/user/UserSchedule"
 import ViewPdf from "../pages/ViewPdf"
+import UsersLabs from "../pages/UsersLabs"
 
 
 const allRoutes = [
@@ -17,6 +18,10 @@ const allRoutes = [
     {
         component:<Dashboard/> ,
         path:"/dashboard"
+    },
+    {
+        component:<UsersLabs/> ,
+        path:"/users/labs"
     },
     {
         component:<UserDashboard/> ,
@@ -30,17 +35,17 @@ const allRoutes = [
         component:<ViewPdf/> ,
         path:"/pdf-view"
     },
-    {
-        component:<UserSchedule/> ,
-        path:"/u/schedule"
-    },
+    // {
+    //     component:<UserSchedule/> ,
+    //     path:"/u/schedule"
+    // },
     {
         component:<FileUpload/> ,
-        path:"/u/files"
+        path:"/files"
     },
     {
         component:<Users/> ,
-        path:"/u/users"
+        path:"/users"
     },
     {
         component:<Login/> ,

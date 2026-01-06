@@ -1,42 +1,51 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Layout from "../components/Layout/Layout";
 import API from "../services/api";
+import ConfirmDeleteModal from "../components/modals/ConfirmDeleteModal";
+import toast from "react-hot-toast";
 
 const FileUpload = () => {
-  // const [files, setFiles] = useState([]);
-  const [search, setSearch] = useState("");
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
   const [filePriview, setFile] = useState({});
   const [uploading, setUploading] = useState(false);
-
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [openModal, setOpenMadal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const handleFiles = async (selectedFiles) => {
     try {
       setUploading(true);
-
       const formData = new FormData();
-
       formData.append("file", selectedFiles[0]);
-      // append multiple files
-     console.log("selectedFiles" ,selectedFiles[0]);
-     
-
       const res = await API.post("/admin/file/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-
-      console.log("res" ,res);
-      
-      // backend response (example: uploaded files info)
-      setFile(res.data);
-
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      toast.success(res?.data?.message);
+      setFile(res.data?.data);
+      setIsOpen(false);
       console.log("Upload success:", res.data);
     } catch (error) {
+      toast.success(error?.response?.data?.message || error?.message);
       console.error("File upload failed:", error);
     } finally {
       setUploading(false);
+    }
+  };
+
+  useEffect(() => {
+    getFile();
+  }, []);
+
+  const getFile = async () => {
+    try {
+      const response = await API.get("/admin/file");
+      console.log(response);
+      setFile(response?.data?.data);
+    } catch (error) {
+      setFile()
+      console.log(error);
     }
   };
 
@@ -45,14 +54,22 @@ const FileUpload = () => {
     handleFiles(e.dataTransfer.files);
   }, []);
 
- 
-
-  const startIndex = (currentPage - 1) * rowsPerPage;
- 
-  const deleteFile = (id) => {
-    setFile((prev) => prev.filter((f) => f.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      setLoading(true);
+      const response = await API.delete(`/admin/delete/file/${filePriview.id}`);
+      // console.log(response);
+      setLoading(false);
+      getFile();
+      toast.success(response?.data?.message);
+      setOpenMadal(false);
+      // setFile({});
+    } catch (error) {
+      setLoading(false);
+      toast.error(error?.response?.data?.message || error?.message);
+      console.log(error);
+    }
   };
-  const [isOpen, setIsOpen] = useState(false);
 
   const FileUploadModal = () => {
     return (
@@ -88,14 +105,20 @@ const FileUpload = () => {
               </p>
               <span className="text-gray-400 my-5">OR</span>
               <label className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg text-sm font-medium cursor-pointer">
-                + Browse files
-                <input
-                  type="file"
-                  multiple
-                  className="hidden"
-                  accept=".pdf,.epub,.mobi"
-                  onChange={(e) => handleFiles(e.target.files)}
-                />
+                {uploading ? (
+                  "Loading..."
+                ) : (
+                  <>
+                    + Browse files
+                    <input
+                      type="file"
+                      multiple
+                      className="hidden"
+                      accept=".pdf,.epub,.mobi"
+                      onChange={(e) => handleFiles(e.target.files)}
+                    />
+                  </>
+                )}
               </label>
               <p className="text-xs text-gray-400 my-4">
                 Supported file types: pdf, epub, mobi
@@ -132,7 +155,7 @@ const FileUpload = () => {
               </button>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="">
               <table className="w-full text-sm">
                 <thead className="bg-gray-100 text-gray-600">
                   <tr>
@@ -144,13 +167,13 @@ const FileUpload = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filePriview?.original_name && (
+                  {!filePriview?.original_name ? (
                     <tr>
                       <td colSpan="5" className="p-4 text-center text-gray-400">
                         No files uploaded
                       </td>
                     </tr>
-                  )}
+                  ) : (
                     <tr key={filePriview.id} className="border-b">
                       <td className="p-3 flex items-center gap-2">
                         <span className="text-red-500 font-semibold">
@@ -168,28 +191,52 @@ const FileUpload = () => {
                             }`}
                           >
                             <img src="/icons/tick.svg" />
-                            {filePriview.status == 1 ?"Processed":"Processing"}
+                            {filePriview.status == 1
+                              ? "Processed"
+                              : "Processing"}
                           </p>
                         </div>
                       </td>
                       <td className="p-3">{filePriview.pages || "0"}</td>
                       <td className="p-3">{filePriview.words || "0"}</td>
                       <td className="p-3">
-                        <button
-                          onClick={() => deleteFile(filePriview.id)}
-                          className="text-red-500 hover:underline"
-                        >
-                          <img src="/icons/ic-bin" />
-                        </button>
+                        <div className="relative inline-block" ref={menuRef}>
+                          {/* 3 dots */}
+                          <button
+                            onClick={() => setOpen(!open)}
+                            className="text-gray-400 text-start hover:text-gray-700 text-xl"
+                          >
+                            ⋯
+                          </button>
+
+                          {/* Dropdown */}
+                          {open && (
+                            <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
+                              <button
+                                onClick={() => setOpenMadal(true)}
+                                className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50"
+                              >
+                                <img src="/icons/ic-bin.svg" />
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </td>
                     </tr>
-                 
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
       </div>
+      <ConfirmDeleteModal
+        isOpen={openModal}
+        onClose={() => setOpenMadal(false)}
+        onConfirm={handleDelete}
+        loading={loading}
+      />
     </Layout>
   );
 };

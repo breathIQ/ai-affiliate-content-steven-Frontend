@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 const statusStyles = {
   Published: "bg-green-100 text-green-700",
@@ -42,6 +42,17 @@ const posts = [
 ];
 
 export default function RecentPostsTable() {
+  const [open, setOpen] = useState({0:false});
+  const menuRef = useRef(null);
+   const [search, setSearch] = useState("");
+    const [page, setPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalPages, settotalPages] = useState(0);
+    
+  // settotalPages(response?.data?.data?.total)
+  //     setPage(response?.data?.data?.current_page)
+  //     setRowsPerPage(response?.data?.data?.per_page)
+  
   return (
     <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
       {/* Header */}
@@ -53,7 +64,9 @@ export default function RecentPostsTable() {
             placeholder="Search"
             className="pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
-          <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+          <span className="absolute left-3 top-2.5 text-gray-400">
+            <img src="/icons/ic-search.svg" />
+          </span>
         </div>
       </div>
 
@@ -62,25 +75,25 @@ export default function RecentPostsTable() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-500">
             <tr>
-              <th className="p-3 text-left">
+              {/* <th className="p-3 text-left">
                 <input type="checkbox" />
-              </th>
+              </th> */}
               <th className="p-3 text-left">Media</th>
               <th className="p-3 text-left">Post</th>
               <th className="p-3 text-left">Chapter</th>
               <th className="p-3 text-left">Hashtags</th>
               <th className="p-3 text-left">AI</th>
               <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-right">Actions</th>
+              <th className="p-3 text-start">Actions</th>
             </tr>
           </thead>
 
           <tbody className="divide-y">
-            {posts.map((item) => (
+            {posts.map((item ,index) => (
               <tr key={item.id} className="hover:bg-gray-50">
-                <td className="p-3">
+                {/* <td className="p-3">
                   <input type="checkbox" />
-                </td>
+                </td> */}
 
                 <td className="p-3">
                   <img
@@ -91,29 +104,58 @@ export default function RecentPostsTable() {
                 </td>
 
                 <td className="p-3 max-w-md">
-                  <p className="text-gray-700 line-clamp-2">
-                    {item.post}
-                  </p>
+                  <p className="text-gray-700 line-clamp-2">{item.post}</p>
                 </td>
 
                 <td className="p-3 text-gray-600">{item.chapter}</td>
 
                 <td className="p-3 text-gray-600">{item.hashtags}</td>
 
-                <td className="p-3 text-lg">{aiIcons[item.ai]}</td>
+                <td className="p-3 text-lg">{
+                // aiIcons[item.ai]
+                }
+                 <img src="/icons/ic-chatgpt.svg" />
+                 {/* <img src="/icons/ic-claude.svg" /> */}
+                </td>
 
                 <td className="p-3">
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[item.status]}`}
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      statusStyles[item.status]
+                    }`}
                   >
                     {item.status}
                   </span>
                 </td>
 
-                <td className="p-3 text-right">
-                  <button className="text-gray-400 hover:text-gray-600">
-                    ⋯
-                  </button>
+                <td className="p-3 text-start">
+                  <div className="relative inline-block" ref={menuRef}>
+                    {/* 3 dots */}
+                    <button
+                      onClick={() => setOpen({[index]:!open[index]})}
+                      className="text-gray-400 text-start hover:text-gray-700 text-xl"
+                    >
+                      ⋯
+                    </button>
+
+                    {/* Dropdown */}
+                    {open[index] && (
+                      <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
+                        <button className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50">
+                          <img src="/icons/ic-veiw.svg" />
+                          View
+                        </button>
+
+                        <button
+                          // onClick={() => setOpenMadal(true)}
+                          className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50"
+                        >
+                          <img src="/icons/ic-bin.svg" />
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

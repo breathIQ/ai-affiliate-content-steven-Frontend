@@ -1,56 +1,80 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Layout from "../components/Layout/Layout";
+import API from "../services/api";
+import { useNavigate } from "react-router-dom";
+import ConfirmDeleteModal from "../components/modals/ConfirmDeleteModal";
+import toast from "react-hot-toast";
 
-const USERS = Array.from({ length: 25 }).map((_, i) => ({
-  id: i + 1,
-  name: `User ${i + 1}`,
-  email: `user${i + 1}@example.com`,
-  affiliateId: `affiliate${i + 1}`,
-  postsGenerated: Math.floor(Math.random() * 150),
-  postsPublished: Math.floor(Math.random() * 120),
-  clicks: Math.floor(Math.random() * 6000),
-  conversion: `${Math.floor(Math.random() * 35)}%`,
-  joinedOn: "15-12-2025 17:31:52",
-}));
 
 export default function Users() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [selected, setSelected] = useState([]);
+  const [totalPages, settotalPages] = useState(0);
+   const [openModal, setOpenMadal] = useState();
+    const [loading, setLoading] = useState(false);
+  const [userList, setUserList] = useState([]);
+  const navigate = useNavigate();
+  useEffect(() => {
+    getUser();
+  }, [page ,rowsPerPage,search]);
 
-  const filtered = useMemo(() => {
-    return USERS.filter(
-      (u) =>
-        u.name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [search]);
-
-  const start = (page - 1) * rowsPerPage;
-  const paginated = filtered.slice(start, start + rowsPerPage);
-  const totalPages = Math.ceil(filtered.length / rowsPerPage);
-
-  const toggleSelect = (id) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
+  
+  const handleDelete = async (id) => {
+    try {
+      setLoading(true);
+      const response = await API.delete(`/admin/user/${openModal}`);
+      // console.log(response);
+      getUser()
+      setLoading(false);
+      toast.success(response?.data?.message);
+      setOpenMadal();
+    } catch (error) {
+      setLoading(false);
+      toast.error(error?.response?.data?.message || error?.message);
+      console.log(error);
+    }
+  };
+  const deActivate = async (id,status) => {
+    try {
+      const response = await API.post(`/admin/update-status/${id}`,{status:status});
+      console.log(response);
+      getUser()
+      toast.success(response?.data?.message);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error?.message);
+      console.log(error);
+    }
   };
 
+  const getUser = async () => {
+    try {
+      let url = `/admin/user?per_page=${rowsPerPage}&page=${page}&search=${search}`;
+      const response = await API.get(url);
+      setUserList(response?.data?.data?.data || []);
+      settotalPages(response?.data?.data?.total)
+      setPage(response?.data?.data?.current_page)
+      setRowsPerPage(response?.data?.data?.per_page)
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const [open, setOpen] = useState({0:false});
+  const menuRef = useRef(null);
+
+ 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto min-h-screen  md:p-8">
+      <div className="max-w-7xl mx-auto min-h-screen py-8">
         {/* Header */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold">Lorem Ipsum</h1>
+            <h1 className="text-xl font-semibold">All Users</h1>
             <p className="text-sm text-gray-500">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             </p>
           </div>
-          {/* <button className="bg-gray-900 text-white py-[10px] px-[16px]flex align-center gap-2 rounded-lg text-sm">
-            <img src="/icons/folderback.svg" /> View Join Requests
-          </button> */}
+          
         </div>
 
         {/* Card */}
@@ -69,48 +93,89 @@ export default function Users() {
             <table className="w-full text-sm">
               <thead className="bg-gray-100 text-gray-600">
                 <tr>
-                  <th className="p-3">
-                    <input
-                      type="checkbox"
-                      onChange={(e) =>
-                        setSelected(
-                          e.target.checked ? paginated.map((u) => u.id) : []
-                        )
-                      }
-                    />
-                  </th>
+                  
                   <th className="p-3 text-start ">User</th>
                   <th className="p-3 text-start">Affiliate ID</th>
                   <th className="p-3 text-start">Posts Generated</th>
                   <th className="p-3 text-start">Posts Published</th>
                   <th className="p-3 text-start">Total Clicks</th>
-                  <th className="p-3 text-start">Conversion</th>
-                  <th className="p-3 text-start">Joined On</th>
+                  {/* <th className="p-3 text-start">Conversion</th>
+                  <th className="p-3 text-start">Joined On</th> */}
                   <th className="p-3 text-start">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {paginated.map((u) => (
+                {userList.map((u,index) => (
                   <tr key={u.id} className="border-b">
-                    <td className="p-3">
+                    {/* <td className="p-3">
                       <input
                         type="checkbox"
                         checked={selected.includes(u.id)}
                         onChange={() => toggleSelect(u.id)}
                       />
-                    </td>
+                    </td> */}
                     <td className="p-3">
-                      <div className="font-medium">{u.name}</div>
-                      <div className="text-xs text-gray-500">{u.email}</div>
+                      <div className="flex gap-2">
+                        <img
+                          src={u?.avatar || "https://i.pravatar.cc/40"}
+                          alt="profile"
+                          // onClick={() => setProfileOpen((v) => !v)}
+                          className="w-9 h-9 rounded-full border border-gray-600 cursor-pointer"
+                        />
+                        <div>
+                          <div className="font-medium">{u.name}</div>
+                          <div className="text-xs text-gray-500">{u.email}</div>
+                        </div>
+                      </div>
                     </td>
-                    <td className="p-3">{u.affiliateId}</td>
-                    <td className="p-3">{u.postsGenerated}</td>
-                    <td className="p-3">{u.postsPublished}</td>
-                    <td className="p-3">{u.clicks.toLocaleString()}</td>
-                    <td className="p-3">{u.conversion}</td>
-                    <td className="p-3 text-xs text-gray-500">{u.joinedOn}</td>
+                    <td className="p-3">{u.affiliate_id || "NA"}</td>
+                    <td className="p-3">{u.postsGenerated || "NA"}</td>
+                    <td className="p-3">{u.postsPublished || "NA"}</td>
+                    <td className="p-3">{u.clicks || "NA"}</td>
+                    {/* <td className="p-3">{u.conversion||"NA"}</td>
+                    <td className="p-3 text-xs text-gray-500">{u.joinedOn||"NA"}</td> */}
                     <td className="p-3 relative">
-                      <ActionMenu />
+                      <div className="relative inline-block" ref={menuRef}>
+                        {/* 3 dots */}
+                        <button
+                      onClick={() => setOpen({[index]:!open[index]})}
+                          className="text-gray-400 text-start hover:text-gray-700 text-xl"
+                        >
+                          ⋯
+                        </button>
+
+                        {/* Dropdown */}
+                        {open[index] && (
+                          <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
+                            <button
+                              onClick={() => {                                
+                                navigate(`/users/labs`,{
+                                  state:u
+                                });
+                              }}
+                              className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50"
+                            >
+                              <img src="/icons/ic-veiw.svg" />
+                              View
+                            </button>
+                           <button
+                                onClick={() => setOpenMadal(u.id)}
+                                className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50"
+                              >
+                                <img src="/icons/ic-bin.svg" />
+                                Delete
+                              </button>
+                            <button 
+                            onClick={()=>{
+                              deActivate(u.id,u?.status == 1 ? 2:1)
+                            }}
+                            className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50">
+                              <img src="/icons/ic-cancel.svg" />
+                              De-activate Affiliate
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -157,52 +222,12 @@ export default function Users() {
           </div>
         </div>
       </div>
+       <ConfirmDeleteModal
+        isOpen={openModal}
+        onClose={() => setOpenMadal(false)}
+        onConfirm={handleDelete}
+        loading={loading}
+      />
     </Layout>
-  );
-}
-
-function ActionMenu() {
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef(null);
-
-  // close on outside click
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  return (
-    <div className="relative inline-block" ref={menuRef}>
-      {/* 3 dots */}
-      <button
-        onClick={() => setOpen(!open)}
-        className="text-gray-400 text-start hover:text-gray-700 text-xl"
-      >
-        ⋯
-      </button>
-
-      {/* Dropdown */}
-      {open && (
-        <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
-          <button className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50">
-            <img src="/icons/ic-veiw.svg" />
-            View
-          </button>
-          <button className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50">
-            <img src="/icons/ic-edit.svg" />
-            Edit
-          </button>
-          <button className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50">
-            <img src="/icons/ic-cancel.svg" />
-            De-activate Affiliate
-          </button>
-        </div>
-      )}
-    </div>
   );
 }

@@ -16,7 +16,7 @@ ChartJS.register(
   Filler
 );
 
-export default function ClicksConversion() {
+export default function ClicksConversion({details}) {
   const data = {
     labels: ["", "", "", "", "", ""],
     datasets: [
@@ -69,7 +69,7 @@ export default function ClicksConversion() {
           <p className="text-xs text-gray-500">Affiliate Clicks</p>
           <p className="text-[32px] font-semibold pt-2 flex gap-2">
             <img src="/icons/ic-click.svg" alt="" />
-            155
+            {details?.affiliate_clicks||0}
           </p>
         </div>
       </div>
