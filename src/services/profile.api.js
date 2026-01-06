@@ -28,3 +28,13 @@ export const updateAdminProfile = async (data) => {
   });
   return res.data;
 };
+
+export const updateUserPassword = async (data) => {
+  const res = await API.post("/user/change-password", data);
+  return res.data;
+};
+
+export const updateAdminPassword = async (data) => {
+  const res = await API.post("/admin/change-password", data);
+  return res.data;
+};
