@@ -10,6 +10,9 @@ const Header = () => {
     console.log("Inviting:", emails);
     // API call here
   };
+   const user = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : {};
 
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
@@ -72,7 +75,7 @@ const Header = () => {
                 <hr />
                 <button 
                 onClick={()=>{
-                  window.location = "/login"
+                  window.location = user?.role_id == 2 ? "/login" :"/admin/login"
                   localStorage.clear()
                 }}
                  className="w-full flex gap-2 align-items-center px-4 py-2 font-semibold text-red-600 hover:bg-red-50">

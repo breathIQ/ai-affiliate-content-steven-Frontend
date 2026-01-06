@@ -109,7 +109,7 @@ export default function PublishModal({ isOpen, onClose, onSubmit }) {
           </div>
 
           {/* Publish When */}
-          <div>
+          {/* <div>
             <p className="text-sm font-medium mb-2">Publish When</p>
 
             <div className="space-y-2">
@@ -121,29 +121,9 @@ export default function PublishModal({ isOpen, onClose, onSubmit }) {
                 />
                 Publish Now
               </label>
-              {/* <div className="flex justify-between">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  checked={publishType === "schedule"}
-                  onChange={() => setPublishType("schedule")}
-                />
-                Schedule
-              </label>
-
-              {publishType === "schedule" && (
-                <input
-                  type="datetime-local"
-                  value={scheduleDate}
-                  onChange={(e) => setScheduleDate(e.target.value)}
-                  className=" border rounded-md px-3 py-2 text-sm"
-                />
-              )}
-
-              </div> */}
 
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Footer */}

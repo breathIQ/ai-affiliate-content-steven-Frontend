@@ -3,6 +3,7 @@ import Layout from "../components/Layout/Layout";
 import API from "../services/api";
 import RecentPostsTable from "../components/RecentPostsTable";
 import { useLocation } from "react-router-dom";
+import { getPost } from "../services/post.api";
 
 export default function UsersLabs() {
   const [search, setSearch] = useState("");
@@ -13,18 +14,13 @@ export default function UsersLabs() {
   const [totalPages, settotalPages] = useState(0);
   const { state } = useLocation();
  
-
-  // console.log("state", state);
-
-  const getPost = async () => {
+  const loadPost = async () => {
     try {
-      let url = `/admin/user/posts?per_page=${rowsPerPage}&page=${page}&search=${search}`;
-      const response = await API.get(url);
-      console.log("response ", response);
-      setUserList(response?.data?.data?.data || []);
-      settotalPages(response?.data?.data?.total);
-      setPage(response?.data?.data?.current_page);
-      setRowsPerPage(response?.data?.data?.per_page);
+      const response = await getPost(rowsPerPage,page,search);
+      setUserList(response?.data?.data || []);
+      settotalPages(response?.data?.total);
+      setPage(response?.data?.current_page);
+      setRowsPerPage(response?.data?.per_page);
     } catch (error) {
       console.log(error);
     }
@@ -41,9 +37,6 @@ export default function UsersLabs() {
               Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             </p>
           </div>
-          {/* <button className="bg-gray-900 text-white py-[10px] px-[16px]flex align-center gap-2 rounded-lg text-sm">
-            <img src="/icons/folderback.svg" /> View Join Requests
-          </button> */}
         </div>
 
         <div className="">

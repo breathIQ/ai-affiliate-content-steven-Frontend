@@ -34,8 +34,13 @@ const tabs = [
   // { id: "conversion", label: "Conversion", icon:"/icons/ic-conversion.svg" },
 ];
 
-export default function TopAffiliates() {
+export default function TopAffiliates({details}) {
   const [activeTab, setActiveTab] = useState("generated");
+
+  // console.log("top_affiliates" ,details?.top_affiliates)
+  const affiliateList = details?.top_affiliates?.[activeTab] || [];
+
+
   return (
     <div className="bg-white rounded-xl shadow p-5 w-full">
       <h2 className="text-sm font-semibold mb-4">Top Performing Affiliates</h2>
@@ -84,7 +89,12 @@ export default function TopAffiliates() {
       </div>
 
       <div className="space-y-4 py-4">
-        {affiliates.map((item, i) => (
+        {affiliateList.length === 0 ? (
+          <p className="text-center text-sm text-gray-400">
+            No data available
+          </p>
+        ) :<>
+        {affiliateList.map((item, i) => (
           <div key={i} className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
@@ -104,6 +114,7 @@ export default function TopAffiliates() {
             </div>
           </div>
         ))}
+        </>}
       </div>
     </div>
   );

@@ -1,32 +1,25 @@
 import { useState } from "react";
 import API from "../../services/api";
+import toast from "react-hot-toast";
 
 export default function InviteModal({ isOpen, onClose, onSend }) {
   const [emails, setEmails] = useState("");
-
+ const user = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : {};
   if (!isOpen) return null;
 
   const handleSend = async () => {
     try {
-      const emailList = emails
-        .split("\n")
-        .map((e) => e.trim())
-        .filter(Boolean);
-
-      if (emailList.length === 0) return;
-
-      const res = await API.post("admin/affiliate/invite", {
-        emails: emailList,
+      if (emails.length === 0) return;
+      const res = await API.post(`/${user?.role_id == 2 ? "user":"admin"}/affiliate/invite`, {
+        emails: emails,
       });
-
-      console.log(res ,"<<<<<<ASDf");
-      
-      // optional callback if needed
-      onSend?.(emailList);
-
+      toast.success(res?.data?.message)
       setEmails("");
       onClose();
     } catch (error) {
+      toast.error(error?.response?.data?.message||error?.message)
       console.error("Invite failed:", error);
     }
   };

@@ -51,17 +51,15 @@ export default function UsersCard({details}) {
     ],
   };
 
-  console.log("details" ,details);
   
-
   const options = {
     responsive: true,
     plugins: {
       legend: { display: false },
     },
     scales: {
-      x: { display: false },
-      y: { display: false },
+      x: { display: true },
+      y: { display: true },
     },
   };
 

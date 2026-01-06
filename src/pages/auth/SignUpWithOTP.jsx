@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { apibase } from "../../services/contants";
 
 export default function SignUpWithOTP() {
@@ -14,7 +14,7 @@ export default function SignUpWithOTP() {
     password_confirmation: "",
   });
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-
+  const navigate = useNavigate();
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -32,9 +32,10 @@ export default function SignUpWithOTP() {
         form
       );
       setISloading(false);
-      // console.log("res" ,res,process.env.apibase);
+      // console.log("res" ,res,);
       toast.success(res?.data.message || "OTP sent to your email");
-      setStep(2); // move to OTP screen
+      navigate("/login");
+      // setStep(2); // move to OTP screen
     } catch (error) {
       setISloading(false);
       toast.error(error?.response?.data?.message || "Signup failed");
@@ -149,7 +150,7 @@ export default function SignUpWithOTP() {
                 </div>
 
                 <button className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-lg py-2">
-                  {isLoading ? "Loading...":"Sign Up"}
+                  {isLoading ? "Loading..." : "Sign Up"}
                 </button>
               </form>
 
@@ -187,8 +188,7 @@ export default function SignUpWithOTP() {
                 onClick={verifyOtp}
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-lg py-2"
               >
-                 {isLoading ? "Loading...":"Verify OTP"}
-                
+                {isLoading ? "Loading..." : "Verify OTP"}
               </button>
 
               <p className="text-sm text-center mt-4 text-gray-500">

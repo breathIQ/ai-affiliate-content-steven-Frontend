@@ -33,7 +33,7 @@ export default function Login() {
       toast.success(res?.data.message);
       localStorage.setItem("user", JSON.stringify(res?.data.data));
       localStorage.setItem("access_token", res?.data.data?.access_token);
-      window.location.href = "/u/dashboard";
+      window.location.href = res?.data.data?.role_id == 2 ? "/u/dashboard": "/dashboard";
     } catch (error) {
       setISloading(false);
       toast.error(error?.response?.data?.message || "Signup failed");
