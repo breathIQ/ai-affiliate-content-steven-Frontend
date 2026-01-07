@@ -1,19 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast, { CheckmarkIcon } from "react-hot-toast";
-import { getProfileByRole, updateProfileByRole } from "../../services/profile.service";
+import {
+  getProfileByRole,
+  updateProfileByRole,
+} from "../../services/profile.service";
 
 const DEFAULT_IMAGE = "/images/defaultImage.png";
 
 export function ProfileEditModal({ isOpen, onClose }) {
   const fileRef = useRef(null);
-
   const [image, setImage] = useState(DEFAULT_IMAGE);
   const [imageFile, setImageFile] = useState(null);
   const [copied, setCopied] = useState(false);
   const [social, setSocial] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const user = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : {};
   const {
     register,
     handleSubmit,
@@ -50,9 +54,7 @@ export function ProfileEditModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   const copyLink = () => {
-    navigator.clipboard.writeText(
-      `https://www.co2book.com/${affiliate}`
-    );
+    navigator.clipboard.writeText(`https://www.co2book.com/${affiliate}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
@@ -75,7 +77,7 @@ export function ProfileEditModal({ isOpen, onClose }) {
     setImageFile(null);
   };
 
-  const onSubmit = async(data) => {
+  const onSubmit = async (data) => {
     const formData = new FormData();
 
     // ✅ Only allowed field
@@ -90,12 +92,6 @@ export function ProfileEditModal({ isOpen, onClose }) {
     if (!imageFile && image === DEFAULT_IMAGE) {
       formData.append("remove_avatar", 1);
     }
-
-    console.log(
-      "Submitting FormData:",
-      Object.fromEntries(formData.entries())
-    );
-
     try {
       setLoading(true);
 
@@ -104,9 +100,7 @@ export function ProfileEditModal({ isOpen, onClose }) {
       toast.success(res?.message || "Profile updated successfully");
       onClose();
     } catch (err) {
-      toast.error(
-        err?.response?.data?.message || "Failed to update profile"
-      );
+      toast.error(err?.response?.data?.message || "Failed to update profile");
     } finally {
       setLoading(false);
     }
@@ -118,7 +112,10 @@ export function ProfileEditModal({ isOpen, onClose }) {
         <h2 className="font-semibold text-lg mb-4">Profile</h2>
 
         {/* Avatar */}
-        <div className="flex gap-6 items-center mb-4">
+        <div
+          className="flex gap-6 items-center mb-4"
+          style={user?.role_id == 1 ? { flexDirection: "column" } : {}}
+        >
           <div className="relative" style={{ width: "12rem", height: "8rem" }}>
             <img
               src={image}
@@ -175,25 +172,29 @@ export function ProfileEditModal({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Affiliate */}
-        <label className="text-sm">Affiliate ID</label>
-        <div className="flex border rounded-md mb-4 bg-gray-100">
-          <span className="px-3 py-2 text-sm">
-            https://www.co2book.com/
-          </span>
-          <input
-            {...register("affiliate")}
-            disabled
-            className="flex-1 px-2 py-2 bg-gray-100 cursor-not-allowed"
-          />
-          <button type="button" onClick={copyLink} className="px-3">
-            {copied ? (
-              <img src="/icons/ic-check.svg" />
-            ) : (
-              <img src="/icons/ic-copy.svg" />
-            )}
-          </button>
-        </div>
+        {/* Affiliate user?.role_id == 1 */}
+        {user?.role_id == 1 && (
+          <>
+            <label className="text-sm">Affiliate ID</label>
+            <div className="flex border rounded-md mb-4 bg-gray-100">
+              <span className="px-3 py-2 text-sm">
+                https://www.co2book.com/
+              </span>
+              <input
+                {...register("affiliate")}
+                disabled
+                className="flex-1 px-2 py-2 bg-gray-100 cursor-not-allowed"
+              />
+              <button type="button" onClick={copyLink} className="px-3">
+                {copied ? (
+                  <img src="/icons/ic-check.svg" />
+                ) : (
+                  <img src="/icons/ic-copy.svg" />
+                )}
+              </button>
+            </div>
+          </>
+        )}
 
         {/* Social */}
         {social && (
@@ -229,7 +230,13 @@ export function ProfileEditModal({ isOpen, onClose }) {
 
         {/* Footer */}
         <div className="flex justify-between items-center py-[14px]">
-          <button className="text-sm bg-red-500 text-white px-3 py-2 rounded-md">
+          <button
+            onClick={() => {
+              window.location = user?.role_id == 2 ? "/login" : "/admin/login";
+              localStorage.clear();
+            }}
+            className="text-sm bg-red-500 text-white px-3 py-2 rounded-md"
+          >
             Logout
           </button>
 
