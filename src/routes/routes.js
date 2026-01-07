@@ -8,6 +8,7 @@ import UserDashboard from "../pages/user/UserDashboard"
 // import UserSchedule from "../pages/user/UserSchedule"
 import ViewPdf from "../pages/ViewPdf"
 import UsersLabs from "../pages/UsersLabs"
+import ResetPassword from "../pages/auth/ResetPassword"
 
 
 const allRoutes = [
@@ -28,8 +29,16 @@ const allRoutes = [
         path:"/u/dashboard"
     },
     {
-        component:<Library/> ,
+        component:<UsersLabs/> ,
         path:"/u/library"
+    },
+    // {
+    //     component:<Library/> ,
+    //     path:"/u/library"
+    // },
+    {
+        component:<ResetPassword/> ,
+        path:"/reset-password"
     },
     {
         component:<ViewPdf/> ,

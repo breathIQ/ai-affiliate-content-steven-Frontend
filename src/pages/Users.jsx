@@ -5,27 +5,35 @@ import { useNavigate } from "react-router-dom";
 import ConfirmDeleteModal from "../components/modals/ConfirmDeleteModal";
 import toast from "react-hot-toast";
 
-
 export default function Users() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalPages, settotalPages] = useState(0);
-   const [openModal, setOpenMadal] = useState();
-    const [loading, setLoading] = useState(false);
+  const [openModal, setOpenMadal] = useState();
+  const [loading, setLoading] = useState(false);
   const [userList, setUserList] = useState([]);
   const navigate = useNavigate();
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      // Reset to page 1 when search changes to avoid empty results on high page numbers
+      setPage(1);
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [search]);
   useEffect(() => {
     getUser();
-  }, [page ,rowsPerPage,search]);
+  }, [page, rowsPerPage, debouncedSearch]);
 
-  
   const handleDelete = async (id) => {
     try {
       setLoading(true);
       const response = await API.delete(`/admin/user/${openModal}`);
       // console.log(response);
-      getUser()
+      getUser();
       setLoading(false);
       toast.success(response?.data?.message);
       setOpenMadal();
@@ -35,11 +43,13 @@ export default function Users() {
       console.log(error);
     }
   };
-  const deActivate = async (id,status) => {
+  const deActivate = async (id, status) => {
     try {
-      const response = await API.post(`/admin/update-status/${id}`,{status:status});
+      const response = await API.post(`/admin/update-status/${id}`, {
+        status: status,
+      });
       console.log(response);
-      getUser()
+      getUser();
       toast.success(response?.data?.message);
     } catch (error) {
       toast.error(error?.response?.data?.message || error?.message);
@@ -52,17 +62,16 @@ export default function Users() {
       let url = `/admin/user?per_page=${rowsPerPage}&page=${page}&search=${search}`;
       const response = await API.get(url);
       setUserList(response?.data?.data?.data || []);
-      settotalPages(response?.data?.data?.total)
-      setPage(response?.data?.data?.current_page)
-      setRowsPerPage(response?.data?.data?.per_page)
+      settotalPages(response?.data?.data?.last_page);
+      setPage(response?.data?.data?.current_page);
+      setRowsPerPage(response?.data?.data?.per_page);
     } catch (error) {
       console.log(error);
     }
   };
-  const [open, setOpen] = useState({0:false});
+  const [open, setOpen] = useState({ 0: false });
   const menuRef = useRef(null);
 
- 
   return (
     <Layout>
       <div className="max-w-7xl mx-auto min-h-screen py-8">
@@ -74,7 +83,6 @@ export default function Users() {
               Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             </p>
           </div>
-          
         </div>
 
         {/* Card */}
@@ -93,7 +101,6 @@ export default function Users() {
             <table className="w-full text-sm">
               <thead className="bg-gray-100 text-gray-600">
                 <tr>
-                  
                   <th className="p-3 text-start ">User</th>
                   <th className="p-3 text-start">Affiliate ID</th>
                   <th className="p-3 text-start">Posts Generated</th>
@@ -105,80 +112,114 @@ export default function Users() {
                 </tr>
               </thead>
               <tbody>
-                {userList.map((u,index) => (
-                  <tr key={u.id} className="border-b">
-                    {/* <td className="p-3">
+                {userList?.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-20 text-center">
+                      <div className="flex flex-col items-center justify-center text-gray-400">
+                        {/* Simple Empty Icon */}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1}
+                          stroke="currentColor"
+                          className="w-16 h-16 mb-4 opacity-20"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                          />
+                        </svg>
+                        <h3 className="text-lg font-medium text-gray-900">
+                          No user found
+                        </h3>
+                        <p className="text-sm mt-1">
+                          Try adjusting your filters.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  userList.map((u, index) => (
+                    <tr key={u.id} className="border-b">
+                      {/* <td className="p-3">
                       <input
                         type="checkbox"
                         checked={selected.includes(u.id)}
                         onChange={() => toggleSelect(u.id)}
                       />
                     </td> */}
-                    <td className="p-3">
-                      <div className="flex gap-2">
-                        <img
-                          src={u?.avatar || "https://i.pravatar.cc/40"}
-                          alt="profile"
-                          // onClick={() => setProfileOpen((v) => !v)}
-                          className="w-9 h-9 rounded-full border border-gray-600 cursor-pointer"
-                        />
-                        <div>
-                          <div className="font-medium">{u.name}</div>
-                          <div className="text-xs text-gray-500">{u.email}</div>
+                      <td className="p-3">
+                        <div className="flex gap-2">
+                          <img
+                            src={u?.avatar || "https://i.pravatar.cc/40"}
+                            alt="profile"
+                            // onClick={() => setProfileOpen((v) => !v)}
+                            className="w-9 h-9 rounded-full border border-gray-600 cursor-pointer"
+                          />
+                          <div>
+                            <div className="font-medium">{u.name}</div>
+                            <div className="text-xs text-gray-500">
+                              {u.email}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="p-3">{u.affiliate_id || "NA"}</td>
-                    <td className="p-3">{u.postsGenerated || "NA"}</td>
-                    <td className="p-3">{u.postsPublished || "NA"}</td>
-                    <td className="p-3">{u.clicks || "NA"}</td>
-                    {/* <td className="p-3">{u.conversion||"NA"}</td>
+                      </td>
+                      <td className="p-3">{u.affiliate_id || "NA"}</td>
+                      <td className="p-3">{u.posts_generated || "NA"}</td>
+                      <td className="p-3">{u.posts_published || "NA"}</td>
+                      <td className="p-3">{u.total_clicks || "NA"}</td>
+                      {/* <td className="p-3">{u.conversion||"NA"}</td>
                     <td className="p-3 text-xs text-gray-500">{u.joinedOn||"NA"}</td> */}
-                    <td className="p-3 relative">
-                      <div className="relative inline-block" ref={menuRef}>
-                        {/* 3 dots */}
-                        <button
-                      onClick={() => setOpen({[index]:!open[index]})}
-                          className="text-gray-400 text-start hover:text-gray-700 text-xl"
-                        >
-                          ⋯
-                        </button>
+                      <td className="p-3 relative">
+                        <div className="relative inline-block" ref={menuRef}>
+                          {/* 3 dots */}
+                          <button
+                            onClick={() => setOpen({ [index]: !open[index] })}
+                            className="text-gray-400 text-start hover:text-gray-700 text-xl"
+                          >
+                            ⋯
+                          </button>
 
-                        {/* Dropdown */}
-                        {open[index] && (
-                          <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
-                            <button
-                              onClick={() => {                                
-                                navigate(`/users/labs`,{
-                                  state:u
-                                });
-                              }}
-                              className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50"
-                            >
-                              <img src="/icons/ic-veiw.svg" />
-                              View
-                            </button>
-                           <button
+                          {/* Dropdown */}
+                          {open[index] && (
+                            <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
+                              <button
+                                onClick={() => {
+                                  navigate(`/users/labs`, {
+                                    state: u,
+                                  });
+                                }}
+                                className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50"
+                              >
+                                <img src="/icons/ic-veiw.svg" />
+                                View
+                              </button>
+                              <button
                                 onClick={() => setOpenMadal(u.id)}
                                 className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50"
                               >
                                 <img src="/icons/ic-bin.svg" />
                                 Delete
                               </button>
-                            <button 
-                            onClick={()=>{
-                              deActivate(u.id,u?.status == 1 ? 2:1)
-                            }}
-                            className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50">
-                              <img src="/icons/ic-cancel.svg" />
-                              De-activate Affiliate
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                              <button
+                                onClick={() => {
+                                  deActivate(u.id, u?.status == 1 ? 2 : 1);
+                                }}
+                                className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50"
+                              >
+                                <img src="/icons/ic-cancel.svg" />
+                                De-activate Affiliate
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+                {}
               </tbody>
             </table>
           </div>
@@ -222,7 +263,7 @@ export default function Users() {
           </div>
         </div>
       </div>
-       <ConfirmDeleteModal
+      <ConfirmDeleteModal
         isOpen={openModal}
         onClose={() => setOpenMadal(false)}
         onConfirm={handleDelete}

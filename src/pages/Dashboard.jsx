@@ -24,6 +24,7 @@ function Dashboard() {
     }
   };
 
+ 
   return (
     <Layout>
       <div className=" bg-gray-100">
@@ -35,7 +36,10 @@ function Dashboard() {
           </div>
           <div className="grid pb-10 grid-cols-1 lg:grid-cols-2 gap-6">
             <TopAffiliates details={details} />
-            <ChapterBubbleChart details={details} />
+            {
+              details?.most_used_chapters?.length &&
+              <ChapterBubbleChart details={ details} />
+            }
           </div>
         </div>
       </div>
