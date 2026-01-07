@@ -1,64 +1,59 @@
 import { useState } from "react";
 import { CheckmarkIcon } from "react-hot-toast";
 
-export default function PublishModal({ isOpen, onClose, onSubmit }) {
+export default function PublishModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  preview,
+}) {
   const [platforms, setPlatforms] = useState({
     instagram: true,
     tiktok: false,
   });
 
-  const [publishType, setPublishType] = useState("now");
-  const [scheduleDate, setScheduleDate] = useState("");
-
   if (!isOpen) return null;
 
   const handleSubmit = () => {
-    const payload = {
-      platforms,
-      publishType,
-      scheduleDate,
-    };
-
-    console.log("Publish Payload:", payload);
-    onSubmit?.(payload);
+    onSubmit({ platforms });
     onClose();
   };
 
   return (
-    <div className="fixed inset-0  bg-black/40 z-50 flex items-center justify-center">
-      <div className="bg-white w-[600px]  rounded-xl shadow-lg overflow-hidden">
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+      <div className="bg-white w-[600px] rounded-xl shadow-lg overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b">
           <h2 className="font-semibold text-lg">Publish</h2>
-          <button onClick={onClose} className="text-gray-500 text-xl">×</button>
+          <button onClick={onClose} className="text-gray-500 text-xl">
+            ×
+          </button>
         </div>
 
         {/* Content */}
         <div className="p-5 space-y-4">
-        <div className="flex justify-center">
-          {/* Preview */}
-          <div className="flex gap-3">
-            <img
-              src="https://i.pravatar.cc/120"
-              className="w-[120px] h-[150px] rounded-lg object-cover"
-            />
-            <div className="w-[120px] h-[150px] rounded-lg bg-purple-600 text-white flex flex-col justify-center items-center text-xs p-2">
-              <p className="font-semibold text-center small">
-                Lorem ipsum dolor sit amet
-              </p>
-              <span className="mt-2 text-[10px]">CO2</span>
+          <div className="flex justify-center">
+            <div className="flex gap-3">
+              {preview.media?.map((file, i) => (
+                <img
+                  key={i}
+                  src={URL.createObjectURL(file)}
+                  className="w-[120px] h-[150px] rounded-lg object-cover"
+                />
+              ))}
             </div>
           </div>
-          </div>
 
-          {/* Caption */}
           <p className="text-sm text-gray-600">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et
-            massa mi. Aliquam in hendrerit urna. <br />
-            #Hashtag01 #Hashtag02 #Hashtag03 #Hashtag04 #Hashtag05
+            {preview.caption}
+            <br />
+            {preview.hashtags.map((t, i) => (
+              <span key={i}>
+                #{t.replace("#", "")}{" "}
+              </span>
+            ))}
           </p>
 
-          {/* Publish To */}
           <div>
             <p className="text-sm font-medium mb-2">Publish To:</p>
 
@@ -107,23 +102,6 @@ export default function PublishModal({ isOpen, onClose, onSubmit }) {
               </label>
             </div>
           </div>
-
-          {/* Publish When */}
-          {/* <div>
-            <p className="text-sm font-medium mb-2">Publish When</p>
-
-            <div className="space-y-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  checked={publishType === "now"}
-                  onChange={() => setPublishType("now")}
-                />
-                Publish Now
-              </label>
-
-            </div>
-          </div> */}
         </div>
 
         {/* Footer */}
@@ -139,7 +117,7 @@ export default function PublishModal({ isOpen, onClose, onSubmit }) {
             onClick={handleSubmit}
             className="px-4 py-2 text-sm rounded-md bg-purple-600 text-white"
           >
-            {publishType === "schedule" ? "Schedule" : "Publish"}
+            Publish
           </button>
         </div>
       </div>

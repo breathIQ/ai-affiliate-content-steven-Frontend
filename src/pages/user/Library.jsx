@@ -1,17 +1,15 @@
 import { useState } from "react";
-// import Modal from "./Modal";
 import Layout from "../../components/Layout/Layout";
 import PublishModal from "../../components/modals/PublishModal";
 import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { createPost } from "../../services/post.api";
 
 export default function DraftPostPage() {
   const [mediaType, setMediaType] = useState("carousel");
   const [files, setFiles] = useState([]);
-  const [scheduleOpen, setScheduleOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState([0, 1, 2, 3]);
-  const [open, setOpen] = useState(false);
-
+  const [selectedMedia, setSelectedMedia] = useState([]);
   const [caption, setCaption] = useState("");
   const [hashtags, setHashtags] = useState([
     "Hashtag #01",
@@ -24,13 +22,10 @@ export default function DraftPostPage() {
     "Hashtag #08",
     "Hashtag #09",
   ]);
+  const [hashtagInput, setHashtagInput] = useState("");
   const [script, setScript] = useState("");
 
-  const toggleMedia = (index) => {
-    setSelectedMedia((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
-    );
-  };
+  const { handleSubmit } = useForm();
 
   const captionWords = caption.trim().split(/\s+/).filter(Boolean).length;
   const scriptWords = script.trim().split(/\s+/).filter(Boolean).length;
@@ -38,60 +33,88 @@ export default function DraftPostPage() {
   const uploadFiles = (e) => {
     const newFiles = Array.from(e.target.files);
     setFiles((prev) => [...prev, ...newFiles]);
+    setSelectedMedia((prev) => [
+      ...prev,
+      ...newFiles.map((_, i) => prev.length + i),
+    ]);
   };
 
-  const removeFile = (index) => {
-    setFiles(files.filter((_, i) => i !== index));
-  };
-
-  const Modal = ({ open, onClose, title, children }) => {
-    if (!open) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl w-full max-w-md p-5">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="font-semibold">{title}</h2>
-            <button onClick={onClose}>✕</button>
-          </div>
-          {children}
-        </div>
-      </div>
+  const toggleMedia = (index) => {
+    setSelectedMedia((prev) =>
+      prev.includes(index)
+        ? prev.filter((i) => i !== index)
+        : [...prev, index]
     );
   };
 
+  const handlePublishSubmit = async ({ platforms }) => {
+    try {
+      const formData = new FormData();
+
+      formData.append("chapter_id", 1);
+      formData.append("caption", caption);
+      formData.append("script", script);
+      formData.append("media_assets", mediaType);
+      formData.append("status", "published");
+      formData.append("ai_model", "gpt-4");
+      formData.append("ai_prompt", "Generate social media post");
+      formData.append(
+        "affiliate_url",
+        "http://localhost/ai-affiliate-content-steven/public/"
+      );
+
+      selectedMedia.forEach((index, i) => {
+        formData.append(`media[${i}][file]`, files[index]);
+        formData.append(`media[${i}][media_order]`, i + 1);
+      });
+
+      hashtags.forEach((tag, i) => {
+        formData.append(
+          `hashtags[${i}]`,
+          tag.startsWith("#") ? tag : `#${tag}`
+        );
+      });
+
+      Object.entries(platforms).forEach(([key, value], i) => {
+        if (value) {
+          formData.append(`platforms[${i}]`, key);
+        }
+      });
+
+      await createPost(formData);
+
+      console.log("POST CREATED SUCCESSFULLY 🚀");
+      setPublishOpen(false);
+    } catch (error) {
+      console.error("CREATE POST ERROR ❌", error);
+    }
+  };
+
+  const selectedFiles = selectedMedia.map((i) => files[i]);
+
   return (
     <Layout>
-      <div className=" max-w-7xl mx-auto min-h-screen">
+      <div className="max-w-7xl mx-auto min-h-screen">
         <div className="bg-white rounded-xl p-6 space-y-6">
           {/* HEADER */}
           <div className="flex justify-between items-center">
-            <div className="flex justify-between items-center gap-3">
-              {/* <span>Back To Library</span> */}
-              <Link to={"/users/labs"}
-                // onClick={() => setIsOpen(true)}
-                className="border bg-white text-dark py-[10px] px-[16px] flex align-center gap-2 rounded-lg text-sm"
+            <div className="flex gap-3 items-center">
+              <Link
+                to={"/users/labs"}
+                className="border bg-white text-dark py-[10px] px-[16px] flex gap-2 rounded-lg text-sm"
               >
                 <img src="/icons/folderback.svg" />
                 Back To Library
               </Link>
-
               <h1 className="font-semibold">Post Preview</h1>
             </div>
-            <div className="flex gap-2">
-              <button
-                // onClick={() => setScheduleOpen(true)}
-                className=" rounded-lg flex align-center gap-2"
-              >
-                <img src="/icons/ic-bin.svg" /> 
-              </button>
-              <button
-                onClick={() => setPublishOpen(true)}
-                className="bg-pink-500 text-white py-[10px] px-[16px] rounded-lg flex align-center gap-2"
-              >
-                <img src="/icons/ic-add.svg" /> Publish
-              </button>
-            </div>
+
+            <button
+              onClick={() => setPublishOpen(true)}
+              className="bg-pink-500 text-white py-[10px] px-[16px] rounded-lg flex gap-2"
+            >
+              <img src="/icons/publish.svg" /> Publish
+            </button>
           </div>
 
           {/* MEDIA TYPE */}
@@ -116,31 +139,45 @@ export default function DraftPostPage() {
 
           {/* MEDIA GRID */}
           <div className="flex gap-4 flex-wrap">
-            {files.map((file, index) => (
-              <div
-                key={index}
-                className="relative w-28 h-28 rounded-lg overflow-hidden bg-gray-200"
-              >
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-                <span className="absolute top-1 left-1 bg-purple-600 text-white text-xs px-2 rounded">
-                  {index + 1}/{files.length}
-                </span>
-                <button
-                  onClick={() => removeFile(index)}
-                  className="absolute top-1 right-1 bg-black/50 text-white text-xs px-1 rounded"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+            {files.map((file, index) => {
+              const isSelected = selectedMedia.includes(index);
 
-            {/* UPLOAD */}
-            <label className="w-28 h-28 border border-dashed rounded-lg flex items-center justify-center cursor-pointer text-sm text-gray-500">
-              + Upload
+              return (
+                <div
+                  key={index}
+                  className="relative w-28 h-28 rounded-lg overflow-hidden bg-gray-200"
+                >
+                  <img
+                    src={URL.createObjectURL(file)}
+                    className="w-full h-full object-cover"
+                  />
+
+                  <button
+                    onClick={() => toggleMedia(index)}
+                    className={`absolute top-2 left-2 w-5 h-5 rounded border flex items-center justify-center ${
+                      isSelected
+                        ? "bg-purple-600 border-purple-600"
+                        : "bg-white border-gray-300"
+                    }`}
+                  >
+                    {isSelected && (
+                      <span className="text-white text-xs">✓</span>
+                    )}
+                  </button>
+
+                  {isSelected && (
+                    <span className="absolute top-2 right-2 bg-purple-600 text-white text-xs px-2 rounded-full">
+                      {selectedMedia.indexOf(index) + 1}/
+                      {selectedMedia.length}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+
+            <label className="w-28 h-28 border border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer text-sm text-gray-500">
+              <img src="/icons/ic-upload-grey.svg" />
+              <p>Upload</p>
               <input
                 type="file"
                 multiple
@@ -154,11 +191,14 @@ export default function DraftPostPage() {
           {/* Chapter + AI */}
           <div className="flex justify-between text-sm text-gray-600">
             <p>
-              <span className="font-medium">Chapter:</span> Ch-1 : Lorem ipsum
-              dolor sit amet.
+              <span className="font-medium">Chapter:</span> <br />
+              <span className="text-gray-400">
+                Ch-1 : Lorem ipsum dolor sit amet.
+              </span>
             </p>
             <p>
-              <span className="font-medium">AI Model:</span> ChatGPT
+              <span className="font-medium">AI Model:</span> <br />
+              <span className="text-gray-400">ChatGPT</span>
             </p>
           </div>
 
@@ -182,8 +222,11 @@ export default function DraftPostPage() {
             <div>
               <div className="flex justify-between mb-1">
                 <label className="text-sm font-medium">Hashtags:</label>
-                <span className="text-xs text-gray-400">{hashtags.length}</span>
+                <span className="text-xs text-gray-400">
+                  {hashtags.length}
+                </span>
               </div>
+
               <div className="flex flex-wrap gap-2 border rounded-lg p-3">
                 {hashtags.map((tag, i) => (
                   <span
@@ -193,7 +236,9 @@ export default function DraftPostPage() {
                     {tag}
                     <button
                       onClick={() =>
-                        setHashtags(hashtags.filter((_, idx) => idx !== i))
+                        setHashtags(
+                          hashtags.filter((_, idx) => idx !== i)
+                        )
                       }
                       className="text-gray-400 hover:text-red-500"
                     >
@@ -201,8 +246,26 @@ export default function DraftPostPage() {
                     </button>
                   </span>
                 ))}
+
+                <input
+                  type="text"
+                  value={hashtagInput}
+                  onChange={(e) => setHashtagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && hashtagInput.trim()) {
+                      e.preventDefault();
+                      setHashtags((prev) => [
+                        ...prev,
+                        hashtagInput.trim(),
+                      ]);
+                      setHashtagInput("");
+                    }
+                  }}
+                  className="text-xs outline-none flex-1 min-w-[120px]"
+                />
               </div>
-              <p className="text-xs text-gray-400 mt-1">
+
+              <p className="text-xs text-gray-400 text-right mt-1">
                 Hashtags will be appended to the caption when publishing
               </p>
             </div>
@@ -214,7 +277,9 @@ export default function DraftPostPage() {
               <label className="text-sm font-medium">
                 Script (For Video Post):
               </label>
-              <span className="text-xs text-gray-400">{scriptWords} words</span>
+              <span className="text-xs text-gray-400">
+                {scriptWords} words
+              </span>
             </div>
             <textarea
               value={script}
@@ -228,33 +293,17 @@ export default function DraftPostPage() {
           </div>
         </div>
 
-
-        {/* PUBLISH MODAL */}
-        <Modal
-          open={publishOpen}
+        <PublishModal
+          isOpen={publishOpen}
           onClose={() => setPublishOpen(false)}
-          title="Confirm Publish"
-        >
-          <p className="text-sm text-gray-600 mb-4">
-            Are you sure you want to publish this post?
-          </p>
-          <button
-            onClick={() => {
-              alert("Post Published 🚀");
-              setPublishOpen(false);
-            }}
-            className="bg-pink-500 text-white w-full py-2 rounded-lg"
-          >
-            Publish Now
-          </button>
-        </Modal>
+          onSubmit={handlePublishSubmit}
+          preview={{
+            caption,
+            hashtags,
+            media: selectedFiles,
+          }}
+        />
       </div>
-      <PublishModal
-        isOpen={publishOpen}
-        onClose={() => setPublishOpen(false)}
-        onSubmit={(data) => console.log(data)}
-      />
-      ;
     </Layout>
   );
 }
