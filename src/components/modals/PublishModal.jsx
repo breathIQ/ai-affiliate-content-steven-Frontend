@@ -12,10 +12,15 @@ export default function PublishModal({
     tiktok: false,
   });
 
+  const [reviewLink, setReviewLink] = useState("");
+
   if (!isOpen) return null;
 
   const handleSubmit = () => {
-    onSubmit({ platforms });
+    onSubmit({
+      platforms,
+      reviewLink,
+    });
     onClose();
   };
 
@@ -54,6 +59,21 @@ export default function PublishModal({
             ))}
           </p>
 
+          {/* Review Link */}
+          <div>
+            <label className="text-sm font-medium mb-1 block">
+              Review Link
+            </label>
+            <input
+              type="url"
+              placeholder="https://example.com"
+              value={reviewLink}
+              onChange={(e) => setReviewLink(e.target.value)}
+              className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          {/* Publish To */}
           <div>
             <p className="text-sm font-medium mb-2">Publish To:</p>
 

@@ -13,3 +13,8 @@ export const createPost = async (data) => {
   });
   return res.data;
 };
+
+export const getChapter = async (data) => {
+  const res = await API.get(`/user/get-chapter`);
+  return res.data;
+};
