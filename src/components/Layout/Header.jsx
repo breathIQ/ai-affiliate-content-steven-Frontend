@@ -5,9 +5,9 @@ import { ChangePasswordModal } from "../modals/ChangePasswordModal";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
-  const access_token = localStorage.getItem("access_token")
+  const access_token = localStorage.getItem("access_token");
 
-   const user = localStorage.getItem("user")
+  const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : {};
 
@@ -18,8 +18,8 @@ const Header = () => {
 
   // close dropdown on outside click
   useEffect(() => {
-    if(!access_token){
-      window.location.href = "/login"
+    if (!access_token) {
+      window.location.href = "/login";
     }
     const handleClickOutside = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
@@ -61,21 +61,31 @@ const Header = () => {
                   Profile
                 </div>
                 <hr />
-                <button  onClick={() => setOpenPassword((v) => !v)} className="w-full flex gap-2 align-items-center px-4 py-2 font-semibold hover:bg-gray-100">
+                <button
+                  onClick={() => setOpenPassword((v) => !v)}
+                  className="w-full flex gap-2 align-items-center px-4 py-2 font-semibold hover:bg-gray-100"
+                >
                   <img src="/icons/ic-password.svg" />
                   Change Password
                 </button>
-                <button className="w-full flex gap-2 align-items-center px-4 py-2 font-semibold hover:bg-gray-100">
-                  <img src="/icons/ic-extension.svg" />
-                  Social Accounts
-                </button>
+                {user?.role_id == 2 && (
+                  <button
+                    onClick={() => setOpenProfile((v) => !v)}
+                    className="w-full flex gap-2 align-items-center px-4 py-2 font-semibold hover:bg-gray-100"
+                  >
+                    <img src="/icons/ic-extension.svg" />
+                    Social Accounts
+                  </button>
+                )}
                 <hr />
-                <button 
-                onClick={()=>{
-                  window.location = user?.role_id == 2 ? "/login" :"/admin/login"
-                  localStorage.clear()
-                }}
-                 className="w-full flex gap-2 align-items-center px-4 py-2 font-semibold text-red-600 hover:bg-red-50">
+                <button
+                  onClick={() => {
+                    window.location =
+                      user?.role_id == 2 ? "/login" : "/admin/login";
+                    localStorage.clear();
+                  }}
+                  className="w-full flex gap-2 align-items-center px-4 py-2 font-semibold text-red-600 hover:bg-red-50"
+                >
                   <img src="/icons/ic-logout.svg" />
                   Logout
                 </button>

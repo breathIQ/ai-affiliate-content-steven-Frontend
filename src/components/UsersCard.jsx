@@ -17,6 +17,11 @@ ChartJS.register(
 );
 
 export default function UsersCard({details}) {
+
+
+  console.log(details);
+  
+
   const data = {
     labels: ["", "", "", "", "", ""],
     datasets: [
