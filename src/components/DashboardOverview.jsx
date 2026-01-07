@@ -1,6 +1,7 @@
 import React from "react";
 import TopAffiliates from "./TopAffiliates";
 import ClicksConversion from "./ClicksConversion";
+import { Link, NavLink } from "react-router-dom";
 
 export default function DashboardOverview() {
   return (
@@ -8,7 +9,7 @@ export default function DashboardOverview() {
       <div className=" grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* COLUMN 1 – Large AI Card */}
         <div className="bg-slate-900 rounded-2xl p-6 text-white flex flex-col justify-between relative overflow-hidden">
-          <div className="w-[70%]">
+          <div className="w-[70%]" style={{zIndex:"10"}}>
             <h2 className="text-lg font-semibold mb-2">
               Generate AI-Powered Content
             </h2>
@@ -16,9 +17,9 @@ export default function DashboardOverview() {
               Turn book chapters into ready-to-publish Instagram and TikTok
               content using AI.
             </p>
-            <button className="bg-pink-600 hover:bg-pink-700 py-[10px] px-[16px] rounded-lg text-sm font-medium">
+            <Link to={"/u/library"} className="bg-pink-600 hover:bg-pink-700 py-[10px] px-[16px] rounded-lg text-sm font-medium">
               Generate Content
-            </button>
+            </Link>
           </div>
 
           {/* Decorative shapes */}

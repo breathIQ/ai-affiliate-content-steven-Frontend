@@ -34,8 +34,8 @@ export default function SignUpWithOTP() {
       setISloading(false);
       // console.log("res" ,res,);
       toast.success(res?.data.message || "OTP sent to your email");
-      navigate("/login");
-      // setStep(2); // move to OTP screen
+      // navigate("/login");
+      setStep(2); // move to OTP screen
     } catch (error) {
       setISloading(false);
       toast.error(error?.response?.data?.message || "Signup failed");

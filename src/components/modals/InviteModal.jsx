@@ -12,7 +12,7 @@ export default function InviteModal({ isOpen, onClose }) {
   const handleSend = async () => {
     try {
       if (emails.length === 0) return;
-      const res = await API.post(`/${user?.role_id == 2 ? "user":"admin"}/affiliate/invite`, {
+      const res = await API.post(`/affiliate/invite`, {
         emails: emails,
       });
       toast.success(res?.data?.message)

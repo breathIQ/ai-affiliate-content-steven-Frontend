@@ -3,6 +3,7 @@ import Layout from "../components/Layout/Layout";
 import RecentPostsTable from "../components/RecentPostsTable";
 import { useLocation } from "react-router-dom";
 import { getPost } from "../services/post.api";
+import GenerateContentModal from "../components/modals/GenerateContentModal";
 
 export default function UsersLabs() {
   const [search, setSearch] = useState("");
@@ -34,11 +35,12 @@ export default function UsersLabs() {
         {/* Header */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold">{state?.name}'s Posts</h1>
+            <h1 className="text-xl font-semibold">{state?.name|| "USER "}'s Posts</h1>
             <p className="text-sm text-gray-500">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             </p>
           </div>
+          <GenerateContentModal/>
         </div>
         <div className="">
           <RecentPostsTable />

@@ -2,6 +2,7 @@ import { useState } from "react";
 // import Modal from "./Modal";
 import Layout from "../../components/Layout/Layout";
 import PublishModal from "../../components/modals/PublishModal";
+import { Link } from "react-router-dom";
 
 export default function DraftPostPage() {
   const [mediaType, setMediaType] = useState("carousel");
@@ -67,23 +68,23 @@ export default function DraftPostPage() {
           <div className="flex justify-between items-center">
             <div className="flex justify-between items-center gap-3">
               {/* <span>Back To Library</span> */}
-              <button
+              <Link to={"/users/labs"}
                 // onClick={() => setIsOpen(true)}
                 className="border bg-white text-dark py-[10px] px-[16px] flex align-center gap-2 rounded-lg text-sm"
               >
                 <img src="/icons/folderback.svg" />
                 Back To Library
-              </button>
+              </Link>
 
-              <h1 className="font-semibold">Draft Post</h1>
+              <h1 className="font-semibold">Post Preview</h1>
             </div>
             <div className="flex gap-2">
-              {/* <button
-                onClick={() => setScheduleOpen(true)}
-                className="bg-gray-900 text-white py-[10px] px-[16px] rounded-lg flex align-center gap-2"
+              <button
+                // onClick={() => setScheduleOpen(true)}
+                className=" rounded-lg flex align-center gap-2"
               >
-                <img src="/icons/ic-add.svg" /> Schedule
-              </button> */}
+                <img src="/icons/ic-bin.svg" /> 
+              </button>
               <button
                 onClick={() => setPublishOpen(true)}
                 className="bg-pink-500 text-white py-[10px] px-[16px] rounded-lg flex align-center gap-2"
