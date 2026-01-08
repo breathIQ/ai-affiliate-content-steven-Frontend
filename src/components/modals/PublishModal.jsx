@@ -1,26 +1,44 @@
 import { useState } from "react";
 import { CheckmarkIcon } from "react-hot-toast";
 
-export default function PublishModal({
-  isOpen,
-  onClose,
-  onSubmit,
-  preview,
-}) {
+export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
   const [platforms, setPlatforms] = useState({
     instagram: true,
     tiktok: false,
   });
 
   const [reviewLink, setReviewLink] = useState("");
+  const [error, setError] = useState("");
 
   if (!isOpen) return null;
 
+  // Function to validate URL
+  const isValidUrl = (url) => {
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch {
+      return false;
+    }
+  };
+
   const handleSubmit = () => {
+    if (!reviewLink.trim()) {
+      setError("Review link is required");
+      return;
+    }
+
+    if (!isValidUrl(reviewLink.trim())) {
+      setError("Please enter a valid URL (https://example.com)");
+      return;
+    }
+
     onSubmit({
       platforms,
-      reviewLink,
+      reviewLink: reviewLink.trim(),
     });
+
+    setError("");
     onClose();
   };
 
@@ -37,8 +55,9 @@ export default function PublishModal({
 
         {/* Content */}
         <div className="p-5 space-y-4">
+          {/* Media Preview */}
           <div className="flex justify-center">
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               {preview.media?.map((file, i) => (
                 <img
                   key={i}
@@ -49,28 +68,40 @@ export default function PublishModal({
             </div>
           </div>
 
+          {/* Caption */}
           <p className="text-sm text-gray-600">
             {preview.caption}
             <br />
             {preview.hashtags.map((t, i) => (
-              <span key={i}>
-                #{t.replace("#", "")}{" "}
-              </span>
+              <span key={i}>#{t.replace("#", "")} </span>
             ))}
           </p>
 
           {/* Review Link */}
           <div>
             <label className="text-sm font-medium mb-1 block">
-              Review Link
+              Review Link <span className="text-red-500">*</span>
             </label>
+
             <input
               type="url"
               placeholder="https://example.com"
               value={reviewLink}
-              onChange={(e) => setReviewLink(e.target.value)}
-              className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              onChange={(e) => {
+                setReviewLink(e.target.value);
+                setError("");
+              }}
+              className={`w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
+                error
+                  ? "border-red-500 focus:ring-red-500"
+                  : "focus:ring-purple-500"
+              }`}
+              required
             />
+
+            {error && (
+              <p className="text-xs text-red-500 mt-1">{error}</p>
+            )}
           </div>
 
           {/* Publish To */}
@@ -135,7 +166,12 @@ export default function PublishModal({
 
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 text-sm rounded-md bg-purple-600 text-white"
+            disabled={!reviewLink.trim() || !isValidUrl(reviewLink.trim())}
+            className={`px-4 py-2 text-sm rounded-md text-white ${
+              reviewLink.trim() && isValidUrl(reviewLink.trim())
+                ? "bg-purple-600 hover:bg-purple-700"
+                : "bg-gray-400 cursor-not-allowed"
+            }`}
           >
             Publish
           </button>

@@ -4,6 +4,7 @@ import RecentPostsTable from "../components/RecentPostsTable";
 import { useLocation } from "react-router-dom";
 import { getPost } from "../services/post.api";
 import GenerateContentModal from "../components/modals/GenerateContentModal";
+import Library from "./user/Library";
 
 export default function UsersLabs() {
   const [search, setSearch] = useState("");
@@ -11,6 +12,7 @@ export default function UsersLabs() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [postData, setPosts] = useState([]);
   const [totalPages, settotalPages] = useState(0);
+  const [generatedData, setGeneratedData] = useState(null);
   const { state } = useLocation();
   const [debouncedSearch, setDebouncedSearch] = useState("");
   useEffect(() => {
@@ -38,6 +40,11 @@ export default function UsersLabs() {
     }
   };
 
+  if (generatedData) {
+    console.log("Generated Data in UsersLabs 👉", generatedData);
+    return <Library generatedData={generatedData} setGeneratedData={setGeneratedData} loadPost={loadPost} />;
+  }
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto min-h-screen py-8">
@@ -51,12 +58,13 @@ export default function UsersLabs() {
               Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             </p>
           </div>
-          {state?.id ? "" : <GenerateContentModal />}
+          {state?.id ? "" : <GenerateContentModal setGeneratedData={setGeneratedData} />}
         </div>
         <div className="">
           <RecentPostsTable
             posts={postData}
             handleSearch={setSearch}
+            loadPost={loadPost}
             pagination={
               <>
                 <div className="flex border-top flex-col md:flex-row md:items-center md:justify-between p-4 text-sm text-gray-500 gap-3">

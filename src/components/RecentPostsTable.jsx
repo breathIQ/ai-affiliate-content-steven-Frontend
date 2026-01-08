@@ -1,4 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { deletePost } from "../services/post.api";
 
 const statusStyles = {
   Published: "bg-green-100 text-green-700",
@@ -8,9 +11,34 @@ const statusStyles = {
 
 
 
-export default function RecentPostsTable({ posts, pagination,handleSearch }) {
+export default function RecentPostsTable({ posts, pagination,handleSearch, loadPost }) {
   const [open, setOpen] = useState({ 0: false });
   const menuRef = useRef(null);
+  const navigate = useNavigate();
+
+  const handleDelete = async (id) => {
+    const ok = window.confirm(
+      "Are you sure you want to delete this post? This action cannot be undone."
+    );
+
+    if (!ok) return;
+
+    try {
+      const res = await deletePost(id);
+
+      if (!res?.success) {
+        toast.error(res?.message || "Failed to delete post");
+        return;
+      }
+
+      toast.success("Post deleted successfully");
+      setOpen({});
+      loadPost();
+    } catch (err) {
+      console.error("DELETE POST ERROR ❌", err);
+      toast.error("Something went wrong");
+    }
+  };
   
   return (
     <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
@@ -134,13 +162,15 @@ export default function RecentPostsTable({ posts, pagination,handleSearch }) {
                       {/* Dropdown */}
                       {open[index] && (
                         <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
-                          <button className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50">
+                          <button className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50"
+                          onClick={()=> navigate(`/u/post/view/${item?.id}`)}
+                          >
                             <img src="/icons/ic-veiw.svg" />
                             View
                           </button>
 
                           <button
-                            // onClick={() => setOpenMadal(true)}
+                            onClick={() => handleDelete(item.id)}
                             className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50"
                           >
                             <img src="/icons/ic-bin.svg" />
