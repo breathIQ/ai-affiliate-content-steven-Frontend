@@ -10,6 +10,7 @@ import API from "../services/api";
 
 function Dashboard() {
   const [details, setDetails] = useState();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getData();
@@ -19,7 +20,9 @@ function Dashboard() {
     try {
       const response = await API.get(`admin/dashboard`);
       setDetails(response?.data?.data)
+      setLoading(false)
     } catch (error) {
+      setLoading(false)
       console.log(error);
     }
   };
@@ -28,6 +31,8 @@ function Dashboard() {
   return (
     <Layout>
       <div className=" bg-gray-100">
+        {
+          !loading &&
         <div className="max-w-7xl mx-auto  min-h-screen pt-10">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <UsersCard details={details} />
@@ -37,11 +42,12 @@ function Dashboard() {
           <div className="grid pb-10 grid-cols-1 lg:grid-cols-2 gap-6">
             <TopAffiliates details={details} />
             {
-              details?.most_used_chapters?.length &&
+              // details?.most_used_chapters?.length &&
               <ChapterBubbleChart details={ details} />
             }
           </div>
         </div>
+        }
       </div>
     </Layout>
   );

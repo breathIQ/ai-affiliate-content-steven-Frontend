@@ -28,7 +28,7 @@ export default function UsersLabs() {
 
   const loadPost = async () => {
     try {
-      const response = await getPost(rowsPerPage, page, search);
+      const response = await getPost(rowsPerPage, page, search,state?.id);
       setPosts(response?.data?.posts || []);
       settotalPages(response?.data?.pagination?.last_page || 1);
       setPage(response?.data?.pagination?.current_page);
