@@ -107,7 +107,7 @@ ChartJS.register(
 
 export default function AffiliateClicksChart({ details }) {
   // Extract data from props
-  const affiliate_clicks = details?.affiliate_clicks
+  const affiliate_clicks = details?.affiliate_clicks || {graph_data:[],count:0}
   const labels = affiliate_clicks?.graph_data?.map((item) => item.label) || [];
   const values = affiliate_clicks?.graph_data?.map((item) => item.value) || [];
 
