@@ -109,6 +109,9 @@ export function ProfileEditModal({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white w-[550px] rounded-xl shadow-lg p-5 relative">
+        <button onClick={onClose} className="absolute right-4 top-4">
+          <img src="/icons/ic-close-circle.svg" />
+        </button>
         <h2 className="font-semibold text-lg mb-4">Profile</h2>
 
         {/* Avatar */}
