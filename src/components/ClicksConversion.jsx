@@ -115,14 +115,38 @@ export default function AffiliateClicksChart({ details }) {
     labels,
     datasets: [
       {
-        fill: true,
-        label: 'Clicks',
+        label: "Clicks",
         data: values,
-        borderColor: '#8B5CF6', // Purple color matching your theme
-        backgroundColor: 'rgba(139, 92, 246, 0.1)',
-        tension: 0.4, // Makes the line curved
-        pointRadius: 4,
-        pointBackgroundColor: '#8B5CF6',
+        fill: true,
+        borderColor: "#8B5CF6",
+        borderWidth: 3,
+        tension: 0.4,
+
+        // 🔑 Important for hover
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        hitRadius: 12,
+        pointHoverBackgroundColor: "#8B5CF6",
+
+        // 🌈 Gradient fill
+        backgroundColor: (context) => {
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+
+          if (!chartArea) return null;
+
+          const gradient = ctx.createLinearGradient(
+            0,
+            chartArea.top,
+            0,
+            chartArea.bottom
+          );
+
+          gradient.addColorStop(0, "rgba(139, 92, 246, 0.25)");
+          gradient.addColorStop(1, "rgba(139, 92, 246, 0)");
+
+          return gradient;
+        },
       },
     ],
   };
@@ -130,11 +154,22 @@ export default function AffiliateClicksChart({ details }) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
     plugins: {
       legend: { display: false },
       tooltip: {
-        mode: 'index',
-        intersect: false,
+        enabled: true,
+        backgroundColor: "#111827",
+        titleColor: "#fff",
+        bodyColor: "#fff",
+        padding: 10,
+        displayColors: false,
+        callbacks: {
+          label: (context) => `Clicks: ${context.parsed.y}`,
+        },
       },
     },
     scales: {
