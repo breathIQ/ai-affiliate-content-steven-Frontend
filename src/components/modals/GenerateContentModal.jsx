@@ -1,22 +1,60 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { getChapter } from "../../services/post.api";
+import { FaPlus } from "react-icons/fa";
 
 export default function GenerateContentModal() {
   const [isOpen, setIsOpen] = useState(false);
-  const [chapter, setChapter] = useState("Ch-1 :: Lorem ipsum dolor sit amet.");
-  const [model, setModel] = useState("ChatGPT");
-  const [prompt, setPrompt] = useState("");
+  const [chapters, setChapters] = useState([]);
 
-  const handleGenerate = () => {
-    console.log({
-      chapter,
-      model,
-      prompt,
-    });
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      chapter_id: "",
+      model: "ChatGPT",
+      prompt: "",
+    },
+  });
 
-    // 🔥 API call here
-    // axios.post("/generate", { chapter, model, prompt })
+  /* 🔹 Fetch chapters when modal opens */
+  useEffect(() => {
+    if (!isOpen) return;
 
-    setIsOpen(false);
+    const fetchChapters = async () => {
+      try {
+        const res = await getChapter();
+        setChapters(res?.data || []);
+      } catch (error) {
+        console.error("GET CHAPTER ERROR ❌", error);
+      }
+    };
+
+    fetchChapters();
+  }, [isOpen]);
+
+  /* 🔹 Submit */
+  const onSubmit = async (formData) => {
+    try {
+      const payload = {
+        chapter_id: formData.chapter_id,
+        model: formData.model,
+        prompt: formData.prompt,
+      };
+
+      console.log("Generate Payload 👉", payload);
+
+      // 🔥 API call for generate content goes here
+      // await generateContent(payload);
+
+      setIsOpen(false);
+      reset();
+    } catch (error) {
+      console.error("GENERATE CONTENT ERROR ❌", error);
+    }
   };
 
   return (
@@ -53,72 +91,101 @@ export default function GenerateContentModal() {
             </div>
 
             {/* Body */}
-            <div className="px-6 py-4 space-y-4">
-              {/* Chapter */}
-              <div>
-                <label className="text-sm font-medium mb-1 block">
-                  Select Chapter
-                </label>
-                <select
-                  value={chapter}
-                  onChange={(e) => setChapter(e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="px-6 py-4 space-y-4">
+                {/* Chapter */}
+                <div>
+                  <label className="text-sm font-medium mb-1 block">
+                    Select Chapter
+                  </label>
+                  <select
+                    {...register("chapter_id", {
+                      required: "Chapter is required",
+                    })}
+                    className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="">Select Chapter</option>
+                    {chapters.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.chapter} :: {item.chapter_title}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.chapter_id && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.chapter_id.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* AI Model */}
+                <div>
+                  <label className="text-sm font-medium mb-1 block">
+                    AI Model
+                  </label>
+                  <select
+                    {...register("model", {
+                      required: "AI model is required",
+                    })}
+                    className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="ChatGPT">ChatGPT</option>
+                    <option value="GPT-4">GPT-4</option>
+                    <option value="Claude">Claude</option>
+                  </select>
+                  {errors.model && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.model.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Custom Prompt */}
+                <div>
+                  <label className="text-sm font-medium mb-1 block">
+                    Custom Prompt
+                  </label>
+                  <textarea
+                    {...register("prompt", {
+                      required: "Prompt is required",
+                      minLength: {
+                        value: 10,
+                        message: "Prompt must be at least 10 characters",
+                      },
+                    })}
+                    rows={5}
+                    placeholder="Write your custom instructions..."
+                    className="w-full border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                  {errors.prompt && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.prompt.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50 rounded-b-xl">
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  className="py-[10px] px-[16px] rounded-lg text-sm bg-gray-900 text-white"
                 >
-                  <option>Ch-1 :: Lorem ipsum dolor sit amet.</option>
-                  <option>Ch-2 :: Consectetur adipiscing elit.</option>
-                  <option>Ch-3 :: Sed do eiusmod tempor.</option>
-                </select>
-              </div>
-
-              {/* AI Model */}
-              <div>
-                <label className="text-sm font-medium mb-1 block">
-                  AI Model
-                </label>
-                <select
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="py-[10px] px-[16px] rounded-lg text-sm bg-purple-600 text-white flex items-center gap-2 disabled:opacity-50"
                 >
-                  <option>ChatGPT</option>
-                  <option>GPT-4</option>
-                  <option>Claude</option>
-                </select>
+                  <span className="text-lg">
+                    <FaPlus size={22} className="bg-[#ffffff28] rounded-[4px] p-[5px]"/>
+                  </span>
+                  {isSubmitting ? "Generating..." : "Generate"}
+                </button>
               </div>
-
-              {/* Custom Prompt */}
-              <div>
-                <label className="text-sm font-medium mb-1 block">
-                  Custom Prompt
-                </label>
-                <textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  rows={5}
-                  placeholder="Write your custom instructions..."
-                  className="w-full border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50 rounded-b-xl">
-              <button
-                onClick={() => setIsOpen(false)}
-                className="py-[10px] px-[16px] rounded-lg text-sm bg-gray-900 text-white"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleGenerate}
-                className="py-[10px] px-[16px] rounded-lg text-sm bg-purple-600 text-white flex items-center gap-2"
-              >
-                <span className="text-lg">
-                  <img src="/icons/ic-add.svg" />
-                </span>{" "}
-                Generate
-              </button>
-            </div>
+            </form>
           </div>
         </div>
       )}
