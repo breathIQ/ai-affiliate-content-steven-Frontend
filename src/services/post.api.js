@@ -19,3 +19,8 @@ export const getChapter = async (data) => {
   const res = await API.get(`/user/get-chapter`);
   return res.data;
 };
+
+export const deletePost = async (id) => {
+  const res = await API.get(`/user/posts/${id}`);
+  return res.data;
+};

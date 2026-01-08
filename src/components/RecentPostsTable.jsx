@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import ConfirmDeleteModal from "./modals/ConfirmDeleteModal";
 
 const statusStyles = {
   Published: "bg-green-100 text-green-700",
@@ -8,9 +9,10 @@ const statusStyles = {
 
 
 
-export default function RecentPostsTable({ posts, pagination,handleSearch }) {
+export default function RecentPostsTable({ posts, pagination,handleSearch,handleDelete }) {
   const [open, setOpen] = useState({ 0: false });
   const menuRef = useRef(null);
+  const [openModal, setOpenMadal] = useState();
   
   return (
     <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
@@ -140,7 +142,7 @@ export default function RecentPostsTable({ posts, pagination,handleSearch }) {
                           </button>
 
                           <button
-                            // onClick={() => setOpenMadal(true)}
+                            onClick={() => setOpenMadal(true)}
                             className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50"
                           >
                             <img src="/icons/ic-bin.svg" />
@@ -165,6 +167,13 @@ export default function RecentPostsTable({ posts, pagination,handleSearch }) {
       <div className="p-3 text-xs text-gray-400 sm:hidden">
         Scroll horizontally →
       </div>
+
+       <ConfirmDeleteModal
+        isOpen={openModal}
+        onClose={() => setOpenMadal(false)}
+        onConfirm={handleDelete}
+        // loading={loading}
+      />
     </div>
   );
 }

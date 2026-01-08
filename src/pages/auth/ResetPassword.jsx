@@ -4,6 +4,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { apibase } from "../../services/contants";
 import toast from "react-hot-toast";
 import { useLocation } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function ResetPassword() {
   const { token } = useParams();
@@ -117,7 +118,8 @@ const handleOtpChange = (index, value) => {
                     onClick={() => setShowPass(!showPass)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-purple-600"
                   >
-                    <EyeIcon visible={showPass} />
+                     {!showPass ? <FaEyeSlash /> : <FaEye />}
+                    {/* <EyeIcon visible={showPass} /> */}
                   </button>
                 </div>
               </div>
@@ -139,7 +141,8 @@ const handleOtpChange = (index, value) => {
                     onClick={() => setShowConfirmPass(!showConfirmPass)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-purple-600"
                   >
-                    <EyeIcon visible={showConfirmPass} />
+                    {!showConfirmPass ? <FaEyeSlash /> : <FaEye />}
+                    {/* <EyeIcon visible={showConfirmPass} /> */}
                   </button>
                 </div>
               </div>

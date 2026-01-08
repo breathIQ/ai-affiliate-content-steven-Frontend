@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Layout from "../components/Layout/Layout";
 import RecentPostsTable from "../components/RecentPostsTable";
 import { useLocation } from "react-router-dom";
-import { getPost } from "../services/post.api";
+import { deletePost, getPost } from "../services/post.api";
 import GenerateContentModal from "../components/modals/GenerateContentModal";
+import toast from "react-hot-toast";
 
 export default function UsersLabs() {
   const [search, setSearch] = useState("");
@@ -38,6 +39,22 @@ export default function UsersLabs() {
     }
   };
 
+
+  
+   const handleDelete = async (id) => {
+    try {
+      const response = await deletePost(id);
+      // console.log(response);
+    
+      toast.success(response?.data?.message);
+      // setOpenMadal();
+    } catch (error) {
+      // setLoading(false);
+      toast.error(error?.response?.data?.message || error?.message);
+      console.log(error);
+    }
+  };
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto min-h-screen py-8">
@@ -57,6 +74,7 @@ export default function UsersLabs() {
           <RecentPostsTable
             posts={postData}
             handleSearch={setSearch}
+            handleDelete={handleDelete}
             pagination={
               <>
                 <div className="flex border-top flex-col md:flex-row md:items-center md:justify-between p-4 text-sm text-gray-500 gap-3">

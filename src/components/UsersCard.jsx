@@ -20,38 +20,32 @@ ChartJS.register(
 );
 
 export default function UsersCard({ details }) {
+  // 1️⃣ Extract graph data from details prop
+  const graphData = details?.total_users?.graph_data || [];
+  
+  // 2️⃣ Map the labels and values
+  const labels = graphData.map((item) => item.label);
+  const values = graphData.map((item) => item.value);
+
   const data = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    labels: labels, // Dynamically set labels (e.g., ["2026-01-06", "2026-01-07"])
     datasets: [
       {
-        data: [30, 40, 38, 45, 50, 55],
+        data: values, // Dynamically set values (e.g., [1, 2])
         borderColor: "#22C55E",
         borderWidth: 3,
         tension: 0.4,
         fill: true,
-
-        // 🔑 Important for hover
         pointRadius: 0,
         pointHoverRadius: 6,
         hitRadius: 10,
-
-        // 🌈 Gradient fill
         backgroundColor: (context) => {
           const chart = context.chart;
           const { ctx, chartArea } = chart;
-
           if (!chartArea) return null;
-
-          const gradient = ctx.createLinearGradient(
-            0,
-            chartArea.top,
-            0,
-            chartArea.bottom
-          );
-
+          const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
           gradient.addColorStop(0, "rgba(34, 197, 94, 0.35)");
           gradient.addColorStop(1, "rgba(34, 197, 94, 0)");
-
           return gradient;
         },
       },
@@ -61,17 +55,12 @@ export default function UsersCard({ details }) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-
-    // ✅ Enables hover anywhere on line
     interaction: {
       mode: "index",
       intersect: false,
     },
-
     plugins: {
-      legend: {
-        display: false,
-      },
+      legend: { display: false },
       tooltip: {
         enabled: true,
         backgroundColor: "#111827",
@@ -84,13 +73,12 @@ export default function UsersCard({ details }) {
         },
       },
     },
-
     scales: {
-      x: {
+      x: { display: false },
+      y: { 
         display: false,
-      },
-      y: {
-        display: false,
+        // Suggested: start at 0 if you have low numbers like 1 and 2
+        beginAtZero: true 
       },
     },
   };
@@ -115,9 +103,15 @@ export default function UsersCard({ details }) {
         </div>
       </div>
 
-      {/* 👇 Chart Height Controlled Here */}
       <div className="h-[120px]">
-        <Line data={data} options={options} />
+        {/* Only render chart if there is data to avoid errors */}
+        {graphData.length > 0 ? (
+          <Line data={data} options={options} />
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+            No data available
+          </div>
+        )}
       </div>
     </div>
   );
