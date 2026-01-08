@@ -209,8 +209,13 @@ export default function Users() {
                                 }}
                                 className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50"
                               >
-                                <img src="/icons/ic-cancel.svg" />
-                                De-activate Affiliate
+                                {u?.status == 1 ? (
+                                  <img src="/icons/ic-cancel.svg" />
+                                ) : (
+                                  <img src="/icons/ic-check.svg" />
+                                )}
+                                {u?.status == 1 ? "De-activate" : "Activate"}
+                                {/* De-activate Affiliate */}
                               </button>
                             </div>
                           )}

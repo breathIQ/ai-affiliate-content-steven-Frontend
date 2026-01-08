@@ -10,7 +10,7 @@ export default function Login() {
   const [isLoading, setISloading] = useState(false);
   // View states: 'login' or 'forgot'
   const [view, setView] = useState("login"); 
-  
+  const navigate = useNavigate()
   const location = useLocation();
   const [isadmin, setisadmin] = useState(false);
 
@@ -49,6 +49,9 @@ export default function Login() {
       const res = await axios.post((process.env.apibase || apibase) + "/forgot-password", { email });
       toast.success(res?.data?.message || "Reset link sent to your email!");
       setISloading(false);
+      navigate("/reset-password",{
+        state:email
+      })
       // Optional: switch back to login after success
       // setView("login");
     } catch (error) {
@@ -162,7 +165,7 @@ export default function Login() {
                   disabled={isLoading}
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-lg py-2.5 font-bold shadow-md transition-all active:scale-[0.98]"
                 >
-                  {isLoading ? "Sending..." : "Send Reset Link"}
+                  {isLoading ? "Sending..." : "Send Reset Otp"}
                 </button>
 
                 <div 

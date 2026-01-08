@@ -195,6 +195,13 @@ export default function RecentPostsTable({ posts, pagination,handleSearch, loadP
       <div className="p-3 text-xs text-gray-400 sm:hidden">
         Scroll horizontally →
       </div>
+
+       <ConfirmDeleteModal
+        isOpen={openModal}
+        onClose={() => setOpenMadal(false)}
+        onConfirm={handleDelete}
+        // loading={loading}
+      />
     </div>
   );
 }

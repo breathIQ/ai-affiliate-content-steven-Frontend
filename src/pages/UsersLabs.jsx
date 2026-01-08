@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Layout from "../components/Layout/Layout";
 import RecentPostsTable from "../components/RecentPostsTable";
 import { useLocation } from "react-router-dom";
-import { getPost } from "../services/post.api";
+import { deletePost, getPost } from "../services/post.api";
 import GenerateContentModal from "../components/modals/GenerateContentModal";
 import Library from "./user/Library";
 

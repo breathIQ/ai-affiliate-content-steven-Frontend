@@ -1,22 +1,37 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useState,useRef } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { apibase } from "../../services/contants";
 import toast from "react-hot-toast";
+import { useLocation } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function ResetPassword() {
   const { token } = useParams();
   const navigate = useNavigate();
-
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+const inputRefs = useRef([]);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setISloading] = useState(false);
+  const {state } =useLocation()
+  // console.log("state" ,state);
   
   // States for toggling visibility
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
+const handleOtpChange = (index, value) => {
+    if (!/^[0-9]?$/.test(value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
 
+    if (value && index < otp.length - 1) {
+      inputRefs.current[index + 1].focus();
+    }
+  };
   const handleResetSubmit = async (e) => {
+    // console.log("cleick",otp.join(""));
     e.preventDefault();
     if (password.length < 6) {
       return toast.error("Password must be at least 6 characters long");
@@ -24,19 +39,18 @@ export default function ResetPassword() {
     if (password !== confirmPassword) {
       return toast.error("Passwords do not match!");
     }
-
     try {
       setISloading(true);
       const res = await axios.post(
         `${process.env.apibase || apibase}/reset-password`, 
-        { token, password }
+        {email:state||"", otp:otp.join(""), password,password_confirmation:confirmPassword }
       );
 
       toast.success(res?.data?.message || "Password reset successfully!");
       setTimeout(() => navigate("/login"), 2000);
 
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Link expired or invalid");
+      toast.error(error?.response?.data?.message|| error?.message || "Link expired or invalid");
     } finally {
       setISloading(false);
     }
@@ -53,6 +67,13 @@ export default function ResetPassword() {
     </svg>
   );
 
+  const handleKeyDown = (index, e) => {
+    // 3. Move focus back on Backspace if current field is empty
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      inputRefs.current[index - 1].focus();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white grid grid-cols-1 lg:grid-cols-2">
       <div className="flex items-center justify-center px-6 py-20">
@@ -65,6 +86,22 @@ export default function ResetPassword() {
 
             <form onSubmit={handleResetSubmit} className="space-y-5">
               {/* Password Input */}
+              <div>
+                <label className="text-sm font-medium text-gray-700">Enter Otp</label>
+               <div className="flex justify-between pt-0 mt-0">
+                {otp.map((digit, i) => (
+                  <input
+                    key={i}
+                    ref={(el) => (inputRefs.current[i] = el)}
+                    maxLength={1}
+                    value={digit}
+                    onKeyDown={(e) => handleKeyDown(i, e)}
+                    onChange={(e) => handleOtpChange(i, e.target.value)}
+                    className="w-10 h-12 text-center border rounded-lg text-lg"
+                  />
+                ))}
+              </div>
+              </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">New Password</label>
                 <div className="relative mt-1">
@@ -81,7 +118,8 @@ export default function ResetPassword() {
                     onClick={() => setShowPass(!showPass)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-purple-600"
                   >
-                    <EyeIcon visible={showPass} />
+                     {!showPass ? <FaEyeSlash /> : <FaEye />}
+                    {/* <EyeIcon visible={showPass} /> */}
                   </button>
                 </div>
               </div>
@@ -103,7 +141,8 @@ export default function ResetPassword() {
                     onClick={() => setShowConfirmPass(!showConfirmPass)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-purple-600"
                   >
-                    <EyeIcon visible={showConfirmPass} />
+                    {!showConfirmPass ? <FaEyeSlash /> : <FaEye />}
+                    {/* <EyeIcon visible={showConfirmPass} /> */}
                   </button>
                 </div>
               </div>
