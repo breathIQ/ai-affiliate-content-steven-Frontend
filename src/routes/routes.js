@@ -20,10 +20,10 @@ const allRoutes = [
         component:<Dashboard/> ,
         path:"/dashboard"
     },
-    {
-        component:<UsersLabs/> ,
-        path:"/users/labs"
-    },
+    // {
+    //     component:<UsersLabs/> ,
+    //     path:"/users/labs"
+    // },
     {
         component:<UserDashboard/> ,
         path:"/u/dashboard"
@@ -32,10 +32,10 @@ const allRoutes = [
         component:<UsersLabs/> ,
         path:"/u/library"
     },
-    // {
-    //     component:<Library/> ,
-    //     path:"/u/library"
-    // },
+    {
+        component:<Library/> ,
+        path:"/u/post/view/:id"
+    },
     {
         component:<ResetPassword/> ,
         path:"/reset-password"

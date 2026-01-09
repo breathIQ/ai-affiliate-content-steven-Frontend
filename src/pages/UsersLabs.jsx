@@ -4,7 +4,7 @@ import RecentPostsTable from "../components/RecentPostsTable";
 import { useLocation } from "react-router-dom";
 import { deletePost, getPost } from "../services/post.api";
 import GenerateContentModal from "../components/modals/GenerateContentModal";
-import toast from "react-hot-toast";
+import Library from "./user/Library";
 
 export default function UsersLabs() {
   const [search, setSearch] = useState("");
@@ -12,6 +12,7 @@ export default function UsersLabs() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [postData, setPosts] = useState([]);
   const [totalPages, settotalPages] = useState(0);
+  const [generatedData, setGeneratedData] = useState(null);
   const { state } = useLocation();
   const [debouncedSearch, setDebouncedSearch] = useState("");
   useEffect(() => {
@@ -39,21 +40,10 @@ export default function UsersLabs() {
     }
   };
 
-
-  
-   const handleDelete = async (id) => {
-    try {
-      const response = await deletePost(id);
-      // console.log(response);
-    
-      toast.success(response?.data?.message);
-      // setOpenMadal();
-    } catch (error) {
-      // setLoading(false);
-      toast.error(error?.response?.data?.message || error?.message);
-      console.log(error);
-    }
-  };
+  if (generatedData) {
+    console.log("Generated Data in UsersLabs 👉", generatedData);
+    return <Library generatedData={generatedData} setGeneratedData={setGeneratedData} loadPost={loadPost} />;
+  }
 
   return (
     <Layout>
@@ -68,13 +58,13 @@ export default function UsersLabs() {
               Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             </p>
           </div>
-          {state?.id ? "" : <GenerateContentModal />}
+          {state?.id ? "" : <GenerateContentModal setGeneratedData={setGeneratedData} />}
         </div>
         <div className="">
           <RecentPostsTable
             posts={postData}
             handleSearch={setSearch}
-            handleDelete={handleDelete}
+            loadPost={loadPost}
             pagination={
               <>
                 <div className="flex border-top flex-col md:flex-row md:items-center md:justify-between p-4 text-sm text-gray-500 gap-3">

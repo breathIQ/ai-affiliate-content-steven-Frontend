@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { getChapter } from "../../services/post.api";
 import { FaPlus } from "react-icons/fa";
+import { generateAIPost } from "../../services/post.api";
 
-export default function GenerateContentModal() {
+export default function GenerateContentModal({setGeneratedData}) {
   const [isOpen, setIsOpen] = useState(false);
   const [chapters, setChapters] = useState([]);
 
@@ -40,18 +41,20 @@ export default function GenerateContentModal() {
   const onSubmit = async (formData) => {
     try {
       const payload = {
-        chapter_id: formData.chapter_id,
+        chapter: formData.chapter_id, // API expects `chapter`
         model: formData.model,
         prompt: formData.prompt,
       };
 
       console.log("Generate Payload 👉", payload);
 
-      // 🔥 API call for generate content goes here
-      // await generateContent(payload);
+      const res = await generateAIPost(payload);
 
-      setIsOpen(false);
-      reset();
+      if (res?.success) {
+        setGeneratedData(res.data); // ✅ EXACT response.data saved
+        setIsOpen(false);
+        reset();
+      }
     } catch (error) {
       console.error("GENERATE CONTENT ERROR ❌", error);
     }
@@ -129,9 +132,8 @@ export default function GenerateContentModal() {
                     })}
                     className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
-                    <option value="ChatGPT">ChatGPT</option>
-                    <option value="GPT-4">GPT-4</option>
-                    <option value="Claude">Claude</option>
+                    <option value="gpt-4-turbo">ChatGPT</option>
+                    <option value="claude-3-haiku-20240307">Claude</option>
                   </select>
                   {errors.model && (
                     <p className="text-xs text-red-500 mt-1">
