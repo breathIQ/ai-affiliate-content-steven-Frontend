@@ -94,7 +94,8 @@ const allRoutes = [
     { component: <UsersLabs />, path: "/u/library", role: "public"},
     // { component: <UsersLabs />, path: "/u/library", role: 2 },
     { component: <UsersLabs />, path: "/library", role: 2 },
-    { component: <Library />, path: "/u/post/view/:id", role: 1 },
+    { component: <Library />, path: "/u/post/view/:id", role: "public" },
+    // { component: <Library />, path: "/u/post/view/:id", role: 2 },
 
     // COMMON/NOT FOUND
     { component: <NotFound />, path: "/*", role: "public" },

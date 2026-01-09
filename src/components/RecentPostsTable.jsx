@@ -10,16 +10,19 @@ const statusStyles = {
   "Saved in Draft": "bg-yellow-100 text-yellow-700",
 };
 
-
-
-export default function RecentPostsTable({ posts, pagination,handleSearch, loadPost }) {
+export default function RecentPostsTable({
+  title,
+  posts,
+  pagination,
+  handleSearch,
+  loadPost,
+}) {
   const [open, setOpen] = useState({ 0: false });
   const menuRef = useRef(null);
   const navigate = useNavigate();
- const [openModal, setOpenMadal] = useState();
+  const [openModal, setOpenMadal] = useState();
   const [loading, setLoading] = useState(false);
 
- 
   const handleDelete = async (id) => {
     try {
       const res = await deletePost(openModal);
@@ -33,16 +36,19 @@ export default function RecentPostsTable({ posts, pagination,handleSearch, loadP
       setOpen({});
       loadPost();
     } catch (err) {
-      console.error("DELETE POST ERROR ❌", err);
-      toast.error("Something went wrong");
+      toast.error(
+        err?.response?.data?.error || err?.message || "Something went wrong"
+      );
+      // console.error("DELETE POST ERROR ❌", err);
+      // toast.error("Something went wrong");
     }
   };
-  
+
   return (
     <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 gap-3">
-        <h2 className="font-semibold text-gray-800">Recent Posts</h2>
+        <h2 className="font-semibold text-gray-800">{title||"Recent Posts"}</h2>
         <div className="relative">
           <input
             type="text"
@@ -160,8 +166,9 @@ export default function RecentPostsTable({ posts, pagination,handleSearch, loadP
                       {/* Dropdown */}
                       {open[index] && (
                         <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
-                          <button className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50"
-                          onClick={()=> navigate(`/u/post/view/${item?.id}`)}
+                          <button
+                            className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50"
+                            onClick={() => navigate(`/u/post/view/${item?.id}`)}
                           >
                             <img src="/icons/ic-veiw.svg" />
                             View
@@ -193,7 +200,7 @@ export default function RecentPostsTable({ posts, pagination,handleSearch, loadP
       <div className="p-3 text-xs text-gray-400 sm:hidden">
         Scroll horizontally →
       </div>
-       <ConfirmDeleteModal
+      <ConfirmDeleteModal
         isOpen={openModal}
         onClose={() => setOpenMadal(false)}
         onConfirm={handleDelete}

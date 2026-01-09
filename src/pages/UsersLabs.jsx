@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Layout from "../components/Layout/Layout";
 import RecentPostsTable from "../components/RecentPostsTable";
 import { useLocation } from "react-router-dom";
-import { deletePost, getPost } from "../services/post.api";
+import { getPost } from "../services/post.api";
 import GenerateContentModal from "../components/modals/GenerateContentModal";
 import Library from "./user/Library";
 import { useLoader } from "../context/LoaderContext";
@@ -65,6 +65,7 @@ export default function UsersLabs() {
         </div>
         <div className="">
           <RecentPostsTable
+          title="All Posts"
             posts={postData}
             handleSearch={setSearch}
             loadPost={loadPost}

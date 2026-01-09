@@ -1,8 +1,13 @@
 import API from "./api";
-
-export const getPost = async (rowsPerPage,page,search,userId) => {
-
-  const res = await API.get(`/${userId ? `admin/user/${userId?userId:""}/posts`:"user/posts"}?per_page=${rowsPerPage}&page=${page}&search=${search}`);
+const user = localStorage.getItem("user")
+  ? JSON.parse(localStorage.getItem("user"))
+  : {};
+export const getPost = async (rowsPerPage, page, search, userId) => {
+  const res = await API.get(
+    `/${
+      userId ? `admin/user/${userId ? userId : ""}/posts` : "user/posts"
+    }?per_page=${rowsPerPage}&page=${page}&search=${search}`
+  );
   return res.data;
 };
 
@@ -37,7 +42,11 @@ export const generateAIPost = async (data) => {
 };
 
 export const getSinglePost = async (id) => {
-  const res = await API.get(`/user/posts/${id}`);
+  console.log("user" ,user);
+  
+  const res = await API.get(
+    `/${user?.role_id == 2 ? "user/posts" : "admin/post"}/${id}`
+  );
   return res.data;
 };
 
