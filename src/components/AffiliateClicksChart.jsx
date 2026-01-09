@@ -43,7 +43,16 @@ export default function AffiliateClicksChart() {
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      tooltip: { enabled: false },
+      tooltip: {
+        enabled: true,
+        mode: "index",
+        intersect: false,
+        backgroundColor: "#111827",
+        titleColor: "#FFFFFF",
+        bodyColor: "#FFFFFF",
+        padding: 8,
+        cornerRadius: 4,
+      },
     },
     scales: {
       x: {
