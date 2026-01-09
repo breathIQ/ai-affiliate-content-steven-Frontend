@@ -127,20 +127,42 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
 
   const uploadFiles = (e) => {
     const newFiles = Array.from(e.target.files);
-    setFiles((prev) => [...prev, ...newFiles]);
-    setSelectedMedia((prev) => [
-      ...prev,
-      ...newFiles.map((_, i) => prev.length + i),
-    ]);
+
+    if (mediaType === "single") {
+      // Allow only one file
+      setFiles([newFiles[0]]);
+      setSelectedMedia([0]);
+    } else {
+      // Carousel → allow multiple
+      setFiles((prev) => [...prev, ...newFiles]);
+      setSelectedMedia((prev) => [
+        ...prev,
+        ...newFiles.map((_, i) => prev.length + i),
+      ]);
+    }
   };
 
+
   const toggleMedia = (index) => {
+    if (mediaType === "single") {
+      setSelectedMedia([index]); // always single
+      return;
+    }
+
     setSelectedMedia((prev) =>
       prev.includes(index)
         ? prev.filter((i) => i !== index)
         : [...prev, index]
     );
   };
+
+  useEffect(() => {
+    if (mediaType === "single" && files.length > 1) {
+      setFiles([files[0]]);
+      setSelectedMedia([0]);
+    }
+  }, [mediaType]);
+
 
   const handlePublishSubmit = async ({ platforms, reviewLink }) => {
     try {
@@ -315,7 +337,7 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
               <p>Upload</p>
               <input
                 type="file"
-                multiple
+                multiple={mediaType === "carousel"}
                 accept="image/*,video/*"
                 className="hidden"
                 onChange={uploadFiles}
