@@ -59,7 +59,7 @@ export default function DashboardOverview() {
             //   className="w-[100%] h-[90%]"
             />
             <h3 className="text-2xl font-bold my-3">25</h3>
-            <p className="text-sm">Posts Generated</p>
+            <p className="text-sm">Posts Published</p>
           </div>
 
           <div className="bg-purple-600 text-white rounded-2xl p-5">
@@ -72,17 +72,21 @@ export default function DashboardOverview() {
             <p className="text-sm">Affiliate Clicks</p>
           </div>
 
-          <div className="col-span-2 bg-emerald-500 rounded-2xl p-6 text-white flex items-center justify-between">
+          <div className="col-span-2 bg-emerald-500 rounded-2xl p-6 text-white flex items-center justify-between relative">
             <div>
-              <h3 className="text-lg font-semibold mb-1">Read CO2 Book</h3>
+              <h3 className="text-lg font-semibold mb-1">
+                <img src="/icons/ic-book-dashboard.svg" alt="book icon" className="inline-block mr-2" />
+                Read CO2 Book
+              </h3>
               <p className="text-sm text-emerald-100">
-                Access the full digital version while creating content.
+                Access the full digital <br/>
+                version for reference while creating content.
               </p>
             </div>
             <img
               src="/images/books.png"
               alt="book"
-              className="w-20 h-28 object-cover rounded-lg"
+              className="absolute bottom-0 right-10 w-[170px] rounded-lg"
             />
           </div>
           <div className="col-span-2 bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
