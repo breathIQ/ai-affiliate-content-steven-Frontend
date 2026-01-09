@@ -5,8 +5,10 @@ import { useLocation } from "react-router-dom";
 import { deletePost, getPost } from "../services/post.api";
 import GenerateContentModal from "../components/modals/GenerateContentModal";
 import Library from "./user/Library";
+import { useLoader } from "../context/LoaderContext";
 
 export default function UsersLabs() {
+  const { profile } = useLoader();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -41,9 +43,10 @@ export default function UsersLabs() {
   };
 
   if (generatedData) {
-    console.log("Generated Data in UsersLabs 👉", generatedData);
+    // console.log("Generated Data in UsersLabs 👉", generatedData);
     return <Library generatedData={generatedData} setGeneratedData={setGeneratedData} loadPost={loadPost} />;
   }
+  
 
   return (
     <Layout>
@@ -52,7 +55,7 @@ export default function UsersLabs() {
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold">
-              {state?.name || "USER "}'s Posts
+              {state?.name ||profile?.name|| "USER "}'s Posts
             </h1>
             <p className="text-sm text-gray-500">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit.

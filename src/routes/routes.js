@@ -9,66 +9,96 @@ import UserDashboard from "../pages/user/UserDashboard"
 import ViewPdf from "../pages/ViewPdf"
 import UsersLabs from "../pages/UsersLabs"
 import ResetPassword from "../pages/auth/ResetPassword"
+import NotFound from "../pages/NotFound"
 
+
+// const allRoutes = [
+//     {
+//         component:<Dashboard/> ,
+//         path:"/"
+//     },
+//     {
+//         component:<Dashboard/> ,
+//         path:"/dashboard"
+//     },
+   
+//     {
+//         component:<UserDashboard/> ,
+//         path:"/u/dashboard"
+//     },
+//     {
+//         component:<UsersLabs/> ,
+//         path:"/u/library"
+//     },
+//     {
+//         component:<Library/> ,
+//         path:"/u/post/view/:id"
+//     },
+//     {
+//         component:<ResetPassword/> ,
+//         path:"/reset-password"
+//     },
+//     {
+//         component:<ViewPdf/> ,
+//         path:"/pdf-view"
+//     },
+//     {
+//         component:<NotFound/> ,
+//         path:"/*"
+//     },
+//     {
+//         component:<FileUpload/> ,
+//         path:"/files"
+//     },
+//     {
+//         component:<Users/> ,
+//         path:"/users"
+//     },
+//     {
+//         component:<Login/> ,
+//         path:"/admin/login"
+//     },
+//     {
+//         component:<Login/> ,
+//         path:"/login"
+//     },
+//     {
+//         component:<SignUpWithOTP/> ,
+//         path:"/signup"
+//     },
+// ]
 
 const allRoutes = [
-    {
-        component:<Dashboard/> ,
-        path:"/"
-    },
-    {
-        component:<Dashboard/> ,
-        path:"/dashboard"
-    },
-    // {
-    //     component:<UsersLabs/> ,
-    //     path:"/users/labs"
-    // },
-    {
-        component:<UserDashboard/> ,
-        path:"/u/dashboard"
-    },
-    {
-        component:<UsersLabs/> ,
-        path:"/u/library"
-    },
-    {
-        component:<Library/> ,
-        path:"/u/post/view/:id"
-    },
+    // PUBLIC ROUTES
+    { component: <Login />, path: "/login", role: "public" },
+    { component: <Login />, path: "/admin/login", role: "public" },
+    { component: <SignUpWithOTP />, path: "/signup", role: "public" },
     {
         component:<ResetPassword/> ,
-        path:"/reset-password"
+        path:"/reset-password",
+        role: "public"
     },
     {
         component:<ViewPdf/> ,
-        path:"/pdf-view"
+        path:"/pdf-view",role: 1
     },
-    // {
-    //     component:<UserSchedule/> ,
-    //     path:"/u/schedule"
-    // },
-    {
-        component:<FileUpload/> ,
-        path:"/files"
-    },
-    {
-        component:<Users/> ,
-        path:"/users"
-    },
-    {
-        component:<Login/> ,
-        path:"/admin/login"
-    },
-    {
-        component:<Login/> ,
-        path:"/login"
-    },
-    {
-        component:<SignUpWithOTP/> ,
-        path:"/signup"
-    },
-]
+
+    // ADMIN ROUTES
+    { component: <Dashboard />, path: "/", role: 2 },
+    { component: <Dashboard />, path: "/dashboard", role: 2 },
+    { component: <Users />, path: "/users", role: 2 },
+    { component: <FileUpload />, path: "/files", role: 2 },
+
+    // USER ROUTES
+    { component: <UserDashboard />, path: "/u/dashboard", role: 1 },
+    { component: <UsersLabs />, path: "/u/library", role: "public"},
+    // { component: <UsersLabs />, path: "/u/library", role: 2 },
+    { component: <UsersLabs />, path: "/library", role: 2 },
+    { component: <Library />, path: "/u/post/view/:id", role: 1 },
+
+    // COMMON/NOT FOUND
+    { component: <NotFound />, path: "/*", role: "public" },
+];
 
 
 export default allRoutes

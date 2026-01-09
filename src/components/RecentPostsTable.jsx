@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { deletePost } from "../services/post.api";
+import ConfirmDeleteModal from "./modals/ConfirmDeleteModal";
 
 const statusStyles = {
   Published: "bg-green-100 text-green-700",
@@ -15,16 +16,13 @@ export default function RecentPostsTable({ posts, pagination,handleSearch, loadP
   const [open, setOpen] = useState({ 0: false });
   const menuRef = useRef(null);
   const navigate = useNavigate();
+ const [openModal, setOpenMadal] = useState();
+  const [loading, setLoading] = useState(false);
 
+ 
   const handleDelete = async (id) => {
-    const ok = window.confirm(
-      "Are you sure you want to delete this post? This action cannot be undone."
-    );
-
-    if (!ok) return;
-
     try {
-      const res = await deletePost(id);
+      const res = await deletePost(openModal);
 
       if (!res?.success) {
         toast.error(res?.message || "Failed to delete post");
@@ -170,7 +168,7 @@ export default function RecentPostsTable({ posts, pagination,handleSearch, loadP
                           </button>
 
                           <button
-                            onClick={() => handleDelete(item.id)}
+                            onClick={() => setOpenMadal(item.id)}
                             className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50"
                           >
                             <img src="/icons/ic-bin.svg" />
@@ -195,6 +193,12 @@ export default function RecentPostsTable({ posts, pagination,handleSearch, loadP
       <div className="p-3 text-xs text-gray-400 sm:hidden">
         Scroll horizontally →
       </div>
+       <ConfirmDeleteModal
+        isOpen={openModal}
+        onClose={() => setOpenMadal(false)}
+        onConfirm={handleDelete}
+        loading={loading}
+      />
     </div>
   );
 }
