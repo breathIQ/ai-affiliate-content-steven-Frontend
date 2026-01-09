@@ -68,9 +68,9 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
         if (post.media?.length) {
           setViewMedia(post.media.map(m => m.url));
         }
-      } catch (err) {
-        console.error("FETCH POST ERROR ❌", err);
-        toast.error("Something went wrong");
+      } catch (err) {        
+        // console.error("FETCH POST ERROR ❌", err);
+        toast.error(err?.response?.data?.error || err?.message||"Something went wrong");
       }
     };
 

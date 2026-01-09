@@ -25,6 +25,12 @@ export default function SignUpWithOTP() {
       toast.error("Passwords do not match");
       return;
     }
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+
+if (!passwordRegex.test(form.password)) {
+  toast.error("Password must be at least 8 characters, include one letter, one number, and one special character");
+  return;
+}
     try {
       setISloading(true);
       const res = await axios.post(

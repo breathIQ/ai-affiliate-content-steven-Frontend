@@ -2,11 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import InviteModal from "../modals/InviteModal";
 import { ProfileEditModal } from "../modals/ProfileEditModal";
 import { ChangePasswordModal } from "../modals/ChangePasswordModal";
+import { useLoader } from "../../context/LoaderContext";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
   const access_token = localStorage.getItem("access_token");
-
+  const { profile } = useLoader();
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : {};
@@ -14,8 +15,7 @@ const Header = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
   const [openProfile, setOpenProfile] = useState(false);
-  const [openPassword, setOpenPassword] = useState(false);
-
+  const [openPassword, setOpenPassword] = useState(false);  
   // close dropdown on outside click
   useEffect(() => {
     if (!access_token) {
@@ -43,7 +43,7 @@ const Header = () => {
           {/* Profile */}
           <div ref={profileRef} className="relative">
             <img
-              src="https://i.pravatar.cc/40"
+              src={profile?.avatar || "/images/defaultImage.png"}
               alt="profile"
               onClick={() => setProfileOpen((v) => !v)}
               className="w-9 h-9 rounded-md border border-gray-600 cursor-pointer"
@@ -53,7 +53,7 @@ const Header = () => {
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border z-50">
                 <div className="w-full flex gap-2 border-bottom align-items-center px-4 py-2 font-semibold hover:bg-gray-100">
                   <img
-                    src="https://i.pravatar.cc/40"
+              src={profile?.avatar || "/images/defaultImage.png"}
                     alt="profile"
                     onClick={() => setOpenProfile((v) => !v)}
                     className="w-7 h-7 rounded-md border border-gray-600 cursor-pointer"

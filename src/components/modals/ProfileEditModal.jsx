@@ -5,16 +5,19 @@ import {
   getProfileByRole,
   updateProfileByRole,
 } from "../../services/profile.service";
+import { useLoader } from "../../context/LoaderContext";
 
 const DEFAULT_IMAGE = "/images/defaultImage.png";
 
 export function ProfileEditModal({ isOpen, onClose }) {
   const fileRef = useRef(null);
-  const [image, setImage] = useState(DEFAULT_IMAGE);
+  const { profile ,loadProfile } = useLoader();
+  const [image, setImage] = useState(profile?.avatar ||DEFAULT_IMAGE);
   const [imageFile, setImageFile] = useState(null);
   const [copied, setCopied] = useState(false);
   const [social, setSocial] = useState(null);
   const [loading, setLoading] = useState(false);
+
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : {};
@@ -33,7 +36,7 @@ export function ProfileEditModal({ isOpen, onClose }) {
 
     const loadProfile = async () => {
       try {
-        const profile = await getProfileByRole();
+        // const profile = await getProfileByRole();
         reset({
           name: profile.name,
           email: profile.email,
@@ -98,6 +101,7 @@ export function ProfileEditModal({ isOpen, onClose }) {
       const res = await updateProfileByRole(formData);
 
       toast.success(res?.message || "Profile updated successfully");
+      loadProfile()
       onClose();
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to update profile");

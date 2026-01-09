@@ -44,7 +44,7 @@ const FileUpload = () => {
       console.log(response);
       setFile(response?.data?.data);
     } catch (error) {
-      setFile()
+      setFile();
       console.log(error);
     }
   };
@@ -147,7 +147,15 @@ const FileUpload = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-3">
               <h2 className="text-lg font-semibold text-gray-800">File</h2>
               <button
-                onClick={() => setIsOpen(true)}
+                onClick={() => {
+                  if (filePriview.original_name) {
+                    toast.error(
+                      "Please delete the existing preview before uploading a new file."
+                    );
+                  } else {
+                    setIsOpen(true);
+                  }
+                }}
                 className="bg-purple-900 text-white py-[10px] px-[16px] flex align-center gap-2 rounded-lg text-sm"
               >
                 <img src="/icons/ic-upload.svg" className="text-white" />

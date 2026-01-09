@@ -187,7 +187,7 @@ export default function Users() {
                             <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
                               <button
                                 onClick={() => {
-                                  navigate(`/users/labs`, {
+                                  navigate(`/u/library`, {
                                     state: u,
                                   });
                                 }}
