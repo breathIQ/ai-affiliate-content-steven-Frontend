@@ -5,14 +5,17 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { LoaderProvider } from "./context/LoaderContext";
 import GlobalLoader from "./components/GlobalLoader";
+import ErrorBoundary from "./pages/ErrorBoundary";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <LoaderProvider>
-      <GlobalLoader />
-      <App />
-    </LoaderProvider>
+    <ErrorBoundary>
+      <LoaderProvider>
+        <GlobalLoader />
+        <App />
+      </LoaderProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );
 
