@@ -6,7 +6,8 @@ import { FaPlus } from "react-icons/fa";
 import AffiliateClicksChart from "./AffiliateClicksChart";
 import { CheckmarkIcon } from "react-hot-toast";
 
-export default function DashboardOverview() {
+export default function DashboardOverview({data}) {
+  console.log("DashboardOverview data:", data);
   return (
     <div className="pt-8">
       <div className=" grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -25,7 +26,7 @@ export default function DashboardOverview() {
             <p className="text-sm mb-8 text-[#99A1B7]">
               Turn book chapters into ready-to-publish Instagram and TikTok content using AI.
             </p>
-            <Link to={"/u/library"} className="bg-pink-600 hover:bg-pink-700 py-[10px] px-[16px] rounded-lg text-sm font-medium flex items-center gap-2 w-fit">
+            <Link to={"/u/library?generate=true"} className="bg-pink-600 hover:bg-pink-700 py-[10px] px-[16px] rounded-lg text-sm font-medium flex items-center gap-2 w-fit">
               <FaPlus size={20} className="bg-[#ffffff24] p-[5px] rounded-[4px]" /> Generate Content
             </Link>
             <h3 className="text-md mt-10 font-semibold">
@@ -58,7 +59,7 @@ export default function DashboardOverview() {
               alt="book"
             //   className="w-[100%] h-[90%]"
             />
-            <h3 className="text-2xl font-bold my-3">25</h3>
+            <h3 className="text-2xl font-bold my-3">{data?.stats?.generated}</h3>
             <p className="text-sm">Posts Published</p>
           </div>
 
@@ -68,11 +69,11 @@ export default function DashboardOverview() {
               alt="book"
             //   className="w-[100%] h-[90%]"
             />
-            <h3 className="text-2xl font-bold my-3">3,900</h3>
+            <h3 className="text-2xl font-bold my-3">{data?.stats?.total_clicks}</h3>
             <p className="text-sm">Affiliate Clicks</p>
           </div>
 
-          <div className="col-span-2 bg-emerald-500 rounded-2xl p-6 text-white flex items-center justify-between relative">
+          <div role="button" onClick={() => window.open(data?.book_url, "_blank", "noopener,noreferrer")} className="col-span-2 bg-emerald-500 rounded-2xl p-6 text-white flex items-center justify-between relative">
             <div>
               <h3 className="text-lg font-semibold mb-1">
                 <img src="/icons/ic-book-dashboard.svg" alt="book icon" className="inline-block mr-2" />
@@ -103,7 +104,7 @@ export default function DashboardOverview() {
               <p className="text-gray-400 text-sm">Affiliate Clicks</p>
 
               <div className="flex items-center gap-3 mt-1">
-                <h3 className="text-4xl font-bold text-gray-900">2,400</h3>
+                <h3 className="text-4xl font-bold text-gray-900">{data?.month_stats?.affiliate_clicks}</h3>
 
                 <span className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full text-sm font-medium">
                   ↑ 18%
@@ -113,7 +114,7 @@ export default function DashboardOverview() {
 
             {/* Chart */}
             <div className="mt-4">
-              <AffiliateClicksChart />
+              <AffiliateClicksChart chartData={data?.month_stats?.clicks_graph} />
             </div>
 
             <hr className="my-6 border-gray-200" />
@@ -125,7 +126,7 @@ export default function DashboardOverview() {
                   <img src={'/icons/postsIcons.svg'} alt="Posts Icon" />
                 </div>
                 <div>
-                  <p className="text-xl font-bold">8</p>
+                  <p className="text-xl font-bold">{data?.month_stats?.posts_published}</p>
                   <p className="text-gray-500 text-sm">Posts Published</p>
                 </div>
               </div>
@@ -135,7 +136,7 @@ export default function DashboardOverview() {
                   <img src={'/icons/clicksIcon.svg'} alt="Clicks Icon" />
                 </div>
                 <div>
-                  <p className="text-xl font-bold">155</p>
+                  <p className="text-xl font-bold">{data?.month_stats?.avg_clicks_per_post}</p>
                   <p className="text-gray-500 text-sm">Avg Clicks / Post</p>
                 </div>
               </div>

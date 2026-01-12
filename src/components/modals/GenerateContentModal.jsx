@@ -3,10 +3,22 @@ import { set, useForm } from "react-hook-form";
 import { getChapter } from "../../services/post.api";
 import { FaPlus } from "react-icons/fa";
 import { generateAIPost } from "../../services/post.api";
+import { useSearchParams } from "react-router-dom";
 
 export default function GenerateContentModal({setGeneratedData}) {
   const [isOpen, setIsOpen] = useState(false);
   const [chapters, setChapters] = useState([]);
+
+  const [searchParams] = useSearchParams();
+  const generate = searchParams.get("generate");
+  const isGenerate = generate === "true";
+
+  useEffect(() => {
+    if (isGenerate) {
+      setIsOpen(true);
+      searchParams.delete("generate");
+    }
+  }, [isGenerate]);
 
   const {
     register,
