@@ -30,10 +30,10 @@ export default function InviteModal({ isOpen, onClose }) {
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-white rounded-xl shadow-lg z-10">
+      <div className="relative w-[600px]  bg-white rounded-xl shadow-lg z-10">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b">
-          <h2 className="font-semibold text-gray-800">Invite Affiliate User</h2>
+          <h2 className="font-semibold text-gray-800 text-base">Invite Affiliate User</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-xl"
@@ -56,7 +56,7 @@ export default function InviteModal({ isOpen, onClose }) {
             className="w-full border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
 
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-end text-gray-400 mt-0">
             Enter multiple emails to invite more than one user, enter email(s)
             separated by enter.
           </p>
