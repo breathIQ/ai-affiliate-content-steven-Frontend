@@ -17,6 +17,7 @@ export function ProfileEditModal({ isOpen, onClose }) {
   const [copied, setCopied] = useState(false);
   const [social, setSocial] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isAvatarRemoved, setIsAvatarRemoved] = useState(false);
 
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
@@ -73,11 +74,16 @@ export function ProfileEditModal({ isOpen, onClose }) {
 
     setImageFile(file);
     setImage(URL.createObjectURL(file));
+    setIsAvatarRemoved(false);
   };
 
   const handleRemove = () => {
     setImage(DEFAULT_IMAGE);
     setImageFile(null);
+    setIsAvatarRemoved(true);
+    if (fileRef.current) {
+      fileRef.current.value = "";
+    }
   };
 
   const onSubmit = async (data) => {
@@ -91,10 +97,10 @@ export function ProfileEditModal({ isOpen, onClose }) {
       formData.append("avatar", imageFile);
     }
 
-    // ✅ Remove avatar
-    if (!imageFile && image === DEFAULT_IMAGE) {
-      formData.append("remove_avatar", 1);
+    if (isAvatarRemoved) {
+      formData.append("avatar", "");
     }
+
     try {
       setLoading(true);
 
@@ -141,7 +147,12 @@ export function ProfileEditModal({ isOpen, onClose }) {
             {/* Edit */}
             <button
               type="button"
-              onClick={() => fileRef.current.click()}
+              onClick={() => {
+                if (fileRef.current) {
+                  fileRef.current.value = "";
+                }
+                fileRef.current.click();
+              }}
               className="absolute -top-2 -right-2 bg-white border rounded-full w-7 h-7 flex items-center justify-center shadow hover:bg-gray-100"
             >
               <img src="/icons/ic-edit.svg" className="w-4 h-4" />
@@ -180,17 +191,17 @@ export function ProfileEditModal({ isOpen, onClose }) {
         </div>
 
         {/* Affiliate user?.role_id == 1 */}
-        {user?.role_id == 1 && (
+        {user?.role_id == 2 && (
           <>
             <label className="text-sm">Affiliate ID</label>
             <div className="flex border rounded-md mb-4 bg-gray-100">
-              <span className="px-3 py-2 text-sm">
+              <span className="px-3 py-2 text-sm pe-0">
                 https://www.co2book.com/
               </span>
               <input
                 {...register("affiliate")}
                 disabled
-                className="flex-1 px-2 py-2 bg-gray-100 cursor-not-allowed"
+                className="flex-1 px-2 py-2 ps-0 text-sm bg-gray-100 cursor-not-allowed"
               />
               <button type="button" onClick={copyLink} className="px-3">
                 {copied ? (
