@@ -1,13 +1,13 @@
 export default function PublishingSuccess({ details }) {
   return (
     <div>
-      <div className="bg-white rounded-xl shadow p-5">
+      <div className="bg-white rounded-xl shadow p-5 h-full">
         <h2 className="text-sm font-semibold text-gray-800 mb-6">
           Publishing Success Rate
         </h2>
 
         {/* Cards */}
-        <div className="flex gap-6">
+        <div className="flex gap-6 py-5 mb-4">
           {/* Posts Published */}
           <div className="flex-1 border-2 border-dotted border-gray-200 rounded-xl py-[8px] px-[16px]">
             <p className="text-[22px] font-bold text-gray-900">

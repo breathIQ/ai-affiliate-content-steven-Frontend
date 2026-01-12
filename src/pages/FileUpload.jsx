@@ -41,7 +41,6 @@ const FileUpload = () => {
   const getFile = async () => {
     try {
       const response = await API.get("/admin/file");
-      console.log(response);
       setFile(response?.data?.data);
     } catch (error) {
       setFile();

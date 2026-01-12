@@ -91,7 +91,7 @@ export default function ChapterBubbleChart() {
           callback: (value) => (value > 0 ? value : ""),
         },
         min: 0,
-        max: 10,
+        max: filter == "week"? 7:31,
       },
       y: {
         beginAtZero: true,

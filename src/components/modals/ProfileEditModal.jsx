@@ -40,7 +40,7 @@ export function ProfileEditModal({ isOpen, onClose }) {
         reset({
           name: profile.name,
           email: profile.email,
-          affiliate: profile.affiliate,
+          affiliate: profile.affiliate?.trim() || "",
         });
 
         setImage(profile.avatar || DEFAULT_IMAGE);

@@ -35,7 +35,7 @@ const tabs = [
 ];
 
 export default function TopAffiliates({ details }) {
-  const [activeTab, setActiveTab] = useState("generated");
+  const [activeTab, setActiveTab] = useState("published");
 
   // console.log("top_affiliates" ,details?.top_affiliates)
   const affiliateList = details?.top_affiliates?.[activeTab] || [];

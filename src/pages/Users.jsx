@@ -122,7 +122,7 @@ export default function Users() {
                   <th className="p-3 text-start">Total Clicks</th>
                   {/* <th className="p-3 text-start">Conversion</th>
                   <th className="p-3 text-start">Joined On</th> */}
-                  <th className="p-3 text-start">Actions</th>
+                  <th className="p-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -156,7 +156,7 @@ export default function Users() {
                   </tr>
                 ) : (
                   userList.map((u, index) => (
-                    <tr key={u.id} className="border-b">
+                    <tr key={u.id} className="border-b ">
                       {/* <td className="p-3">
                       <input
                         type="checkbox"
@@ -186,7 +186,7 @@ export default function Users() {
                       <td className="p-3">{u.total_clicks || "NA"}</td>
                       {/* <td className="p-3">{u.conversion||"NA"}</td>
                     <td className="p-3 text-xs text-gray-500">{u.joinedOn||"NA"}</td> */}
-                      <td className="p-3 relative">
+                      <td className="p-3 text-center">
                         <div className="relative inline-block"  ref={menuRef}
                         
                         >
@@ -203,7 +203,7 @@ export default function Users() {
 
                           {/* Dropdown */}
                           {open[index] && (
-                            <div id="btns" onClick={(e) => e.stopPropagation()} className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
+                            <div id="btns" onClick={(e) => e.stopPropagation()} className="absolute left-[-60px]  mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();

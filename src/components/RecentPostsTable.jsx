@@ -17,7 +17,7 @@ export default function RecentPostsTable({
   handleSearch,
   loadPost,
 }) {
-  const [open, setOpen] = useState({ 0: false });
+  const [open, setOpen] = useState({1:false });
   const menuRef = useRef(null);
   const navigate = useNavigate();
   const [openModal, setOpenMadal] = useState();
@@ -25,17 +25,20 @@ export default function RecentPostsTable({
 
   const handleDelete = async (id) => {
     try {
+      setLoading(true);
       const res = await deletePost(openModal);
-
+      setLoading(false);
+      
       if (!res?.success) {
         toast.error(res?.message || "Failed to delete post");
         return;
       }
-
+      
       toast.success("Post deleted successfully");
       setOpen({});
       loadPost();
     } catch (err) {
+      setLoading(false);
       toast.error(
         err?.response?.data?.error || err?.message || "Something went wrong"
       );
@@ -50,7 +53,7 @@ export default function RecentPostsTable({
         if (!menuRef.current) return;
     
         if (!menuRef.current.contains(e.target)) {
-          setOpen({0:false});
+          setOpen({});
         }
       };
     
@@ -62,7 +65,7 @@ export default function RecentPostsTable({
     }, []);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm border">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 gap-3">
         <h2 className="font-semibold text-gray-800">{title||"Recent Posts"}</h2>
@@ -93,7 +96,7 @@ export default function RecentPostsTable({
               <th className="p-3 text-left">Hashtags</th>
               <th className="p-3 text-left">AI</th>
               <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-start">Actions</th>
+              <th className="p-3 text-center">Actions</th>
             </tr>
           </thead>
 
@@ -148,7 +151,7 @@ export default function RecentPostsTable({
                     </p>
                   </td>
 
-                  <td className="p-3 text-gray-600">{item.chapter_name}</td>
+                  <td className="p-3 text-gray-600">{item?.chapter_code ? item?.chapter_code+":":""}{item.chapter_name}</td>
 
                   <td className="p-3 text-gray-600">{item.hashtags_count}</td>
 
@@ -170,19 +173,23 @@ export default function RecentPostsTable({
                     </span>
                   </td>
 
-                  <td className="p-3 text-start">
+                  <td className="p-3 text-center">
                     <div className="relative inline-block" ref={menuRef}>
                       {/* 3 dots */}
                       <button
-                        onClick={() => setOpen({ [index]: !open[index] })}
+                        onClick={(e) => {
+                              e.stopPropagation() 
+                          setOpen((prev)=>({[index+1]: !prev[index+1] }))
+                          // console.log(open , index+1 ,open[index]);
+                        }}
                         className="text-gray-400 text-start hover:text-gray-700 text-xl"
                       >
                         ⋯
                       </button>
 
                       {/* Dropdown */}
-                      {open[index] && (
-                        <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
+                      {open[index+1] && (
+                        <div id="btns" onClick={(e) => e.stopPropagation()} className="absolute left-[-60px] mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
                           <button
                             className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50"
                             onClick={() => navigate(`/u/post/view/${item?.id}`)}
