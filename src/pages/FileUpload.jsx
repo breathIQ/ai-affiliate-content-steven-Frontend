@@ -71,6 +71,22 @@ const FileUpload = () => {
     }
   };
 
+   useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!menuRef.current) return;
+  
+      if (!menuRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+  
+    document.addEventListener("click", handleClickOutside);
+  
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
   const FileUploadModal = () => {
     return (
       isOpen && (
@@ -148,7 +164,7 @@ const FileUpload = () => {
               <h2 className="text-lg font-semibold text-gray-800">File</h2>
               <button
                 onClick={() => {
-                  if (filePriview.original_name) {
+                  if (filePriview?.original_name || false) {
                     toast.error(
                       "Please delete the existing preview before uploading a new file."
                     );
@@ -182,12 +198,12 @@ const FileUpload = () => {
                       </td>
                     </tr>
                   ) : (
-                    <tr key={filePriview.id} className="border-b">
+                    <tr key={filePriview?.id} className="border-b">
                       <td className="p-3 flex items-center gap-2">
                         <span className="text-red-500 font-semibold">
                           <img src="/icons/pdf.svg" />
                         </span>
-                        {filePriview.original_name}
+                        {filePriview?.original_name}
                       </td>
                       <td className="p-3">
                         <div>

@@ -71,7 +71,21 @@ export default function Users() {
   };
   const [open, setOpen] = useState({ 0: false });
   const menuRef = useRef(null);
+ useEffect(() => {
+  const handleClickOutside = (e) => {
+    if (!menuRef.current) return;
 
+    if (!menuRef.current.contains(e.target)) {
+      setOpen({0:false});
+    }
+  };
+
+  document.addEventListener("click", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("click", handleClickOutside);
+  };
+}, []);
   return (
     <Layout>
       <div className="max-w-7xl mx-auto min-h-screen py-8">
@@ -97,7 +111,7 @@ export default function Users() {
             />
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflouto">
             <table className="w-full text-sm">
               <thead className="bg-gray-100 text-gray-600">
                 <tr>
@@ -173,10 +187,15 @@ export default function Users() {
                       {/* <td className="p-3">{u.conversion||"NA"}</td>
                     <td className="p-3 text-xs text-gray-500">{u.joinedOn||"NA"}</td> */}
                       <td className="p-3 relative">
-                        <div className="relative inline-block" ref={menuRef}>
+                        <div className="relative inline-block"  ref={menuRef}
+                        
+                        >
                           {/* 3 dots */}
                           <button
-                            onClick={() => setOpen({ [index]: !open[index] })}
+                            onClick={(e) => {
+                              e.stopPropagation() 
+                              setOpen({ [index]: !open[index] })
+                            }}
                             className="text-gray-400 text-start hover:text-gray-700 text-xl"
                           >
                             ⋯
@@ -184,9 +203,10 @@ export default function Users() {
 
                           {/* Dropdown */}
                           {open[index] && (
-                            <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
+                            <div id="btns" onClick={(e) => e.stopPropagation()} className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
                               <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   navigate(`/u/library`, {
                                     state: u,
                                   });
