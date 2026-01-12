@@ -44,6 +44,23 @@ export default function RecentPostsTable({
     }
   };
 
+
+   useEffect(() => {
+      const handleClickOutside = (e) => {
+        if (!menuRef.current) return;
+    
+        if (!menuRef.current.contains(e.target)) {
+          setOpen({0:false});
+        }
+      };
+    
+      document.addEventListener("click", handleClickOutside);
+    
+      return () => {
+        document.removeEventListener("click", handleClickOutside);
+      };
+    }, []);
+
   return (
     <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
       {/* Header */}
@@ -63,7 +80,7 @@ export default function RecentPostsTable({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overfl-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-500">
             <tr>
