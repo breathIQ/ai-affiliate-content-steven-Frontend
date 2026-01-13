@@ -11,7 +11,10 @@ export default function InviteModal({ isOpen, onClose }) {
 
   const handleSend = async () => {
     try {
-      if (emails.length === 0) return;
+      if (emails.length === 0) {
+        toast.error("Please enter at least one email address");
+        return
+      };
       const res = await API.post(`/affiliate/invite`, {
         emails: emails,
       });

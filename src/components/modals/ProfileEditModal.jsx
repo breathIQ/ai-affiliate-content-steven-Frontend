@@ -11,8 +11,8 @@ const DEFAULT_IMAGE = "/images/defaultImage.png";
 
 export function ProfileEditModal({ isOpen, onClose }) {
   const fileRef = useRef(null);
-  const { profile ,loadProfile } = useLoader();
-  const [image, setImage] = useState(profile?.avatar ||DEFAULT_IMAGE);
+  const { profile, loadProfile } = useLoader();
+  const [image, setImage] = useState(profile?.avatar || DEFAULT_IMAGE);
   const [imageFile, setImageFile] = useState(null);
   const [copied, setCopied] = useState(false);
   const [social, setSocial] = useState(null);
@@ -107,7 +107,7 @@ export function ProfileEditModal({ isOpen, onClose }) {
       const res = await updateProfileByRole(formData);
 
       toast.success(res?.message || "Profile updated successfully");
-      loadProfile()
+      loadProfile();
       onClose();
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to update profile");
@@ -140,7 +140,8 @@ export function ProfileEditModal({ isOpen, onClose }) {
               type="file"
               ref={fileRef}
               hidden
-              accept="image/*"
+              // accept="image/*"
+              accept=".jpeg,.jpg,.png,.gif,.svg"
               onChange={handleUpload}
             />
 

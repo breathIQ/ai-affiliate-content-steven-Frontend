@@ -72,15 +72,15 @@ export default function RecentPostsTable({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 gap-3">
         <h2 className="font-semibold text-gray-800">{title||"Recent Posts"}</h2>
         <div className="relative">
+          {/* <span className="absolute right-3 top-2 text-gray-400">
+            <img src="/icons/ic-search.svg" />
+          </span> */}
           <input
             type="text"
             onChange={handleSearch}
             placeholder="Search"
-            className="pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="pl-4 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
-          <span className="absolute left-3 top-2.5 text-gray-400">
-            <img src="/icons/ic-search.svg" />
-          </span>
         </div>
       </div>
 

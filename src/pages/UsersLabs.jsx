@@ -6,6 +6,7 @@ import { getPost } from "../services/post.api";
 import GenerateContentModal from "../components/modals/GenerateContentModal";
 import Library from "./user/Library";
 import { useLoader } from "../context/LoaderContext";
+import toast from "react-hot-toast";
 
 export default function UsersLabs() {
   const { profile } = useLoader();
@@ -39,6 +40,7 @@ export default function UsersLabs() {
       setRowsPerPage(response?.data?.pagination?.per_page);
     } catch (error) {
       console.log(error);
+      toast.error(error?.response?.data?.message||"Server Error while fetching posts");
     }
   };
 

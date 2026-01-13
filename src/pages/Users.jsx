@@ -106,12 +106,18 @@ export default function Users() {
         <div className="bg-white rounded-xl shadow">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between p-4 gap-3">
             <h2 className="font-medium">Users</h2>
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search"
-              className="border rounded-lg px-4 py-2 text-sm"
-            />
+
+            <div className="relative">
+              {/* <span className="absolute right-3 top-2 text-gray-400">
+                <img src="/icons/ic-search.svg" />
+              </span> */}
+              <input
+                type="text"
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search"
+                className="pl-4 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
           </div>
 
           <div className="overflouto">
@@ -160,17 +166,10 @@ export default function Users() {
                 ) : (
                   userList.map((u, index) => (
                     <tr key={u.id} className="border-b ">
-                      {/* <td className="p-3">
-                      <input
-                        type="checkbox"
-                        checked={selected.includes(u.id)}
-                        onChange={() => toggleSelect(u.id)}
-                      />
-                    </td> */}
                       <td className="p-3">
                         <div className="flex gap-2">
                           <img
-                            src={u?.avatar || "https://i.pravatar.cc/40"}
+                            src={u?.avatar || "/images/defaultImage.png"}
                             alt="profile"
                             // onClick={() => setProfileOpen((v) => !v)}
                             className="w-9 h-9 rounded-full border border-gray-600 cursor-pointer"
@@ -207,7 +206,7 @@ export default function Users() {
                             <div
                               id="btns"
                               onClick={(e) => e.stopPropagation()}
-                              className="absolute left-[-60px]  mt-2 w-46 bg-white border rounded-lg shadow-lg z-50"
+                              className="absolute left-[-60px]  mt-2 w-[180px] bg-white border rounded-lg shadow-lg z-50"
                             >
                               <button
                                 onClick={(e) => {

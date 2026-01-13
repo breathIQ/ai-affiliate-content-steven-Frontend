@@ -35,7 +35,7 @@ const Header = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between h-16">
         {/* Left: Logo */}
         <div className="flex items-center gap-2">
-          <img src="/icons/logo.svg" />
+          <img src="/images/logolatest.svg" />
         </div>
 
         {/* Right: Actions */}
