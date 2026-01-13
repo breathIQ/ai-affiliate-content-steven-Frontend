@@ -17,12 +17,12 @@ export default function RecentPostsTable({
   handleSearch,
   loadPost,
 }) {
-  const [open, setOpen] = useState({1:false });
+  const [open, setOpen] = useState({ 1: false });
   const menuRef = useRef(null);
   const navigate = useNavigate();
   const [openModal, setOpenMadal] = useState();
   const [loading, setLoading] = useState(false);
- const user = localStorage.getItem("user")
+  const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : {};
   const handleDelete = async (id) => {
@@ -30,12 +30,12 @@ export default function RecentPostsTable({
       setLoading(true);
       const res = await deletePost(openModal);
       setLoading(false);
-      
+
       if (!res?.success) {
         toast.error(res?.message || "Failed to delete post");
         return;
       }
-      
+
       toast.success("Post deleted successfully");
       setOpen({});
       loadPost();
@@ -49,28 +49,29 @@ export default function RecentPostsTable({
     }
   };
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!menuRef.current) return;
 
-   useEffect(() => {
-      const handleClickOutside = (e) => {
-        if (!menuRef.current) return;
-    
-        if (!menuRef.current.contains(e.target)) {
-          setOpen({});
-        }
-      };
-    
-      document.addEventListener("click", handleClickOutside);
-    
-      return () => {
-        document.removeEventListener("click", handleClickOutside);
-      };
-    }, []);
+      if (!menuRef.current.contains(e.target)) {
+        setOpen({});
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 gap-3">
-        <h2 className="font-semibold text-gray-800">{title||"Recent Posts"}</h2>
+        <h2 className="font-semibold text-gray-800">
+          {title || "Recent Posts"}
+        </h2>
         <div className="relative">
           {/* <span className="absolute right-3 top-2 text-gray-400">
             <img src="/icons/ic-search.svg" />
@@ -140,11 +141,20 @@ export default function RecentPostsTable({
                 </td> */}
 
                   <td className="p-3">
-                    <img
-                      src={item.media || ""}
-                      alt=""
-                      className="w-10 h-10 rounded-md object-cover"
-                    />
+                    {/* {console.log(item, "<<<<<ASd")} */}
+                    {item.media_type == "video" ? (
+                      <img
+                        src={"/icons/videoicon.svg"}
+                        alt=""
+                        className="w-10 h-10 rounded-md object-cover"
+                      />
+                    ) : (
+                      <img
+                        src={item.media || ""}
+                        alt=""
+                        className="w-10 h-10 rounded-md object-cover"
+                      />
+                    )}
                   </td>
 
                   <td className="p-3 max-w-md">
@@ -153,9 +163,14 @@ export default function RecentPostsTable({
                     </p>
                   </td>
 
-                  <td className="p-3 text-gray-600">{item?.chapter_code ? item?.chapter_code+":":""}{item.chapter_name}</td>
+                  <td className="p-3 text-gray-600">
+                    {item?.chapter_code ? item?.chapter_code + ":" : ""}
+                    {item.chapter_name}
+                  </td>
 
-                  <td className="p-3 text-gray-600">{item.hashtags_count || 0}</td>
+                  <td className="p-3 text-gray-600">
+                    {item.hashtags_count || 0}
+                  </td>
 
                   <td className="p-3 text-lg">
                     {item.ai_generated ? (
@@ -180,8 +195,10 @@ export default function RecentPostsTable({
                       {/* 3 dots */}
                       <button
                         onClick={(e) => {
-                              e.stopPropagation() 
-                          setOpen((prev)=>({[index+1]: !prev[index+1] }))
+                          e.stopPropagation();
+                          setOpen((prev) => ({
+                            [index + 1]: !prev[index + 1],
+                          }));
                           // console.log(open , index+1 ,open[index]);
                         }}
                         className="text-gray-400 text-start hover:text-gray-700 text-xl"
@@ -190,17 +207,21 @@ export default function RecentPostsTable({
                       </button>
 
                       {/* Dropdown */}
-                      {open[index+1] && (
-                        <div id="btns" onClick={(e) => e.stopPropagation()} className="absolute left-[-60px] mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
+                      {open[index + 1] && (
+                        <div
+                          id="btns"
+                          onClick={(e) => e.stopPropagation()}
+                          className="absolute left-[-60px] mt-2 w-36 bg-white border rounded-lg shadow-lg z-50"
+                        >
                           <button
                             className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50"
                             onClick={() => {
-                              if(user?.role_id==1){
+                              if (user?.role_id == 1) {
                                 navigate(`/admin/u/post/view/${item?.id}`, {
                                   state: item,
                                 });
-                              }else{
-                              navigate(`/u/post/view/${item?.id}`)
+                              } else {
+                                navigate(`/u/post/view/${item?.id}`);
                               }
                             }}
                           >
