@@ -107,7 +107,7 @@ export default function DashboardOverview({data}) {
                 <h3 className="text-4xl font-bold text-gray-900">{data?.month_stats?.affiliate_clicks}</h3>
 
                 <span className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full text-sm font-medium">
-                  ↑ 18%
+                  {data?.month_stats?.growth_rate > 0 ? '↑' : '↓'} {data?.month_stats?.growth_rate}%
                 </span>
               </div>
             </div>
