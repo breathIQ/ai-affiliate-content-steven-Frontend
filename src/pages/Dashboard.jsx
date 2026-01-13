@@ -43,7 +43,7 @@ function Dashboard() {
             <TopAffiliates details={details} />
             {
               // details?.most_used_chapters?.length &&
-              <ChapterBubbleChart details={ details} />
+              <ChapterBubbleChart useddetails={ details} />
             }
           </div>
         </div>

@@ -93,9 +93,11 @@ const allRoutes = [
     // USER ROUTES
     { component: <UserDashboard />, path: "/u/dashboard", role: 1 },
     { component: <UsersLabs />, path: "/u/library", role: "public"},
+    { component: <UsersLabs />, path: "/admin/library", role: "public"},
     // { component: <UsersLabs />, path: "/u/library", role: 2 },
     { component: <UsersLabs />, path: "/library", role: 2 },
     { component: <Library />, path: "/u/post/view/:id", role: "public" },
+    { component: <Library />, path: "/admin/u/post/view/:id", role: "public" },
     // { component: <Library />, path: "/u/post/view/:id", role: 2 },
 
     // COMMON/NOT FOUND

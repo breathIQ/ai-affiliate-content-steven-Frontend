@@ -15,6 +15,9 @@ export default function Users() {
   const [userList, setUserList] = useState([]);
   const navigate = useNavigate();
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const user = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : {};
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
@@ -71,21 +74,21 @@ export default function Users() {
   };
   const [open, setOpen] = useState({ 0: false });
   const menuRef = useRef(null);
- useEffect(() => {
-  const handleClickOutside = (e) => {
-    if (!menuRef.current) return;
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!menuRef.current) return;
 
-    if (!menuRef.current.contains(e.target)) {
-      setOpen({0:false});
-    }
-  };
+      if (!menuRef.current.contains(e.target)) {
+        setOpen({ 0: false });
+      }
+    };
 
-  document.addEventListener("click", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
 
-  return () => {
-    document.removeEventListener("click", handleClickOutside);
-  };
-}, []);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
   return (
     <Layout>
       <div className="max-w-7xl mx-auto min-h-screen py-8">
@@ -187,14 +190,12 @@ export default function Users() {
                       {/* <td className="p-3">{u.conversion||"0"}</td>
                     <td className="p-3 text-xs text-gray-500">{u.joinedOn||"0"}</td> */}
                       <td className="p-3 text-center">
-                        <div className="relative inline-block"  ref={menuRef}
-                        
-                        >
+                        <div className="relative inline-block" ref={menuRef}>
                           {/* 3 dots */}
                           <button
                             onClick={(e) => {
-                              e.stopPropagation() 
-                              setOpen({ [index]: !open[index] })
+                              e.stopPropagation();
+                              setOpen({ [index]: !open[index] });
                             }}
                             className="text-gray-400 text-start hover:text-gray-700 text-xl"
                           >
@@ -203,13 +204,24 @@ export default function Users() {
 
                           {/* Dropdown */}
                           {open[index] && (
-                            <div id="btns" onClick={(e) => e.stopPropagation()} className="absolute left-[-60px]  mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
+                            <div
+                              id="btns"
+                              onClick={(e) => e.stopPropagation()}
+                              className="absolute left-[-60px]  mt-2 w-46 bg-white border rounded-lg shadow-lg z-50"
+                            >
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  navigate(`/u/library`, {
-                                    state: u,
-                                  });
+
+                                  if (user?.role_id == 1) {
+                                    navigate(`/admin/library`, {
+                                      state: u,
+                                    });
+                                  } else {
+                                    navigate(`/u/library`, {
+                                      state: u,
+                                    });
+                                  }
                                 }}
                                 className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50"
                               >

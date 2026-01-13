@@ -231,7 +231,7 @@ export default function DraftPostPage({
                 onClick={() => {
                   if (isEditMode) {
                     if(user?.role_id==1){
-                      navigate(`/u/library`, {
+                      navigate(`/admin/library`, {
                         state: userData,
                       });
                     }else{

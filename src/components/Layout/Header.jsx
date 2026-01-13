@@ -15,7 +15,7 @@ const Header = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
   const [openProfile, setOpenProfile] = useState(false);
-  const [openPassword, setOpenPassword] = useState(false);  
+  const [openPassword, setOpenPassword] = useState(false);
   // close dropdown on outside click
   useEffect(() => {
     if (!access_token) {
@@ -51,12 +51,15 @@ const Header = () => {
 
             {profileOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border z-50">
-                <div  onClick={() => setOpenProfile((v) => !v)} className="w-full flex gap-2 border-bottom align-items-center px-4 py-2 font-semibold hover:bg-gray-100">
+                <div
+                  onClick={() => setOpenProfile((v) => !v)}
+                  className="w-full flex gap-2 border-bottom cursor-pointer align-items-center px-4 py-2 font-semibold hover:bg-gray-100"
+                >
                   <img
-              src={profile?.avatar || "/images/defaultImage.png"}
+                    src={profile?.avatar || "/images/defaultImage.png"}
                     alt="profile"
-                    onClick={() => setOpenProfile((v) => !v)}
-                    className="w-7 h-7 rounded-md border border-gray-600 cursor-pointer"
+                    // onClick={() => setOpenProfile((v) => !v)}
+                    className="w-7 h-7 rounded-md border border-gray-600 "
                   />
                   Profile
                 </div>

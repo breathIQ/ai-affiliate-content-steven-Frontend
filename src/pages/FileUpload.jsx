@@ -241,7 +241,7 @@ const FileUpload = () => {
                               <button
                                 onClick={() => {
                                   console.log("filePriview" ,filePriview);
-                                  window.open(`${apibase}/${filePriview?.file_path}`, "_blank");
+                                  window.open(`${filePriview?.full_path}`, "_blank");
                                   
                                 }}
                                 className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50"

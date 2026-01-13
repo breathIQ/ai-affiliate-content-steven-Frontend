@@ -7,32 +7,46 @@ import {
 } from "chart.js";
 import { Bubble } from "react-chartjs-2";
 import API from "../services/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 ChartJS.register(LinearScale, PointElement, Tooltip, Legend);
 
-export default function ChapterBubbleChart() {
-  const [filter, setFilter] = useState("week"); // Default filter
+export default function ChapterBubbleChart({ useddetails }) {
+  const [filter, setFilter] = useState(""); // Default filter
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+  console.log("useddetails",filter, useddetails?.most_used_chapters);
+  const isFirstRender = useRef(true);
+
   useEffect(() => {
+    // ✅ First render → use props data
+    if (!filter) {
+      console.log("cliekc");
+      
+      setDetails({most_used_chapters :useddetails?.most_used_chapters || []} );
+      setLoading(false);
+      return; // ❌ stop API call
+    }
+
+    // ✅ API call only after filter change
     const fetchChartData = async () => {
       setLoading(true);
       try {
         const response = await API.get(
           `admin/most-used-chapter?filter_by=${filter}`
         );
-        // console.log(response?.data);
-
-        setDetails(response?.data?.data);
+        setDetails(response?.data?.data || []);
       } catch (error) {
         console.error("Error fetching bubble chart data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchChartData();
-  }, [filter]);
+
+    if(filter){
+      fetchChartData();
+    }
+  }, [filter, useddetails]);
   // console.log(details?.most_used_chapters);
   const most_used_chapters = details?.most_used_chapters || [
     { id: 1, chapter: "CHAPTER 1", total: 45 },
@@ -62,15 +76,15 @@ export default function ChapterBubbleChart() {
 
   const data = {
     datasets: most_used_chapters.map((item, index) => ({
-      label: `Ch - ${item.id}`,
+      label: `${item.label || `Ch - ${item.id}`}`,
       data: [
         {
           // X is decided by index (multiplied by a factor to spread them)
           x: index + 1,
           // Y is decided strictly by the usage 'total'
-          y: item.total,
+          y: item.data?.posts_count,
           // Radius is decided by usage (scaled for visibility)
-          r: item.total / 15 + 10,
+          r: item.data?.posts_count / 15 + 10,
         },
       ],
       backgroundColor: chartColors[index % chartColors.length],
@@ -91,7 +105,7 @@ export default function ChapterBubbleChart() {
           callback: (value) => (value > 0 ? value : ""),
         },
         min: 0,
-        max: filter == "week"? 7:31,
+        max: filter == "week" ? 7 : 31,
       },
       y: {
         beginAtZero: true,
@@ -116,7 +130,7 @@ export default function ChapterBubbleChart() {
     },
   };
   const legends = most_used_chapters?.slice(0, 12).map((item, index) => ({
-    label: `Ch - ${item.id}`,
+    label: item?.label || `Ch - ${item.id}`,
     color: chartColors[index],
   }));
 
@@ -127,7 +141,7 @@ export default function ChapterBubbleChart() {
         <div className="flex gap-2 text-xs">
           <button
             className={`px-2 py-1  ${
-              filter === "month" ? " bg-gray-100" : ""
+              (filter === "month" || filter == "") ? " bg-gray-100" : ""
             } rounded`}
             onClick={() => setFilter("month")}
           >

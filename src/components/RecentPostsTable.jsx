@@ -22,7 +22,9 @@ export default function RecentPostsTable({
   const navigate = useNavigate();
   const [openModal, setOpenMadal] = useState();
   const [loading, setLoading] = useState(false);
-
+ const user = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : {};
   const handleDelete = async (id) => {
     try {
       setLoading(true);
@@ -192,8 +194,17 @@ export default function RecentPostsTable({
                         <div id="btns" onClick={(e) => e.stopPropagation()} className="absolute left-[-60px] mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
                           <button
                             className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50"
-                            onClick={() => navigate(`/u/post/view/${item?.id}`)}
+                            onClick={() => {
+                              if(user?.role_id==1){
+                                navigate(`/admin/u/post/view/${item?.id}`, {
+                                  state: item,
+                                });
+                              }else{
+                              navigate(`/u/post/view/${item?.id}`)
+                              }
+                            }}
                           >
+                            {/* /admin/u/ */}
                             <img src="/icons/ic-veiw.svg" />
                             View
                           </button>

@@ -62,8 +62,8 @@ export default function TopNavTabs() {
           })}
         </div>
         {user?.role_id == 1 && (
-          <div className="ml-auto text-[15px] w-[131px]">
-            <span className="text-gray-400 text-xs" style={{fontWeight:"600",color:"white"}}>Admin</span>
+          <div className="ml-auto  w-[131px]">
+            <span className="text-gray-400 text-[15px]" style={{fontWeight:"600",color:"white"}}>Admin</span>
           </div>
         )}
       </div>
