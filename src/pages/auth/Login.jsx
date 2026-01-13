@@ -37,7 +37,7 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(res?.data.data));
       localStorage.setItem("access_token", res?.data.data?.access_token);
       window.location.href =
-        res?.data.data?.role_id == 2 ? "/u/dashboard" : "/";
+        res?.data.data?.role_id == 2 ? "/u/dashboard" : "/admin/dashboard";
     } catch (error) {
       setISloading(false);
       toast.error(error?.response?.data?.message || "Login failed");

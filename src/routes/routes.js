@@ -85,9 +85,10 @@ const allRoutes = [
 
     // ADMIN ROUTES
     { component: <Dashboard />, path: "/", role: 2 },
-    { component: <Dashboard />, path: "/dashboard", role: 2 },
-    { component: <Users />, path: "/users", role: 2 },
-    { component: <FileUpload />, path: "/files", role: 2 },
+    { component: <Dashboard />, path: "/admin", role: 2 },
+    { component: <Dashboard />, path: "/admin/dashboard", role: 2 },
+    { component: <Users />, path: "/admin/users", role: 2 },
+    { component: <FileUpload />, path: "/admin/files", role: 2 },
 
     // USER ROUTES
     { component: <UserDashboard />, path: "/u/dashboard", role: 1 },

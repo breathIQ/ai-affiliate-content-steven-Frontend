@@ -3,6 +3,7 @@ import Layout from "../components/Layout/Layout";
 import API from "../services/api";
 import ConfirmDeleteModal from "../components/modals/ConfirmDeleteModal";
 import toast from "react-hot-toast";
+import { apibase } from "../services/contants";
 
 const FileUpload = () => {
   const [filePriview, setFile] = useState({});
@@ -37,6 +38,8 @@ const FileUpload = () => {
   useEffect(() => {
     getFile();
   }, []);
+
+  console.log("filePriview", filePriview);
 
   const getFile = async () => {
     try {
@@ -235,6 +238,17 @@ const FileUpload = () => {
                           {/* Dropdown */}
                           {open && (
                             <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-50">
+                              <button
+                                onClick={() => {
+                                  console.log("filePriview" ,filePriview);
+                                  window.open(`${apibase}/${filePriview?.file_path}`, "_blank");
+                                  
+                                }}
+                                className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50"
+                              >
+                                <img src="/icons/ic-veiw.svg" />
+                                View
+                              </button>
                               <button
                                 onClick={() => setOpenMadal(true)}
                                 className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-red-50"

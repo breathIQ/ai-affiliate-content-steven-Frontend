@@ -9,9 +9,9 @@ export default function TopNavTabs() {
     : {};
 
   const defaultTabs = [
-    { name: "Dashboard", path: "/dashboard" },
-    { name: "Users", path: "/users" },
-    { name: "Files", path: "/files" },
+    { name: "Dashboard", path: "/admin/dashboard" },
+    { name: "Users", path: "/admin/users" },
+    { name: "Files", path: "/admin/files" },
   ];
 
   const userTabs = [
