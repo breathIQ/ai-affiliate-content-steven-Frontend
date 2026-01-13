@@ -40,25 +40,32 @@ export default function TopNavTabs() {
   return (
     <div className="w-full bg-black px-6 py-3">
       <div className="max-w-7xl mx-auto flex items-center gap-6 text-sm">
-        {tabs.map((tab) => {
-          const isActive = active?.path === tab.path;
+        <div>
+          {tabs.map((tab) => {
+            const isActive = active?.path === tab.path;
 
-          return (
-            <button
-              key={tab.path}
-              onClick={() => navigate(tab.path)}
-              className={`px-[12px] py-[8px] rounded-md transition
+            return (
+              <button
+                key={tab.path}
+                onClick={() => navigate(tab.path)}
+                className={`px-[12px] py-[8px] rounded-md transition
                 ${
                   isActive
                     ? "bg-gray-800 text-white"
                     : "text-gray-400 hover:text-white"
                 }
               `}
-            >
-              {tab.name}
-            </button>
-          );
-        })}
+              >
+                {tab.name}
+              </button>
+            );
+          })}
+        </div>
+        {user?.role_id == 1 && (
+          <div className="ml-auto text-[15px] w-[131px]">
+            <span className="text-gray-400 text-xs" style={{fontWeight:"600",color:"white"}}>Admin</span>
+          </div>
+        )}
       </div>
     </div>
   );

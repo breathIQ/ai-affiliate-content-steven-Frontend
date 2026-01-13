@@ -7,7 +7,11 @@ import { createPost } from "../../services/post.api";
 import toast from "react-hot-toast";
 import { getSinglePost } from "../../services/post.api";
 
-export default function DraftPostPage({generatedData, setGeneratedData, loadPost}) {
+export default function DraftPostPage({
+  generatedData,
+  setGeneratedData,
+  loadPost,
+}) {
   const [mediaType, setMediaType] = useState("carousel");
   const [files, setFiles] = useState([]);
   const [publishOpen, setPublishOpen] = useState(false);
@@ -19,6 +23,10 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
   const [hashtagInput, setHashtagInput] = useState("");
   const [script, setScript] = useState("");
   const [viewMedia, setViewMedia] = useState([]);
+  const [userData, setUser] = useState({});
+  const user = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : {};
 
   const { id } = useParams();
   const isEditMode = Boolean(id);
@@ -42,6 +50,7 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
         setCaption(post.caption || "");
         setScript(post.script || "");
         setAiModel(post.ai_model || "");
+        setUser(post.user || "");
 
         // Chapter
         if (post.chapter) {
@@ -57,7 +66,7 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
           setHashtags(
             post.hashtags
               .split(",")
-              .map(tag => tag.trim())
+              .map((tag) => tag.trim())
               .filter(Boolean)
           );
         }
@@ -66,21 +75,22 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
         setMediaType(post.media_assets);
 
         if (post.media?.length) {
-          setViewMedia(post.media.map(m => m.url));
+          setViewMedia(post.media.map((m) => m.url));
         }
-      } catch (err) {        
+      } catch (err) {
         // console.error("FETCH POST ERROR ❌", err);
-        toast.error(err?.response?.data?.error || err?.message||"Something went wrong");
+        toast.error(
+          err?.response?.data?.error || err?.message || "Something went wrong"
+        );
       }
     };
 
     fetchPost();
   }, [id, isEditMode]);
 
-
   const hasUnsavedData =
-  !isEditMode &&
-  (caption || script || files.length > 0 || hashtags.length > 0);
+    !isEditMode &&
+    (caption || script || files.length > 0 || hashtags.length > 0);
 
   useEffect(() => {
     if (!hasUnsavedData) return;
@@ -96,7 +106,6 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [hasUnsavedData]);
-
 
   useEffect(() => {
     if (!generatedData) return;
@@ -142,7 +151,6 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
     }
   };
 
-
   const toggleMedia = (index) => {
     if (mediaType === "single") {
       setSelectedMedia([index]); // always single
@@ -150,9 +158,7 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
     }
 
     setSelectedMedia((prev) =>
-      prev.includes(index)
-        ? prev.filter((i) => i !== index)
-        : [...prev, index]
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
   };
 
@@ -162,7 +168,6 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
       setSelectedMedia([0]);
     }
   }, [mediaType]);
-
 
   const handlePublishSubmit = async ({ platforms, reviewLink }) => {
     try {
@@ -175,7 +180,7 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
       formData.append("status", "published");
       formData.append("ai_model", aiModel);
       formData.append("ai_prompt", generatedData?.ai_prompt);
-      
+
       if (reviewLink) {
         formData.append("affiliate_url", reviewLink);
       }
@@ -186,8 +191,8 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
       });
 
       const hashtagString = hashtags
-      .map(tag => (tag.startsWith("#") ? tag : `#${tag}`))
-      .join(", ");
+        .map((tag) => (tag.startsWith("#") ? tag : `#${tag}`))
+        .join(", ");
 
       formData.append("hashtags", hashtagString);
 
@@ -202,13 +207,12 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
       if (!response?.success) {
         toast.error(response?.messages.join(", ") || "Failed to create post.");
         return;
-      }else{
+      } else {
         toast.success(response?.message || "Post created successfully!");
         loadPost();
         setGeneratedData(null);
         setPublishOpen(false);
       }
-      
     } catch (error) {
       console.error("CREATE POST ERROR ❌", error);
     }
@@ -225,8 +229,14 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
             <div className="flex gap-3 items-center">
               <span
                 onClick={() => {
-                  if(isEditMode){
-                    navigate('/u/library');
+                  if (isEditMode) {
+                    if(user?.role_id==1){
+                      navigate(`/u/library`, {
+                        state: userData,
+                      });
+                    }else{
+                      navigate("/u/library");
+                    }
                     return;
                   }
                   if (!hasUnsavedData) {
@@ -248,20 +258,26 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
                 <img src="/icons/folderback.svg" />
                 Back To Library
               </span>
-              <h1 className="font-semibold">{isEditMode ? "Post Details" : "Post Preview"}</h1>
+              <h1 className="font-semibold">
+                {isEditMode ? "Post Details" : "Post Preview"}
+              </h1>
             </div>
 
-            {!isEditMode && <button
-              onClick={() => setPublishOpen(true)}
-              className="bg-pink-500 text-white py-[10px] px-[16px] rounded-lg flex gap-2"
-            >
-              <img src="/icons/publish.svg" /> Publish
-            </button>}
+            {!isEditMode && (
+              <button
+                onClick={() => setPublishOpen(true)}
+                className="bg-pink-500 text-white py-[10px] px-[16px] rounded-lg flex gap-2"
+              >
+                <img src="/icons/publish.svg" /> Publish
+              </button>
+            )}
           </div>
 
           {/* MEDIA TYPE */}
           <div className="flex gap-6 text-sm">
-            <label className={`flex gap-2 ${isEditMode && "cursor-not-allowed"}`}>
+            <label
+              className={`flex gap-2 ${isEditMode && "cursor-not-allowed"}`}
+            >
               <input
                 type="radio"
                 checked={mediaType === "single"}
@@ -270,7 +286,9 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
               />
               Single Media
             </label>
-            <label className={`flex gap-2 ${isEditMode && "cursor-not-allowed"}`}>
+            <label
+              className={`flex gap-2 ${isEditMode && "cursor-not-allowed"}`}
+            >
               <input
                 type="radio"
                 checked={mediaType === "carousel"}
@@ -289,60 +307,59 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
                   key={`view-${index}`}
                   className="relative w-28 h-28 rounded-lg overflow-hidden bg-gray-200"
                 >
-                  <img
-                    src={url}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={url} className="w-full h-full object-cover" />
                 </div>
-              ))
-            }
-            {viewMedia.length === 0 && files.map((file, index) => {
-              const isSelected = selectedMedia.includes(index);
+              ))}
+            {viewMedia.length === 0 &&
+              files.map((file, index) => {
+                const isSelected = selectedMedia.includes(index);
 
-              return (
-                <div
-                  key={index}
-                  className="relative w-28 h-28 rounded-lg overflow-hidden bg-gray-200"
-                >
-                  <img
-                    src={URL.createObjectURL(file)}
-                    className="w-full h-full object-cover"
-                  />
-
-                  <button
-                    onClick={() => toggleMedia(index)}
-                    className={`absolute top-2 left-2 w-5 h-5 rounded border flex items-center justify-center ${
-                      isSelected
-                        ? "bg-purple-600 border-purple-600"
-                        : "bg-white border-gray-300"
-                    }`}
+                return (
+                  <div
+                    key={index}
+                    className="relative w-28 h-28 rounded-lg overflow-hidden bg-gray-200"
                   >
+                    <img
+                      src={URL.createObjectURL(file)}
+                      className="w-full h-full object-cover"
+                    />
+
+                    <button
+                      onClick={() => toggleMedia(index)}
+                      className={`absolute top-2 left-2 w-5 h-5 rounded border flex items-center justify-center ${
+                        isSelected
+                          ? "bg-purple-600 border-purple-600"
+                          : "bg-white border-gray-300"
+                      }`}
+                    >
+                      {isSelected && (
+                        <span className="text-white text-xs">✓</span>
+                      )}
+                    </button>
+
                     {isSelected && (
-                      <span className="text-white text-xs">✓</span>
+                      <span className="absolute top-2 right-2 bg-purple-600 text-white text-xs px-2 rounded-full">
+                        {selectedMedia.indexOf(index) + 1}/
+                        {selectedMedia.length}
+                      </span>
                     )}
-                  </button>
+                  </div>
+                );
+              })}
 
-                  {isSelected && (
-                    <span className="absolute top-2 right-2 bg-purple-600 text-white text-xs px-2 rounded-full">
-                      {selectedMedia.indexOf(index) + 1}/
-                      {selectedMedia.length}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-
-            {!isEditMode &&<label className="w-28 h-28 border border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer text-sm text-gray-500">
-              <img src="/icons/ic-upload-grey.svg" />
-              <p>Upload</p>
-              <input
-                type="file"
-                multiple={mediaType === "carousel"}
-                accept="image/*,video/*"
-                className="hidden"
-                onChange={uploadFiles}
-              />
-            </label>}
+            {!isEditMode && (
+              <label className="w-28 h-28 border border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer text-sm text-gray-500">
+                <img src="/icons/ic-upload-grey.svg" />
+                <p>Upload</p>
+                <input
+                  type="file"
+                  multiple={mediaType === "carousel"}
+                  accept="image/*,video/*"
+                  className="hidden"
+                  onChange={uploadFiles}
+                />
+              </label>
+            )}
           </div>
 
           {/* Chapter + AI */}
@@ -356,12 +373,9 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
 
             <p>
               <span className="font-medium">AI Model:</span> <br />
-              <span className="text-gray-400">
-                {aiModel || "-"}
-              </span>
+              <span className="text-gray-400">{aiModel || "-"}</span>
             </p>
           </div>
-
 
           {/* Caption + Hashtags */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -384,9 +398,7 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
             <div>
               <div className="flex justify-between mb-1">
                 <label className="text-sm font-medium">Hashtags:</label>
-                <span className="text-xs text-gray-400">
-                  {hashtags.length}
-                </span>
+                <span className="text-xs text-gray-400">{hashtags.length}</span>
               </div>
 
               <div className="flex flex-wrap gap-2 border rounded-lg p-3">
@@ -396,16 +408,16 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
                     className="bg-gray-100 px-3 py-1 rounded-full text-xs flex items-center gap-1"
                   >
                     {tag}
-                    {!isEditMode && (<button
-                      onClick={() =>
-                        setHashtags(
-                          hashtags.filter((_, idx) => idx !== i)
-                        )
-                      }
-                      className="text-gray-400 hover:text-red-500"
-                    >
-                      ×
-                    </button>)}
+                    {!isEditMode && (
+                      <button
+                        onClick={() =>
+                          setHashtags(hashtags.filter((_, idx) => idx !== i))
+                        }
+                        className="text-gray-400 hover:text-red-500"
+                      >
+                        ×
+                      </button>
+                    )}
                   </span>
                 ))}
 
@@ -417,10 +429,7 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && hashtagInput.trim()) {
                       e.preventDefault();
-                      setHashtags((prev) => [
-                        ...prev,
-                        hashtagInput.trim(),
-                      ]);
+                      setHashtags((prev) => [...prev, hashtagInput.trim()]);
                       setHashtagInput("");
                     }
                   }}
@@ -442,9 +451,7 @@ export default function DraftPostPage({generatedData, setGeneratedData, loadPost
               <label className="text-sm font-medium">
                 Script (For Video Post):
               </label>
-              <span className="text-xs text-gray-400">
-                {scriptWords} words
-              </span>
+              <span className="text-xs text-gray-400">{scriptWords} words</span>
             </div>
             <textarea
               value={script}

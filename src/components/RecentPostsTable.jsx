@@ -153,7 +153,7 @@ export default function RecentPostsTable({
 
                   <td className="p-3 text-gray-600">{item?.chapter_code ? item?.chapter_code+":":""}{item.chapter_name}</td>
 
-                  <td className="p-3 text-gray-600">{item.hashtags_count}</td>
+                  <td className="p-3 text-gray-600">{item.hashtags_count || 0}</td>
 
                   <td className="p-3 text-lg">
                     {item.ai_generated ? (

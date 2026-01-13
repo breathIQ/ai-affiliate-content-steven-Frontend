@@ -180,12 +180,12 @@ export default function Users() {
                           </div>
                         </div>
                       </td>
-                      <td className="p-3">{u.affiliate_id || "NA"}</td>
-                      <td className="p-3">{u.posts_generated || "NA"}</td>
-                      <td className="p-3">{u.posts_published || "NA"}</td>
-                      <td className="p-3">{u.total_clicks || "NA"}</td>
-                      {/* <td className="p-3">{u.conversion||"NA"}</td>
-                    <td className="p-3 text-xs text-gray-500">{u.joinedOn||"NA"}</td> */}
+                      <td className="p-3">{u.affiliate_id || "0"}</td>
+                      <td className="p-3">{u.posts_generated || "0"}</td>
+                      <td className="p-3">{u.posts_published || "0"}</td>
+                      <td className="p-3">{u.total_clicks || "0"}</td>
+                      {/* <td className="p-3">{u.conversion||"0"}</td>
+                    <td className="p-3 text-xs text-gray-500">{u.joinedOn||"0"}</td> */}
                       <td className="p-3 text-center">
                         <div className="relative inline-block"  ref={menuRef}
                         

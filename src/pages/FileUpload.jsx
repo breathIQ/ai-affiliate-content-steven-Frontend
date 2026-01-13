@@ -129,14 +129,14 @@ const FileUpload = () => {
                       type="file"
                       multiple
                       className="hidden"
-                      accept=".pdf,.epub,.mobi"
+                      accept=".pdf"
                       onChange={(e) => handleFiles(e.target.files)}
                     />
                   </>
                 )}
               </label>
               <p className="text-xs text-gray-400 my-4">
-                Supported file types: pdf, epub, mobi
+                Supported file types: pdf
               </p>
             </div>
 
