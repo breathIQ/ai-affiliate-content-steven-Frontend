@@ -146,7 +146,7 @@ export default function RecentPostsTable({
                       <img
                         src={"/icons/videoicon.svg"}
                         alt=""
-                        className="w-10 h-10 rounded-md object-cover"
+                        className="w-10 h-10  object-cover"
                       />
                     ) : (
                       <img
