@@ -4,6 +4,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { apibase } from "../../services/contants";
 import toast from "react-hot-toast";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import InstagramLoginBtn from "./InstagramAuth";
+import TiktokLogin from "./TiktokAuth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -87,18 +89,20 @@ export default function Login() {
 
               {!isadmin && (
                 <>
-                  <button className="w-full border rounded-lg py-2 mb-3 flex items-center justify-center gap-2 text-sm hover:bg-gray-50">
+                  {/* <button className="w-full border rounded-lg py-2 mb-3 flex items-center justify-center gap-2 text-sm hover:bg-gray-50">
                     <img
                       src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png"
                       className="w-4"
                       alt="insta"
                     />
                     Sign In with Instagram
-                  </button>
-                  <button className="w-full border rounded-lg py-2 mb-4 flex items-center justify-center gap-2 text-sm hover:bg-gray-50">
+                  </button> */}
+                  {<InstagramLoginBtn/>}
+                  {/* <button className="w-full border rounded-lg py-2 mb-4 flex items-center justify-center gap-2 text-sm hover:bg-gray-50">
                     <img src="/icons/tiktok.svg" className="w-4" alt="tiktok" />
                     Sign In with TikTok
-                  </button>
+                  </button> */}
+                    <TiktokLogin/>
                   <div className="flex items-center my-4">
                     <div className="flex-grow h-px bg-gray-200" />
                     <span className="mx-2 text-xs text-gray-400">OR</span>

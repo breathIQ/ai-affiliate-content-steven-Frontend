@@ -24,6 +24,7 @@ export default function DraftPostPage({
   const [script, setScript] = useState("");
   const [viewMedia, setViewMedia] = useState([]);
   const [userData, setUser] = useState({});
+  const [selectedVideo, setSelectedVideo] = useState(null);
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : {};
@@ -75,7 +76,7 @@ export default function DraftPostPage({
         setMediaType(post.media_assets);
 
         if (post.media?.length) {
-          setViewMedia(post.media.map((m) => m.url));
+          setViewMedia(post.media);
         }
       } catch (err) {
         // console.error("FETCH POST ERROR ❌", err);
@@ -230,11 +231,11 @@ export default function DraftPostPage({
               <span
                 onClick={() => {
                   if (isEditMode) {
-                    if(user?.role_id==1){
+                    if (user?.role_id == 1) {
                       navigate(`/admin/library`, {
                         state: userData,
                       });
-                    }else{
+                    } else {
                       navigate("/u/library");
                     }
                     return;
@@ -302,14 +303,47 @@ export default function DraftPostPage({
           {/* MEDIA GRID */}
           <div className="flex gap-4 flex-wrap">
             {viewMedia.length > 0 &&
-              viewMedia.map((url, index) => (
-                <div
-                  key={`view-${index}`}
-                  className="relative w-28 h-28 rounded-lg overflow-hidden bg-gray-200"
-                >
-                  <img src={url} className="w-full h-full object-cover" />
-                </div>
-              ))}
+              viewMedia.map((url, index) => {
+                // console.log("url " ,url);
+                return (
+                  <>
+                    {url?.media_type == "video" ? (
+                      <div
+                        key={`view-${index}`}
+                        className="relative w-28 h-28 rounded-lg overflow-hidden bg-gray-200"
+                      >
+                        <div
+                          className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer bg-black/20 hover:bg-black/40 transition-colors"
+                          onClick={() => setSelectedVideo(url?.url)}
+                        >
+                          <img
+                            src="/icons/ic-play2.svg"
+                            className="w-9 h-9 transform group-hover:scale-110 transition-transform"
+                            alt="Play"
+                          />
+                        </div>
+
+                        {/* Video Thumbnail (muted so it loads easily) */}
+                        <video
+                          src={url?.url}
+                          className="w-full h-full object-cover"
+                          muted
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        key={`view-${index}`}
+                        className="relative w-28 h-28 rounded-lg overflow-hidden bg-gray-200"
+                      >
+                        <img
+                          src={url?.url}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                  </>
+                );
+              })}
             {viewMedia.length === 0 &&
               files.map((file, index) => {
                 const isSelected = selectedMedia.includes(index);
@@ -477,6 +511,35 @@ export default function DraftPostPage({
           }}
         />
       </div>
+
+      {selectedVideo && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
+    
+    {/* Close Button */}
+    <button 
+      className="absolute top-6 right-6 text-white text-4xl hover:text-gray-300 z-50"
+      onClick={() => setSelectedVideo(null)}
+    >
+      &times;
+    </button>
+
+    {/* Video Container */}
+    <div className="relative w-full max-w-4xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
+      <video 
+        src={selectedVideo} 
+        className="w-full h-full" 
+        controls 
+        autoPlay 
+      />
+    </div>
+
+    {/* Click outside to close */}
+    <div 
+      className="absolute inset-0 -z-10" 
+      onClick={() => setSelectedVideo(null)}
+    />
+  </div>
+)}
     </Layout>
   );
 }
