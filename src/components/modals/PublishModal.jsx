@@ -42,9 +42,38 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
     onClose();
   };
 
+  // ✅ supports: File OR {type:"file"} OR {type:"url"}
+  const getMediaSrc = (item) => {
+    if (!item) return "";
+
+    // new structure from DraftPostPage
+    if (typeof item === "object" && item.type === "url") return item.url;
+    if (typeof item === "object" && item.type === "file") {
+      // prefer cached preview to avoid creating new blob URLs each render
+      if (item.preview) return item.preview;
+      if (item.file) return URL.createObjectURL(item.file); // fallback
+      return "";
+    }
+
+    // backward compatibility: if parent still sends actual File[]
+    if (item instanceof File) return URL.createObjectURL(item);
+
+    // if a plain url string is passed
+    if (typeof item === "string") return item;
+
+    return "";
+  };
+
+  const getHashtagText = (t) => {
+    if (!t) return "";
+    // support already formatted "#tag" or "tag"
+    const s = String(t);
+    return `#${s.replace(/^#/, "")}`;
+  };
+
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-      <div className="bg-white w-[600px] rounded-xl shadow-lg overflow-hidden">
+      <div className="bg-white w-[600px] rounded-xl shadow-lg max-w-xl h-screen overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b">
           <h2 className="font-semibold text-lg">Publish</h2>
@@ -58,10 +87,10 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
           {/* Media Preview */}
           <div className="flex justify-center">
             <div className="flex flex-wrap gap-3">
-              {preview.media?.map((file, i) => (
+              {preview.media?.map((item, i) => (
                 <img
                   key={i}
-                  src={URL.createObjectURL(file)}
+                  src={getMediaSrc(item)}
                   className="w-[120px] h-[150px] rounded-lg object-cover"
                 />
               ))}
@@ -72,8 +101,8 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
           <p className="text-sm text-gray-600">
             {preview.caption}
             <br />
-            {preview.hashtags.map((t, i) => (
-              <span key={i}>#{t.replace("#", "")} </span>
+            {preview.hashtags?.map((t, i) => (
+              <span key={i}>{getHashtagText(t)} </span>
             ))}
           </p>
 

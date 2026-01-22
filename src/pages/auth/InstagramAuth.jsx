@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import InstagramLogin from "react-instagram-oauth";
+// import InstagramLogin from "react-instagram-oauth";
 
 const InstagramLoginBtn = () => {
   const CLIENT_ID = "894645976266970";

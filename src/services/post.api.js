@@ -26,18 +26,7 @@ export const getChapter = async (data) => {
 };
 
 export const generateAIPost = async (data) => {
-  const formData = new FormData();
-
-  formData.append("chapter", data.chapter);
-  formData.append("model", data.model);
-  formData.append("prompt", data.prompt);
-
-  const res = await API.post("/user/generate-ai-post", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-
+  const res = await API.post("/user/generate-ai-post", data);
   return res.data;
 };
 

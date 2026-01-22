@@ -13,7 +13,9 @@ export default function DraftPostPage({
   loadPost,
 }) {
   const [mediaType, setMediaType] = useState("carousel");
-  const [files, setFiles] = useState([]);
+
+  // ✅ keep your existing states (no UI change)
+  const [files, setFiles] = useState([]); // uploaded file list (still used for modal preview compatibility)
   const [publishOpen, setPublishOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState([]);
   const [caption, setCaption] = useState("");
@@ -22,9 +24,14 @@ export default function DraftPostPage({
   const [aiModel, setAiModel] = useState("");
   const [hashtagInput, setHashtagInput] = useState("");
   const [script, setScript] = useState("");
-  const [viewMedia, setViewMedia] = useState([]);
+  const [viewMedia, setViewMedia] = useState([]); // keep for edit mode UI (we'll fill it)
   const [userData, setUser] = useState({});
   const [selectedVideo, setSelectedVideo] = useState(null);
+
+  // ✅ NEW: unified media list for preview + payload
+  // each item: { type: "file", file: File, preview: string } OR { type: "url", url: string, media_type?: "video"|"image" }
+  const [mediaItems, setMediaItems] = useState([]);
+
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : {};
@@ -75,11 +82,22 @@ export default function DraftPostPage({
         // Media type (fallback)
         setMediaType(post.media_assets);
 
+        // ✅ existing media from API (edit mode) as URL items (NO blob conversion)
         if (post.media?.length) {
           setViewMedia(post.media);
+
+          const urlItems = post.media.map((m) => ({
+            type: "url",
+            url: m.url,
+            media_type: m.media_type, // useful for video detection
+          }));
+          setMediaItems(urlItems);
+          setSelectedMedia(urlItems.map((_, idx) => idx)); // select all by default
+
+          // keep files empty in edit mode (uploads disabled anyway)
+          setFiles([]);
         }
       } catch (err) {
-        // console.error("FETCH POST ERROR ❌", err);
         toast.error(
           err?.response?.data?.error || err?.message || "Something went wrong"
         );
@@ -117,7 +135,8 @@ export default function DraftPostPage({
     if (generatedData.hashtags) {
       const tagsArray = generatedData.hashtags
         .split(",")
-        .map((tag) => tag.trim());
+        .map((tag) => tag.trim())
+        .filter(Boolean);
       setHashtags(tagsArray);
     }
 
@@ -128,6 +147,25 @@ export default function DraftPostPage({
     });
 
     setAiModel(generatedData.model || "");
+    setMediaType(generatedData.post_type || "carousel");
+
+    // ✅ generated images come as URLs → set into unified mediaItems
+    if (generatedData.images?.length) {
+      const urlItems = generatedData.images.map((img) => ({
+        type: "url",
+        url: img.image_url,
+        media_type: "image",
+      }));
+
+      setMediaItems(urlItems);
+      setSelectedMedia(urlItems.map((_, idx) => idx)); // select all by default
+
+      // keep viewMedia empty so UI uses the "files map" section (we will render from mediaItems there)
+      setViewMedia([]);
+
+      // keep files empty because these are NOT uploads
+      setFiles([]);
+    }
   }, [generatedData]);
 
   const { handleSubmit } = useForm();
@@ -135,22 +173,71 @@ export default function DraftPostPage({
   const captionWords = caption.trim().split(/\s+/).filter(Boolean).length;
   const scriptWords = script.trim().split(/\s+/).filter(Boolean).length;
 
+  // ✅ Upload and store as {type:file} in mediaItems, also keep files state updated
   const uploadFiles = (e) => {
-    const newFiles = Array.from(e.target.files);
+    const incoming = Array.from(e.target.files || []).filter(Boolean);
+    if (!incoming.length) return;
 
-    if (mediaType === "single") {
-      // Allow only one file
-      setFiles([newFiles[0]]);
-      setSelectedMedia([0]);
-    } else {
-      // Carousel → allow multiple
-      setFiles((prev) => [...prev, ...newFiles]);
-      setSelectedMedia((prev) => [
-        ...prev,
-        ...newFiles.map((_, i) => prev.length + i),
-      ]);
-    }
+    // IMPORTANT: allow selecting same file again later
+    e.target.value = "";
+
+    const fileSig = (f) => `${f.name}-${f.size}-${f.lastModified}`;
+
+    const newItemsRaw = incoming.map((file) => ({
+      type: "file",
+      file,
+      preview: URL.createObjectURL(file),
+      media_type: file.type?.startsWith("video/") ? "video" : "image",
+      _sig: fileSig(file), // internal signature for dedupe
+    }));
+
+    // ✅ ONE atomic update for BOTH arrays
+    // ✅ DEDUPE: if the same upload is processed twice, it won't be added again
+    setMediaItems((prevMedia) => {
+      const existingSigs = new Set(
+        prevMedia
+          .filter((m) => m?.type === "file" && m?._sig)
+          .map((m) => m._sig)
+      );
+
+      const newItems = newItemsRaw.filter((m) => !existingSigs.has(m._sig));
+
+      // if nothing new (because it was a duplicate run), do nothing
+      if (!newItems.length) return prevMedia;
+
+      if (mediaType === "single") {
+        // in single mode, replace all with first new item
+        setSelectedMedia([0]);
+        setFiles([newItems[0].file]);
+        return [newItems[0]];
+      }
+
+      // carousel -> append
+      const startIndex = prevMedia.length;
+      const nextMedia = [...prevMedia, ...newItems];
+
+      // update selectedMedia ONCE based on final indexes
+      setSelectedMedia((prevSelected) => {
+        const appendedIndexes = newItems.map((_, i) => startIndex + i);
+        // prevent duplicates in selection too
+        const setSel = new Set(prevSelected);
+        appendedIndexes.forEach((idx) => setSel.add(idx));
+        return Array.from(setSel);
+      });
+
+      // keep your files state updated (only true uploads)
+      setFiles((prevFiles) => {
+        const prevSigs = new Set(prevFiles.map(fileSig));
+        const addFiles = newItems
+          .map((m) => m.file)
+          .filter((f) => !prevSigs.has(fileSig(f)));
+        return [...prevFiles, ...addFiles];
+      });
+
+      return nextMedia;
+    });
   };
+
 
   const toggleMedia = (index) => {
     if (mediaType === "single") {
@@ -164,11 +251,28 @@ export default function DraftPostPage({
   };
 
   useEffect(() => {
-    if (mediaType === "single" && files.length > 1) {
-      setFiles([files[0]]);
-      setSelectedMedia([0]);
+    if (mediaType === "single") {
+      // ensure only one selection
+      setSelectedMedia((prev) => (prev.length ? [prev[0]] : []));
+      // ensure only one media item
+      setMediaItems((prev) => (prev.length > 1 ? [prev[0]] : prev));
+      // ensure only one file in files state (if files exist)
+      setFiles((prev) => (prev.length > 1 ? [prev[0]] : prev));
     }
   }, [mediaType]);
+
+  // ✅ Clean up object URLs for uploaded files
+  useEffect(() => {
+    return () => {
+      mediaItems.forEach((m) => {
+        if (m?.type === "file" && m?.preview) {
+          try {
+            URL.revokeObjectURL(m.preview);
+          } catch (e) { }
+        }
+      });
+    };
+  }, [mediaItems]);
 
   const handlePublishSubmit = async ({ platforms, reviewLink }) => {
     try {
@@ -186,8 +290,21 @@ export default function DraftPostPage({
         formData.append("affiliate_url", reviewLink);
       }
 
-      selectedMedia.forEach((index, i) => {
-        formData.append(`media[${i}][file]`, files[index]);
+      // ✅ media payload exactly like screenshot:
+      // media[0][file] = File OR URL string
+      // media[0][media_order] = 1
+      const uniqueSelected = Array.from(new Set(selectedMedia));
+
+      uniqueSelected.forEach((index, i) => {
+        const item = mediaItems[index];
+        if (!item) return;
+
+        if (item.type === "file") {
+          formData.append(`media[${i}][file]`, item.file);
+        } else {
+          formData.append(`media[${i}][file]`, item.url);
+        }
+
         formData.append(`media[${i}][media_order]`, i + 1);
       });
 
@@ -219,7 +336,16 @@ export default function DraftPostPage({
     }
   };
 
-  const selectedFiles = selectedMedia.map((i) => files[i]);
+  // ✅ For modal preview:
+  // If file → pass File (existing behavior)
+  // If url → pass url string (PublishModal should render url if it already supports it)
+  const selectedFiles = selectedMedia
+    .map((idx) => {
+      const item = mediaItems[idx];
+      if (!item) return null;
+      return item.type === "file" ? item.file : item.url;
+    })
+    .filter(Boolean);
 
   return (
     <Layout>
@@ -304,7 +430,6 @@ export default function DraftPostPage({
           <div className="flex gap-4 flex-wrap">
             {viewMedia.length > 0 &&
               viewMedia.map((url, index) => {
-                // console.log("url " ,url);
                 return (
                   <>
                     {url?.media_type == "video" ? (
@@ -323,7 +448,6 @@ export default function DraftPostPage({
                           />
                         </div>
 
-                        {/* Video Thumbnail (muted so it loads easily) */}
                         <video
                           src={url?.url}
                           className="w-full h-full object-cover"
@@ -344,27 +468,40 @@ export default function DraftPostPage({
                   </>
                 );
               })}
+
             {viewMedia.length === 0 &&
-              files.map((file, index) => {
+              mediaItems.map((m, index) => {
                 const isSelected = selectedMedia.includes(index);
+
+                const src = m?.type === "url" ? m?.url : m?.preview;
+                const isVideo =
+                  m?.media_type === "video" ||
+                  (m?.type === "url" &&
+                    /\.(mp4|webm|ogg)(\?|$)/i.test(m?.url || "")) ||
+                  (m?.type === "file" &&
+                    m?.file?.type?.startsWith("video/"));
 
                 return (
                   <div
                     key={index}
                     className="relative w-28 h-28 rounded-lg overflow-hidden bg-gray-200"
                   >
-                    <img
-                      src={URL.createObjectURL(file)}
-                      className="w-full h-full object-cover"
-                    />
+                    {isVideo ? (
+                      <video
+                        src={src}
+                        className="w-full h-full object-cover"
+                        muted
+                      />
+                    ) : (
+                      <img src={src} className="w-full h-full object-cover" />
+                    )}
 
                     <button
                       onClick={() => toggleMedia(index)}
-                      className={`absolute top-2 left-2 w-5 h-5 rounded border flex items-center justify-center ${
-                        isSelected
+                      className={`absolute top-2 left-2 w-5 h-5 rounded border flex items-center justify-center ${isSelected
                           ? "bg-purple-600 border-purple-600"
                           : "bg-white border-gray-300"
-                      }`}
+                        }`}
                     >
                       {isSelected && (
                         <span className="text-white text-xs">✓</span>
@@ -467,9 +604,8 @@ export default function DraftPostPage({
                       setHashtagInput("");
                     }
                   }}
-                  className={`text-xs outline-none flex-1 min-w-[120px] ${
-                    isEditMode && "bg-transparent cursor-not-allowed"
-                  }`}
+                  className={`text-xs outline-none flex-1 min-w-[120px] ${isEditMode && "bg-transparent cursor-not-allowed"
+                    }`}
                 />
               </div>
 
@@ -513,33 +649,27 @@ export default function DraftPostPage({
       </div>
 
       {selectedVideo && (
-  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
-    
-    {/* Close Button */}
-    <button 
-      className="absolute top-6 right-6 text-white text-4xl hover:text-gray-300 z-50"
-      onClick={() => setSelectedVideo(null)}
-    >
-      &times;
-    </button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
+          {/* Close Button */}
+          <button
+            className="absolute top-6 right-6 text-white text-4xl hover:text-gray-300 z-50"
+            onClick={() => setSelectedVideo(null)}
+          >
+            &times;
+          </button>
 
-    {/* Video Container */}
-    <div className="relative w-full max-w-4xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
-      <video 
-        src={selectedVideo} 
-        className="w-full h-full" 
-        controls 
-        autoPlay 
-      />
-    </div>
+          {/* Video Container */}
+          <div className="relative w-full max-w-4xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
+            <video src={selectedVideo} className="w-full h-full" controls autoPlay />
+          </div>
 
-    {/* Click outside to close */}
-    <div 
-      className="absolute inset-0 -z-10" 
-      onClick={() => setSelectedVideo(null)}
-    />
-  </div>
-)}
+          {/* Click outside to close */}
+          <div
+            className="absolute inset-0 -z-10"
+            onClick={() => setSelectedVideo(null)}
+          />
+        </div>
+      )}
     </Layout>
   );
 }
