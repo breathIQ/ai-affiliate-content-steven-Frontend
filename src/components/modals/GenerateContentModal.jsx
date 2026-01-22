@@ -4,8 +4,9 @@ import { getChapter } from "../../services/post.api";
 import { FaPlus } from "react-icons/fa";
 import { generateAIPost } from "../../services/post.api";
 import { useSearchParams } from "react-router-dom";
+import toast from "react-hot-toast";
 
-export default function GenerateContentModal({setGeneratedData}) {
+export default function GenerateContentModal({ setGeneratedData }) {
   const [isOpen, setIsOpen] = useState(false);
   const [chapters, setChapters] = useState([]);
 
@@ -13,25 +14,36 @@ export default function GenerateContentModal({setGeneratedData}) {
   const generate = searchParams.get("generate");
   const isGenerate = generate === "true";
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm();
+
+  const postType = watch("post_type");
+  const slidesCount = watch("slides");
+
+  const slideTexts = watch("slide_texts");
+  const hasText =
+    postType === "single"
+      ? slideTexts?.[0]?.trim()
+      : Array.isArray(slideTexts) && slideTexts.some(t => t?.trim());
+
+  const slideInputsCount =
+    postType === "carousel"
+      ? Number(slidesCount || 0)
+      : postType === "single"
+        ? 1
+        : 0;
+
   useEffect(() => {
     if (isGenerate) {
       setIsOpen(true);
       searchParams.delete("generate");
     }
   }, [isGenerate]);
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm({
-    defaultValues: {
-      chapter_id: "",
-      model: "ChatGPT",
-      prompt: "",
-    },
-  });
 
   /* 🔹 Fetch chapters when modal opens */
   useEffect(() => {
@@ -50,27 +62,93 @@ export default function GenerateContentModal({setGeneratedData}) {
   }, [isOpen]);
 
   /* 🔹 Submit */
+  /* 🔹 Submit */
   const onSubmit = async (formData) => {
     try {
+      // Filter slide_texts to only include filled ones and match the count
+      let slideTexts = formData.slide_texts || [];
+
+      if (postType === "carousel") {
+        // Only include texts up to the selected slides count
+        const count = Number(formData.slides || 0);
+        slideTexts = slideTexts.slice(0, count);
+      } else if (postType === "single") {
+        // For single, only take first text
+        slideTexts = slideTexts.slice(0, 1);
+      }
+
+      // Filter out empty/whitespace-only values
+      slideTexts = slideTexts.filter(text => text?.trim());
+
+      const hasText = slideTexts.length > 0;
+
       const payload = {
-        chapter: formData.chapter_id, // API expects `chapter`
+        chapter: formData.chapter_id,
         model: formData.model,
         prompt: formData.prompt,
+        post_type: formData.post_type,
+        slides: postType === "single" ? 1 : formData.slides,
       };
+
+      // Only add slide_texts if there are non-empty values
+      if (hasText) {
+        payload.slide_texts = slideTexts;
+      }
+
+      // Add design fields ONLY if text exists
+      if (hasText) {
+        payload.design = {
+          overlay_color: formData.overlay_color,
+          text_placement: formData.text_placement,
+          font_family: formData.font_family,
+          font_size: formData.font_size,
+          font_weight: formData.font_weight,
+        };
+      }
 
       console.log("Generate Payload 👉", payload);
 
       const res = await generateAIPost(payload);
 
       if (res?.success) {
-        setGeneratedData(res.data); // ✅ EXACT response.data saved
+        setGeneratedData(res.data);
         setIsOpen(false);
         reset();
+      } else {
+        toast.error(res?.message || "Failed to generate content");
       }
     } catch (error) {
       console.error("GENERATE CONTENT ERROR ❌", error);
+      toast.error(error?.response?.data?.message || "An error occurred while generating content");
     }
   };
+
+  // Add this useEffect after your existing useEffects
+  useEffect(() => {
+    if (postType) {
+      // Reset slide_texts array when switching post types
+      reset({
+        ...watch(), // Keep other form values
+        slide_texts: [], // Clear all slide texts
+        slides: postType === "single" ? undefined : watch("slides"), // Clear slides count for single
+      });
+    }
+  }, [postType]);
+  // Add this to handle when slides count changes in carousel mode
+  useEffect(() => {
+    if (postType === "carousel" && slidesCount) {
+      const currentTexts = watch("slide_texts") || [];
+      const count = Number(slidesCount);
+
+      // If reducing slides, trim the array
+      if (currentTexts.length > count) {
+        reset({
+          ...watch(),
+          slide_texts: currentTexts.slice(0, count), // Keep only first N texts
+        });
+      }
+    }
+  }, [slidesCount, postType]);
 
   return (
     <>
@@ -93,7 +171,7 @@ export default function GenerateContentModal({setGeneratedData}) {
           />
 
           {/* Modal Box */}
-          <div className="relative bg-white w-full max-w-xl rounded-xl shadow-lg z-50">
+          <div className="relative bg-white w-full max-w-xl h-screen rounded-xl shadow-lg z-50 overflow-y-auto">
             {/* Header */}
             <div className="flex justify-between items-center px-6 py-4 border-b">
               <h2 className="text-lg font-semibold">Generate Content</h2>
@@ -177,6 +255,192 @@ export default function GenerateContentModal({setGeneratedData}) {
                     </p>
                   )}
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Post Type */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Post Type</label>
+                    <div className="flex gap-6">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          value="single"
+                          {...register("post_type")}
+                        />
+                        Single Post
+                      </label>
+
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          value="carousel"
+                          {...register("post_type")}
+                        />
+                        Carousel
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Carousel Slides */}
+                  <div>
+                    {postType === "carousel" && (
+                      <>
+                        <label className="text-sm font-medium mb-1 block">
+                          No. of Carousel Slides
+                        </label>
+                        <select
+                          {...register("slides")}
+                          className="w-full border rounded-lg px-3 py-2 text-sm"
+                        >
+                          <option value="">Select Slides</option>
+                          {[1, 2, 3, 4, 5].map((num) => (
+                            <option key={num} value={num}>
+                              {num}
+                            </option>
+                          ))}
+                        </select>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {slideInputsCount > 0 &&
+                  [...Array(slideInputsCount)].map((_, index) => (
+                    <div key={index}>
+                      <label className="text-sm font-medium mb-1 block">
+                        {postType === "single"
+                          ? "Post Text"
+                          : `Slide ${index + 1}'s Text`}
+                      </label>
+                      <input
+                        type="text"
+                        {...register(`slide_texts.${index}`)}
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                        placeholder={
+                          postType === "single"
+                            ? "Enter post text"
+                            : `Enter text for slide ${index + 1}`
+                        }
+                      />
+                    </div>
+                  ))}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">
+                      Image Overlay Color
+                    </label>
+                    <input
+                      type="color"
+                      {...register("overlay_color", {
+                        required: hasText ? "Overlay color is required" : false,
+                      })}
+                      className="w-full h-[42px] border rounded-lg p-1"
+                    />
+                    {errors.overlay_color && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.overlay_color.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">
+                      Text Placement
+                    </label>
+                    <select
+                      {...register("text_placement", {
+                        required: hasText ? "Text placement is required" : false,
+                      })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="">Select Placement</option>
+
+                      <option value="top-left">Top Left</option>
+                      <option value="top-center">Top Center</option>
+                      <option value="top-right">Top Right</option>
+
+                      <option value="center">Centered</option>
+
+                      <option value="bottom-left">Bottom Left</option>
+                      <option value="bottom-center">Bottom Center</option>
+                      <option value="bottom-right">Bottom Right</option>
+                    </select>
+                    {errors.text_placement && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.text_placement.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Font Family</label>
+                    <select
+                      {...register("font_family", {
+                        required: hasText ? "Font family is required" : false,
+                      })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="">Select Font</option>
+                      <option value="Inter">Inter</option>
+                      <option value="Poppins">Poppins</option>
+                      <option value="Roboto">Roboto</option>
+                    </select>
+                    {errors.font_family && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.font_family.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Font Size</label>
+                    <select
+                      {...register("font_size", {
+                        required: hasText ? "Font size is required" : false,
+                      })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="">Select Size</option>
+                      <option value="H1">H1</option>
+                      <option value="H2">H2</option>
+                      <option value="H3">H3</option>
+                      <option value="H4">H4</option>
+                      <option value="H5">H5</option>
+                      <option value="H6">H6</option>
+                    </select>
+                    {errors.font_size && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.font_size.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Font Weight</label>
+                    <select
+                      {...register("font_weight", {
+                        required: hasText ? "Font weight is required" : false,
+                      })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="">Select Weight</option>
+                      <option value="400">Regular (400)</option>
+                      <option value="500">Medium (500)</option>
+                      <option value="600">Semi Bold (600)</option>
+                      <option value="700">Bold (700)</option>
+                      <option value="900">Bolder (900)</option>
+                    </select>
+                    {errors.font_weight && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.font_weight.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
               </div>
 
               {/* Footer */}
@@ -194,7 +458,7 @@ export default function GenerateContentModal({setGeneratedData}) {
                   className="py-[10px] px-[16px] rounded-lg text-sm bg-purple-600 text-white flex items-center gap-2 disabled:opacity-50"
                 >
                   <span className="text-lg">
-                    <FaPlus size={22} className="bg-[#ffffff28] rounded-[4px] p-[5px]"/>
+                    <FaPlus size={22} className="bg-[#ffffff28] rounded-[4px] p-[5px]" />
                   </span>
                   {isSubmitting ? "Generating..." : "Generate"}
                 </button>
