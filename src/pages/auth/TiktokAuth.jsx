@@ -5,8 +5,6 @@ const TiktokLogin = () => {
   const REDIRECT_URI = "https://aiaffiliate.betacvinfotech.com/auth/instagram/callback";
   //  "https://aiaffiliate.betacvinfotech.com/login";
 
-
-
   const tiktokLogin = () => {
     const url = `https://www.tiktok.com/v2/auth/authorize/?client_key=${TIKTOK_CLIENT_KEY}&scope=user.info.basic&response_type=code&redirect_uri=${REDIRECT_URI}&state=login`;
     window.location.href = url;
