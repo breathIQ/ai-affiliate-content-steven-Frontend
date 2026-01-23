@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { apibase } from "../../services/contants";
 import toast from "react-hot-toast";
@@ -18,6 +18,66 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isadmin, setisadmin] = useState(false);
+
+  const tiktokUserFromQuery = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    const userParam = params.get("user");
+    if (!userParam) return null;
+
+    try {
+      // userParam is URL-encoded JSON string
+      const parsed = JSON.parse(decodeURIComponent(userParam));
+      return parsed;
+    } catch (e) {
+      return null;
+    }
+  }, [location.search]);
+
+  
+  const hasRequiredAuthFields = (u) => {
+    return Boolean(
+      u &&
+        u.access_token &&
+        (u.role_id === 1 || u.role_id === 2 || String(u.role_id).length > 0) &&
+        u.affiliate_id
+    );
+  };
+
+  const completeLogin = (userObj) => {
+    localStorage.setItem("user", JSON.stringify(userObj));
+    localStorage.setItem("access_token", userObj?.access_token);
+
+    // redirect based on role_id (your existing logic)
+    const roleIdNum = Number(userObj?.role_id);
+    window.location.href = roleIdNum === 2 ? "/u/dashboard" : "/admin/dashboard";
+  };
+
+  useEffect(() => {
+    if (!tiktokUserFromQuery) return;
+
+    // If malformed JSON
+    if (tiktokUserFromQuery === null) {
+      toast.error("Invalid TikTok login response.");
+      return;
+    }
+
+    // Validate required fields
+    if (!hasRequiredAuthFields(tiktokUserFromQuery)) {
+      toast.error("TikTok login failed: missing access_token / role_id / affiliate_id");
+      return;
+    }
+
+    // Success
+    toast.success("Logged in with TikTok!");
+
+    // Complete login
+    completeLogin(tiktokUserFromQuery);
+
+    // ✅ clean URL to remove token from query params
+    // (will run before navigation finishes in most cases; still worth doing)
+    navigate(location.pathname, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tiktokUserFromQuery]);
 
   useEffect(() => {
     const isadminPath = location.pathname.startsWith("/admin/");

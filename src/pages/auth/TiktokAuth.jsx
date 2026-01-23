@@ -1,13 +1,16 @@
 import React, { useRef } from "react";
+import { tiktokSignin } from "../../services/socialMediaAuth.api";
 
 const TiktokLogin = () => {
-  const TIKTOK_CLIENT_KEY = "awk5c3938mfcb3wc"; // process.env.TIKTOK_CLIENT_KEY||
-  const REDIRECT_URI = "https://aiaffiliate.betacvinfotech.com/auth/instagram/callback";
-  //  "https://aiaffiliate.betacvinfotech.com/login";
 
-  const tiktokLogin = () => {
-    const url = `https://www.tiktok.com/v2/auth/authorize/?client_key=${TIKTOK_CLIENT_KEY}&scope=user.info.basic&response_type=code&redirect_uri=${REDIRECT_URI}&state=login`;
-    window.location.href = url;
+  const tiktokLogin = async () => {
+    try {
+      const res = await tiktokSignin();
+      console.log("TikTok Signin Response:", res);
+      window.location.href = res.data;
+    } catch (error) {
+      console.error("TikTok Signin Error:", error);
+    }
   };
 
   return (
