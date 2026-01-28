@@ -6,6 +6,10 @@ import { set, useForm } from "react-hook-form";
 import { createPost } from "../../services/post.api";
 import toast from "react-hot-toast";
 import { getSinglePost } from "../../services/post.api";
+import Lightbox from "yet-another-react-lightbox";
+import Video from "yet-another-react-lightbox/plugins/video";
+
+import "yet-another-react-lightbox/styles.css";
 
 export default function DraftPostPage({
   generatedData,
@@ -27,6 +31,8 @@ export default function DraftPostPage({
   const [viewMedia, setViewMedia] = useState([]); // keep for edit mode UI (we'll fill it)
   const [userData, setUser] = useState({});
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   // ✅ NEW: unified media list for preview + payload
   // each item: { type: "file", file: File, preview: string } OR { type: "url", url: string, media_type?: "video"|"image" }
@@ -39,6 +45,25 @@ export default function DraftPostPage({
   const { id } = useParams();
   const isEditMode = Boolean(id);
   const navigate = useNavigate();
+
+  const lightboxSlides = viewMedia.map((item) => {
+    if (item.media_type === "video") {
+      return {
+        type: "video",
+        sources: [
+          {
+            src: item.url,
+            type: "video/mp4",
+          },
+        ],
+      };
+    }
+
+    return {
+      src: item.url,
+    };
+  });
+
 
   useEffect(() => {
     if (!isEditMode) return;
@@ -347,7 +372,7 @@ export default function DraftPostPage({
     })
     .filter(Boolean);
 
-  return (
+  return (<>
     <Layout>
       <div className="max-w-7xl mx-auto min-h-screen">
         <div className="bg-white rounded-xl p-6 space-y-6">
@@ -439,7 +464,10 @@ export default function DraftPostPage({
                       >
                         <div
                           className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer bg-black/20 hover:bg-black/40 transition-colors"
-                          onClick={() => setSelectedVideo(url?.url)}
+                          onClick={() => {
+                            setLightboxIndex(index);
+                            setLightboxOpen(true);
+                          }}
                         >
                           <img
                             src="/icons/ic-play2.svg"
@@ -461,7 +489,11 @@ export default function DraftPostPage({
                       >
                         <img
                           src={url?.url}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover cursor-pointer"
+                          onClick={() => {
+                            setLightboxIndex(index);
+                            setLightboxOpen(true);
+                          }}
                         />
                       </div>
                     )}
@@ -499,8 +531,8 @@ export default function DraftPostPage({
                     <button
                       onClick={() => toggleMedia(index)}
                       className={`absolute top-2 left-2 w-5 h-5 rounded border flex items-center justify-center ${isSelected
-                          ? "bg-purple-600 border-purple-600"
-                          : "bg-white border-gray-300"
+                        ? "bg-purple-600 border-purple-600"
+                        : "bg-white border-gray-300"
                         }`}
                     >
                       {isSelected && (
@@ -671,5 +703,12 @@ export default function DraftPostPage({
         </div>
       )}
     </Layout>
-  );
+    <Lightbox
+      open={lightboxOpen}
+      close={() => setLightboxOpen(false)}
+      index={lightboxIndex}
+      slides={lightboxSlides}
+      plugins={[Video]}
+    />
+  </>);
 }

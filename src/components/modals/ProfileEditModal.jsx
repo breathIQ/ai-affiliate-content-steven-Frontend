@@ -5,6 +5,8 @@ import {
   getProfileByRole,
   updateProfileByRole,
 } from "../../services/profile.service";
+import { instagramAccountLink } from "../../services/socialMediaAuth.api";
+import { tiktokAccountLink } from "../../services/socialMediaAuth.api";
 import { useLoader } from "../../context/LoaderContext";
 
 const DEFAULT_IMAGE = "/images/defaultImage.png";
@@ -31,6 +33,28 @@ export function ProfileEditModal({ isOpen, onClose }) {
   } = useForm();
 
   const affiliate = watch("affiliate");
+
+  const instagramLinkAccount = async () => {
+    try {
+      const res = await instagramAccountLink();
+      window.location.href = res.data;
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to link Instagram account"
+      );
+    }
+  };
+
+  const tiktokLinkAccount = async () => {
+    try {
+      const res = await tiktokAccountLink();
+      window.location.href = res.data;
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to link TikTok account"
+      );
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -220,7 +244,8 @@ export function ProfileEditModal({ isOpen, onClose }) {
           <>
             <p className="text-sm font-medium mb-2">Social Accounts</p>
             <div className="flex gap-3 mb-4">
-              <div className="flex items-center w-full justify-center gap-2 border rounded-md px-3 py-2 text-sm">
+              <div className={`flex items-center w-full justify-center gap-2 border rounded-md px-3 py-2 text-sm ${social.instagram?.connected ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+              onClick={!social.instagram?.connected && instagramLinkAccount}>
                 <img src="/icons/insta.svg" />
                 {social.instagram?.connected ? (
                   <span>
@@ -232,7 +257,8 @@ export function ProfileEditModal({ isOpen, onClose }) {
                 )}
               </div>
 
-              <div className="flex items-center w-full justify-center gap-2 border rounded-md px-3 py-2 text-sm">
+              <div className={`flex items-center w-full justify-center gap-2 border rounded-md px-3 py-2 text-sm ${social.tiktok?.connected ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+              onClick={!social.tiktok?.connected && tiktokLinkAccount}>
                 <img src="/icons/tiktok.svg" />
                 {social.tiktok?.connected ? (
                   <span>

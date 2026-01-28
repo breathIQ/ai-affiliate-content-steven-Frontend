@@ -151,18 +151,18 @@ export default function DashboardOverview({data}) {
               >
                 <img src="/icons/insta.svg" alt="Instagram" />
 
-                {/* {social?.instagram?.connected ? (
+                {data?.social_accounts_status?.instagram?.connected ? (
                 <span className="flex items-center gap-1 font-medium">
-                  {social.instagram.username}
+                  {data?.social_accounts_status?.instagram?.username}
                   <CheckmarkIcon size={14} />
                 </span>
               ) : (
                 <span className="text-gray-600">Connect Instagram</span>
-              )} */}
-                <span className="flex items-center gap-1 text-[#0000008A]">
+              )}
+                {/* <span className="flex items-center gap-1 text-[#0000008A]">
                   @johndoe
                   <CheckmarkIcon size={14} />
-                </span>
+                </span> */}
               </button>
 
               {/* TikTok */}
@@ -171,15 +171,15 @@ export default function DashboardOverview({data}) {
               >
                 <img src="/icons/tiktok.svg" alt="TikTok" />
 
-                {/* {social?.tiktok?.connected ? (
+                {data?.social_accounts_status?.tiktok?.connected ? (
                 <span className="flex items-center gap-1 font-medium">
-                  {social.tiktok.username}
+                  {data?.social_accounts_status?.tiktok?.username}
                   <CheckmarkIcon size={14} />
                 </span>
               ) : (
                 <span className="text-gray-600">Connect TikTok</span>
-              )} */}
-                <span className="text-[#0000008A]">Connect TikTok</span>
+              )}
+                {/* <span className="text-[#0000008A]">Connect TikTok</span> */}
               </button>
             </div>
           </div>
