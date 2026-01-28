@@ -4,10 +4,34 @@ import ClicksConversion from "./ClicksConversion";
 import { Link, NavLink } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
 import AffiliateClicksChart from "./AffiliateClicksChart";
-import { CheckmarkIcon } from "react-hot-toast";
+import toast, { CheckmarkIcon } from "react-hot-toast";
+
+import {instagramAccountLink} from "../services/socialMediaAuth.api";
+import {tiktokAccountLink} from "../services/socialMediaAuth.api";
 
 export default function DashboardOverview({data}) {
   console.log("DashboardOverview data:", data);
+  const instagramLinkAccount = async () => {
+    try {
+      const res = await instagramAccountLink();
+      window.location.href = res.data;
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to link Instagram account"
+      );
+    }
+  };
+
+  const tiktokLinkAccount = async () => {
+    try {
+      const res = await tiktokAccountLink();
+      window.location.href = res.data;
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to link TikTok account"
+      );
+    }
+  };
   return (
     <div className="pt-8">
       <div className=" grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -147,7 +171,8 @@ export default function DashboardOverview({data}) {
             <div className="flex gap-3">
               {/* Instagram */}
               <button
-                className={`flex items-center w-full gap-2 border rounded-md px-3 py-2 text-sm bg-white`}
+                className={`flex items-center w-full gap-2 border rounded-md px-3 py-2 text-sm bg-white ${data?.social_accounts_status?.instagram?.connected ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                onClick={!data?.social_accounts_status.instagram?.connected && instagramLinkAccount}
               >
                 <img src="/icons/insta.svg" alt="Instagram" />
 
@@ -167,7 +192,8 @@ export default function DashboardOverview({data}) {
 
               {/* TikTok */}
               <button
-                className={`flex items-center w-full gap-2 border rounded-md px-3 py-2 text-sm bg-white`}
+                className={`flex items-center w-full gap-2 border rounded-md px-3 py-2 text-sm bg-white ${data?.social_accounts_status?.tiktok?.connected ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                onClick={!data?.social_accounts_status.tiktok?.connected && tiktokLinkAccount}
               >
                 <img src="/icons/tiktok.svg" alt="TikTok" />
 
