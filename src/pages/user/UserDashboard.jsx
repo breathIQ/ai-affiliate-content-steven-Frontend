@@ -3,10 +3,15 @@ import Layout from "../../components/Layout/Layout";
 import DashboardOverview from "../../components/DashboardOverview";
 import RecentPostsTable from "../../components/RecentPostsTable";
 import { getUserDashboardData } from "../../services/userDashboard.api";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 function UserDashboard() {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const fetchDashboardData = async () => {
     try {
@@ -21,6 +26,27 @@ function UserDashboard() {
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  useEffect(() => {
+    const linkResponse = searchParams.get("linkResponse");
+
+    if (linkResponse) {
+      try {
+        const parsedResponse = JSON.parse(decodeURIComponent(linkResponse));
+
+        if (parsedResponse?.message) {
+          parsedResponse.status
+            ? toast.success(parsedResponse.message)
+            : toast.error(parsedResponse.message);
+        }
+      } catch (err) {
+        console.error("Invalid linkResponse param", err);
+      }
+
+      // ✅ Remove query params from URL
+      navigate("/u/dashboard", { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   if (loading) {
     return (
