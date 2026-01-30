@@ -91,7 +91,7 @@ export default function Users() {
   }, []);
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto min-h-screen py-8">
+      <div className="max-w-7xl mx-auto min-h-screen pt-8">
         {/* Header */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>

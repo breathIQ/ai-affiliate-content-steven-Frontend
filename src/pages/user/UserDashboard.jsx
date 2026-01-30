@@ -37,7 +37,7 @@ function UserDashboard() {
       <div className="max-w-7xl mx-auto">
         <DashboardOverview data={dashboardData} />
 
-        <div className="pb-10 pt-6">
+        <div className=" pt-6">
           <RecentPostsTable loadPost={fetchDashboardData} posts={dashboardData?.recent_posts} />
         </div>
       </div>

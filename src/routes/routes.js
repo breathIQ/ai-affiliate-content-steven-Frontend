@@ -10,6 +10,8 @@ import ViewPdf from "../pages/ViewPdf"
 import UsersLabs from "../pages/UsersLabs"
 import ResetPassword from "../pages/auth/ResetPassword"
 import NotFound from "../pages/NotFound"
+import Privacy from "../pages/common/Privacy"
+import Terms from "../pages/common/Terms"
 
 
 // const allRoutes = [
@@ -76,6 +78,16 @@ const allRoutes = [
     {
         component:<ResetPassword/> ,
         path:"/reset-password",
+        role: ""
+    },
+    {
+        component:<Terms/> ,
+        path:"/terms",
+        role: "public"
+    },
+    {
+        component:<Privacy/> ,
+        path:"/privacy",
         role: "public"
     },
     {
