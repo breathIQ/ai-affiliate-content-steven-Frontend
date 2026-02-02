@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
   const [platforms, setPlatforms] = useState({
-    instagram: true,
+    instagram: false,
     tiktok: false,
   });
   const [mediaStatus, setMediaStatus] = useState({});
@@ -51,6 +51,10 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
   };
 
   const handleSubmit = () => {
+    if (!platforms.instagram && !platforms.tiktok) {
+      toast.error("Please select at least one platform to publish");
+      return;
+    }
     if (!reviewLink.trim()) {
       setError("Review link is required");
       return;
@@ -60,7 +64,7 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
       setError("Please enter a valid URL (https://example.com)");
       return;
     }
-
+    console.log("Submitting with platforms:", platforms, "and reviewLink:", reviewLink);
     onSubmit({
       platforms,
       reviewLink: reviewLink.trim(),
