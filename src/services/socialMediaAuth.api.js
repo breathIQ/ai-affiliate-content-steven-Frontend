@@ -19,3 +19,8 @@ export const instagramAccountLink = async () => {
   const res = await API.get("/user/instagram/link");
   return res.data;
 }
+
+export const getSocialMediaStatus = async () => {
+  const res = await API.get("/user/social/accounts");
+  return res.data;
+};

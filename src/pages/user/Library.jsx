@@ -46,23 +46,47 @@ export default function DraftPostPage({
   const isEditMode = Boolean(id);
   const navigate = useNavigate();
 
-  const lightboxSlides = viewMedia.map((item) => {
-    if (item.media_type === "video") {
-      return {
-        type: "video",
-        sources: [
-          {
-            src: item.url,
-            type: "video/mp4",
-          },
-        ],
-      };
-    }
+  const lightboxSlides =
+    viewMedia.length > 0
+      ? viewMedia.map((item) => {
+        if (item.media_type === "video") {
+          return {
+            type: "video",
+            sources: [
+              {
+                src: item.url,
+                type: "video/mp4",
+              },
+            ],
+          };
+        }
+        return {
+          src: item.url,
+        };
+      })
+      : mediaItems.map((m) => {
+        const src = m.type === "url" ? m.url : m.preview;
 
-    return {
-      src: item.url,
-    };
-  });
+        const isVideo =
+          m.media_type === "video" ||
+          (m.type === "file" && m.file?.type?.startsWith("video/")) ||
+          /\.(mp4|webm|ogg)(\?|$)/i.test(src || "");
+
+        return isVideo
+          ? {
+            type: "video",
+            sources: [
+              {
+                src,
+                type: "video/mp4",
+              },
+            ],
+          }
+          : {
+            src,
+          };
+      });
+
 
 
   useEffect(() => {
@@ -264,16 +288,40 @@ export default function DraftPostPage({
   };
 
 
+  // const toggleMedia = (index) => {
+  //   if (mediaType === "single") {
+  //     setSelectedMedia([index]); // always single
+  //     return;
+  //   }
+
+  //   setSelectedMedia((prev) =>
+  //     prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+  //   );
+  // };
+
   const toggleMedia = (index) => {
+    // SINGLE MODE → never allow deselect
     if (mediaType === "single") {
-      setSelectedMedia([index]); // always single
+      setSelectedMedia([index]);
       return;
     }
 
-    setSelectedMedia((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
-    );
+    // CAROUSEL MODE
+    setSelectedMedia((prev) => {
+      const isSelected = prev.includes(index);
+
+      // 🚫 Prevent removing the LAST selected media
+      if (isSelected && prev.length === 1) {
+        // toast.error("At least one media is required");
+        return prev;
+      }
+
+      return isSelected
+        ? prev.filter((i) => i !== index)
+        : [...prev, index];
+    });
   };
+
 
   useEffect(() => {
     if (mediaType === "single") {
@@ -521,15 +569,30 @@ export default function DraftPostPage({
                     {isVideo ? (
                       <video
                         src={src}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover cursor-pointer"
                         muted
+                        onClick={() => {
+                          setLightboxIndex(index);
+                          setLightboxOpen(true);
+                        }}
                       />
                     ) : (
-                      <img src={src} className="w-full h-full object-cover" />
+                      <img
+                        src={src}
+                        className="w-full h-full object-cover cursor-pointer"
+                        onClick={() => {
+                          setLightboxIndex(index);
+                          setLightboxOpen(true);
+                        }}
+                      />
                     )}
 
+
                     <button
-                      onClick={() => toggleMedia(index)}
+                      onClick={(e) => {
+                      e.stopPropagation();
+                      toggleMedia(index);
+                    }}
                       className={`absolute top-2 left-2 w-5 h-5 rounded border flex items-center justify-center ${isSelected
                         ? "bg-purple-600 border-purple-600"
                         : "bg-white border-gray-300"

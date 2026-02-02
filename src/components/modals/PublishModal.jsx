@@ -1,16 +1,44 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckmarkIcon } from "react-hot-toast";
+import { getSocialMediaStatus, instagramAccountLink, tiktokAccountLink } from "../../services/socialMediaAuth.api";
+import toast from "react-hot-toast";
 
 export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
   const [platforms, setPlatforms] = useState({
     instagram: true,
     tiktok: false,
   });
+  const [mediaStatus, setMediaStatus] = useState({});
 
   const [reviewLink, setReviewLink] = useState("");
   const [error, setError] = useState("");
 
-  if (!isOpen) return null;
+  const instagramStatus = mediaStatus?.instagram;
+  const tiktokStatus = mediaStatus?.tiktok;
+
+  console.log("mediaStatus:", mediaStatus);
+
+  const instagramLinkAccount = async () => {
+    try {
+      const res = await instagramAccountLink();
+      window.location.href = res.data;
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to link Instagram account"
+      );
+    }
+  };
+
+  const tiktokLinkAccount = async () => {
+    try {
+      const res = await tiktokAccountLink();
+      window.location.href = res.data;
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to link TikTok account"
+      );
+    }
+  };
 
   // Function to validate URL
   const isValidUrl = (url) => {
@@ -71,6 +99,22 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
     return `#${s.replace(/^#/, "")}`;
   };
 
+  const fetchMediaStatus = async () => {
+    try {
+      const res = await getSocialMediaStatus();
+      setMediaStatus(res?.data || {});
+    } catch (err) {
+      console.error("Failed to fetch social media status", err);
+      return {};
+    }
+  };
+
+  useEffect(() => {
+    fetchMediaStatus();
+  }, []);
+
+  if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
       <div className="bg-white w-[600px] rounded-xl shadow-lg max-w-xl h-screen overflow-y-auto">
@@ -120,11 +164,10 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
                 setReviewLink(e.target.value);
                 setError("");
               }}
-              className={`w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
-                error
+              className={`w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 ${error
                   ? "border-red-500 focus:ring-red-500"
                   : "focus:ring-purple-500"
-              }`}
+                }`}
               required
             />
 
@@ -143,6 +186,7 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
                   <input
                     type="checkbox"
                     checked={platforms.instagram}
+                    disabled={!instagramStatus?.connected}
                     onChange={() =>
                       setPlatforms((p) => ({
                         ...p,
@@ -153,18 +197,30 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
                   <span>Instagram</span>
                 </div>
 
-                <div className="flex items-center border px-2 py-1 rounded-md gap-1 text-sm">
-                  <img src="/icons/insta.svg" className="w-4" />
-                  @johndoe
-                  <CheckmarkIcon className="text-green-500" size={14} />
-                </div>
+                {instagramStatus?.connected ? (
+                  <div className="flex items-center border px-2 py-1 rounded-md gap-1 text-sm">
+                    <img src="/icons/insta.svg" className="w-4" />
+                    @{instagramStatus.username}
+                    <CheckmarkIcon className="text-green-500" size={14} />
+                  </div>
+                ) : (
+                  <button
+                    className="text-sm border px-2 py-1 rounded-md flex items-center gap-1 cursor-pointer"
+                    onClick={instagramLinkAccount}
+                  >
+                    <img src="/icons/insta.svg" className="w-4" />
+                    Connect Instagram
+                  </button>
+                )}
               </label>
+
 
               <label className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={platforms.tiktok}
+                    disabled={!tiktokStatus?.connected}
                     onChange={() =>
                       setPlatforms((p) => ({
                         ...p,
@@ -175,11 +231,23 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
                   <span>TikTok</span>
                 </div>
 
-                <button className="text-sm border px-2 py-1 rounded-md flex items-center gap-1">
-                  <img src="/icons/tiktok.svg" className="w-4" />
-                  Connect TikTok
-                </button>
+                {tiktokStatus?.connected ? (
+                  <div className="flex items-center border px-2 py-1 rounded-md gap-1 text-sm">
+                    <img src="/icons/tiktok.svg" className="w-4" />
+                    @{tiktokStatus.username}
+                    <CheckmarkIcon className="text-green-500" size={14} />
+                  </div>
+                ) : (
+                  <button
+                    className="text-sm border px-2 py-1 rounded-md flex items-center gap-1 cursor-pointer"
+                    onClick={tiktokLinkAccount}
+                  >
+                    <img src="/icons/tiktok.svg" className="w-4" />
+                    Connect TikTok
+                  </button>
+                )}
               </label>
+
             </div>
           </div>
         </div>
@@ -196,11 +264,10 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
           <button
             onClick={handleSubmit}
             disabled={!reviewLink.trim() || !isValidUrl(reviewLink.trim())}
-            className={`px-4 py-2 text-sm rounded-md text-white ${
-              reviewLink.trim() && isValidUrl(reviewLink.trim())
+            className={`px-4 py-2 text-sm rounded-md text-white ${reviewLink.trim() && isValidUrl(reviewLink.trim())
                 ? "bg-purple-600 hover:bg-purple-700"
                 : "bg-gray-400 cursor-not-allowed"
-            }`}
+              }`}
           >
             Publish
           </button>
