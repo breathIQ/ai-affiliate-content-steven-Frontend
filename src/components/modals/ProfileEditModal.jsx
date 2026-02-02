@@ -245,10 +245,14 @@ export function ProfileEditModal({ isOpen, onClose }) {
             <p className="text-sm font-medium mb-2">Social Accounts</p>
             <div className="flex gap-3 mb-4">
               <div className={`flex items-center w-full justify-center gap-2 border rounded-md px-3 py-2 text-sm ${social.instagram?.connected ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-              onClick={!social.instagram?.connected && instagramLinkAccount}>
+              onClick={() => {
+                  if (!social.instagram?.connected) {
+                    instagramLinkAccount();
+                  }
+                }}>
                 <img src="/icons/insta.svg" />
                 {social.instagram?.connected ? (
-                  <span>
+                  <span className="flex">
                     {social.instagram.username}
                     <CheckmarkIcon size={14} className="ml-1 text-green-500" />
                   </span>
@@ -258,10 +262,14 @@ export function ProfileEditModal({ isOpen, onClose }) {
               </div>
 
               <div className={`flex items-center w-full justify-center gap-2 border rounded-md px-3 py-2 text-sm ${social.tiktok?.connected ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-              onClick={!social.tiktok?.connected && tiktokLinkAccount}>
+              onClick={() => {
+                if (!social.tiktok?.connected) {
+                  tiktokLinkAccount();
+                }
+              }}>
                 <img src="/icons/tiktok.svg" />
                 {social.tiktok?.connected ? (
-                  <span>
+                  <span className="flex">
                     {social.tiktok.username}
                     <CheckmarkIcon size={14} className="ml-1 text-green-500" />
                   </span>

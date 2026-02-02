@@ -6,10 +6,10 @@ import { FaPlus } from "react-icons/fa";
 import AffiliateClicksChart from "./AffiliateClicksChart";
 import toast, { CheckmarkIcon } from "react-hot-toast";
 
-import {instagramAccountLink} from "../services/socialMediaAuth.api";
-import {tiktokAccountLink} from "../services/socialMediaAuth.api";
+import { instagramAccountLink } from "../services/socialMediaAuth.api";
+import { tiktokAccountLink } from "../services/socialMediaAuth.api";
 
-export default function DashboardOverview({data}) {
+export default function DashboardOverview({ data }) {
   console.log("DashboardOverview data:", data);
   const instagramLinkAccount = async () => {
     try {
@@ -104,7 +104,7 @@ export default function DashboardOverview({data}) {
                 Read CO2 Book
               </h3>
               <p className="text-sm text-emerald-100">
-                Access the full digital <br/>
+                Access the full digital <br />
                 version for reference while creating content.
               </p>
             </div>
@@ -172,18 +172,22 @@ export default function DashboardOverview({data}) {
               {/* Instagram */}
               <button
                 className={`flex items-center w-full gap-2 border rounded-md px-3 py-2 text-sm bg-white ${data?.social_accounts_status?.instagram?.connected ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                onClick={!data?.social_accounts_status.instagram?.connected && instagramLinkAccount}
+                onClick={() => {
+                  if (!data?.social_accounts_status?.instagram?.connected) {
+                    instagramLinkAccount();
+                  }
+                }}
               >
                 <img src="/icons/insta.svg" alt="Instagram" />
 
                 {data?.social_accounts_status?.instagram?.connected ? (
-                <span className="flex items-center gap-1 font-medium">
-                  {data?.social_accounts_status?.instagram?.username}
-                  <CheckmarkIcon size={14} />
-                </span>
-              ) : (
-                <span className="text-gray-600">Connect Instagram</span>
-              )}
+                  <span className="flex items-center gap-1 font-medium">
+                    {data?.social_accounts_status?.instagram?.username}
+                    <CheckmarkIcon size={14} />
+                  </span>
+                ) : (
+                  <span className="text-gray-600">Connect Instagram</span>
+                )}
                 {/* <span className="flex items-center gap-1 text-[#0000008A]">
                   @johndoe
                   <CheckmarkIcon size={14} />
@@ -193,18 +197,22 @@ export default function DashboardOverview({data}) {
               {/* TikTok */}
               <button
                 className={`flex items-center w-full gap-2 border rounded-md px-3 py-2 text-sm bg-white ${data?.social_accounts_status?.tiktok?.connected ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                onClick={!data?.social_accounts_status.tiktok?.connected && tiktokLinkAccount}
+                onClick={() => {
+                  if (!data?.social_accounts_status?.tiktok?.connected) {
+                    tiktokLinkAccount();
+                  }
+                }}
               >
                 <img src="/icons/tiktok.svg" alt="TikTok" />
 
                 {data?.social_accounts_status?.tiktok?.connected ? (
-                <span className="flex items-center gap-1 font-medium">
-                  {data?.social_accounts_status?.tiktok?.username}
-                  <CheckmarkIcon size={14} />
-                </span>
-              ) : (
-                <span className="text-gray-600">Connect TikTok</span>
-              )}
+                  <span className="flex items-center gap-1 font-medium">
+                    {data?.social_accounts_status?.tiktok?.username}
+                    <CheckmarkIcon size={14} />
+                  </span>
+                ) : (
+                  <span className="text-gray-600">Connect TikTok</span>
+                )}
                 {/* <span className="text-[#0000008A]">Connect TikTok</span> */}
               </button>
             </div>
