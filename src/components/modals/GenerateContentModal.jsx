@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { set, useForm } from "react-hook-form";
 import { getChapter } from "../../services/post.api";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaInfoCircle } from "react-icons/fa";
 import { generateAIPost } from "../../services/post.api";
 import { useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -20,23 +20,27 @@ export default function GenerateContentModal({ setGeneratedData }) {
     reset,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      post_type: "carousel",
+    },
+  });
 
   const postType = watch("post_type");
   const slidesCount = watch("slides");
 
-  const slideTexts = watch("slide_texts");
-  const hasText =
-    postType === "single"
-      ? slideTexts?.[0]?.trim()
-      : Array.isArray(slideTexts) && slideTexts.some(t => t?.trim());
+  // const slideTexts = watch("slide_texts");
+  // const hasText =
+  //   postType === "single"
+  //     ? slideTexts?.[0]?.trim()
+  //     : Array.isArray(slideTexts) && slideTexts.some(t => t?.trim());
 
-  const slideInputsCount =
-    postType === "carousel"
-      ? Number(slidesCount || 0)
-      : postType === "single"
-        ? 1
-        : 0;
+  // const slideInputsCount =
+  //   postType === "carousel"
+  //     ? Number(slidesCount || 0)
+  //     : postType === "single"
+  //       ? 1
+  //       : 0;
 
   useEffect(() => {
     if (isGenerate) {
@@ -87,24 +91,30 @@ export default function GenerateContentModal({ setGeneratedData }) {
         model: formData.model,
         prompt: formData.prompt,
         post_type: formData.post_type,
-        slides: postType === "single" ? 1 : formData.slides,
+        slides: postType === "single" ? 1 : Number(formData.slides),
+        design: {
+          image_style: formData.image_style,
+          content_angle: formData.content_angle,
+          human_presence: formData.human_presence,
+          visual_mood: formData.visual_mood,
+        },
       };
 
       // Only add slide_texts if there are non-empty values
-      if (hasText) {
-        payload.slide_texts = slideTexts;
-      }
+      // if (hasText) {
+      //   payload.slide_texts = slideTexts;
+      // }
 
-      // Add design fields ONLY if text exists
-      if (hasText) {
-        payload.design = {
-          overlay_color: formData.overlay_color,
-          text_placement: formData.text_placement,
-          font_family: formData.font_family,
-          font_size: formData.font_size,
-          font_weight: formData.font_weight,
-        };
-      }
+      // // Add design fields ONLY if text exists
+      // if (hasText) {
+      //   payload.design = {
+      //     overlay_color: formData.overlay_color,
+      //     text_placement: formData.text_placement,
+      //     font_family: formData.font_family,
+      //     font_size: formData.font_size,
+      //     font_weight: formData.font_weight,
+      //   };
+      // }
 
       console.log("Generate Payload 👉", payload);
 
@@ -234,9 +244,37 @@ export default function GenerateContentModal({ setGeneratedData }) {
 
                 {/* Custom Prompt */}
                 <div>
-                  <label className="text-sm font-medium mb-1 block">
+                  <label className="text-sm font-medium mb-1 block flex items-center">
                     Custom Prompt
+
+                    <div className="relative group cursor-pointer inline-block ms-2">
+                      <span className="text-gray-400 hover:text-gray-600">
+                        <FaInfoCircle className="text-md" />
+                      </span>
+
+                      {/* Tooltip */}
+                      <div
+                        className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2
+                        hidden group-hover:block
+                        bg-black text-white text-xs px-3 py-2 rounded-md
+                        w-56 text-center z-50"
+                      >
+                        This custom prompt is used only to generate the post’s caption, hashtags, and script. It does not affect image generation.
+
+                        {/* Notch / Arrow */}
+                        <div
+                          className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0"
+                          style={{
+                            borderLeft: "7px solid transparent",
+                            borderRight: "7px solid transparent",
+                            borderTop: "7px solid black",
+                            borderBottom: "0",
+                          }}
+                        />
+                      </div>
+                    </div>
                   </label>
+
                   <textarea
                     {...register("prompt", {
                       required: "Prompt is required",
@@ -289,7 +327,11 @@ export default function GenerateContentModal({ setGeneratedData }) {
                           No. of Carousel Slides
                         </label>
                         <select
-                          {...register("slides")}
+                          {...register("slides", {
+                            required: postType === "carousel"
+                              ? "Slides is required for carousel posts"
+                              : false,
+                          })}
                           className="w-full border rounded-lg px-3 py-2 text-sm"
                         >
                           <option value="">Select Slides</option>
@@ -301,10 +343,15 @@ export default function GenerateContentModal({ setGeneratedData }) {
                         </select>
                       </>
                     )}
+                    {errors.slides && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.slides.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {slideInputsCount > 0 &&
+                {/* {slideInputsCount > 0 &&
                   [...Array(slideInputsCount)].map((_, index) => (
                     <div key={index}>
                       <label className="text-sm font-medium mb-1 block">
@@ -323,9 +370,9 @@ export default function GenerateContentModal({ setGeneratedData }) {
                         }
                       />
                     </div>
-                  ))}
+                  ))} */}
 
-                <div className="grid grid-cols-2 gap-4">
+                {/* <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium mb-1 block">
                       Image Overlay Color
@@ -372,9 +419,9 @@ export default function GenerateContentModal({ setGeneratedData }) {
                       </p>
                     )}
                   </div>
-                </div>
+                </div> */}
 
-                <div className="grid grid-cols-3 gap-4">
+                {/* <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="text-sm font-medium mb-1 block">Font Family</label>
                     <select
@@ -439,6 +486,88 @@ export default function GenerateContentModal({ setGeneratedData }) {
                       </p>
                     )}
                   </div>
+                </div> */}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Image Style</label>
+                    <select
+                      {...register("image_style", { required: "Image style is required" })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="">Select Style</option>
+                      <option value="Minimalist / Modern">Minimalist / Modern</option>
+                      <option value="Clinical / Physiological">Clinical / Physiological</option>
+                      <option value="Scientific / Conceptual">Scientific / Conceptual</option>
+                      <option value="Human / Real People">Human / Real People</option>
+                      <option value="Lifestyle / Wellness">Lifestyle / Wellness</option>
+                      <option value="Nature-Inspired">Nature-Inspired</option>
+                      <option value="Hyper-Realistic">Hyper-Realistic</option>
+                      <option value="Illustrated / Graphic">Illustrated / Graphic</option>
+                      <option value="Text-Forward / Typography-Led">
+                        Text-Forward / Typography-Led
+                      </option>
+                    </select>
+
+                    {errors.image_style && (
+                      <p className="text-xs text-red-500 mt-1">{errors.image_style.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Content Angle</label>
+                    <select
+                      {...register("content_angle", { required: "Content angle is required" })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="">Select Angle</option>
+                      <option value="Beginner Friendly">Beginner Friendly</option>
+                      <option value="Myth-Busting">Myth-Busting</option>
+                      <option value="Contrarian Insight">Contrarian Insight</option>
+                      <option value="Educational / Explainer">Educational / Explainer</option>
+                      <option value="Clinical Perspective">Clinical Perspective</option>
+                      <option value="Story-Driven">Story-Driven</option>
+                      <option value="Problem → Reframe">Problem → Reframe</option>
+                    </select>
+                    {errors.content_angle && (
+                      <p className="text-xs text-red-500 mt-1">{errors.content_angle.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Human Presence</label>
+                    <select
+                      {...register("human_presence", { required: "Human presence is required" })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="">Select Option</option>
+                      <option value="No People">No People</option>
+                      <option value="Single Person">Single Person</option>
+                      <option value="Everyday People">Everyday People</option>
+                      <option value="Athletic / Active">Athletic / Active</option>
+                      <option value="Clinical / Professional">Clinical / Professional</option>
+                    </select>
+                    {errors.human_presence && (
+                      <p className="text-xs text-red-500 mt-1">{errors.human_presence.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Visual Mood</label>
+                    <select
+                      {...register("visual_mood", { required: "Visual mood is required" })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="">Select Mood</option>
+                      <option value="Calm & Grounded">Calm & Grounded</option>
+                      <option value="Curious & Thoughtful">Curious & Thoughtful</option>
+                      <option value="Serious & Clinical">Serious & Clinical</option>
+                      <option value="Empowering">Empowering</option>
+                      <option value="Quietly Provocative">Quietly Provocative</option>
+                      <option value="Warm & Reassuring">Warm & Reassuring</option>
+                    </select>
+                    {errors.visual_mood && (
+                      <p className="text-xs text-red-500 mt-1">{errors.visual_mood.message}</p>
+                    )}
+                  </div>
+
                 </div>
 
               </div>

@@ -73,7 +73,7 @@ export default function UsersLabs() {
             loadPost={loadPost}
             pagination={
               <>
-                <div className="flex border-top flex-col md:flex-row md:items-center md:justify-between p-4 text-sm text-gray-500 gap-3">
+                <div className="flex border-top md:flex-row items-center justify-between p-4 text-sm text-gray-500 gap-3">
                   <div>
                     Rows per page:
                     <select
