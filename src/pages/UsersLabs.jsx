@@ -60,7 +60,7 @@ export default function UsersLabs() {
               {state?.name ||profile?.name|| "USER "}'s Posts
             </h1>
             <p className="text-sm text-gray-500">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              View and manage all your posts in one place.
             </p>
           </div>
           {state?.id ? "" : <GenerateContentModal setGeneratedData={setGeneratedData} />}

@@ -620,7 +620,7 @@ export default function DraftPostPage({
                 <input
                   type="file"
                   multiple={mediaType === "carousel"}
-                  accept="image/*,video/*"
+                  accept="image/*"
                   className="hidden"
                   onChange={uploadFiles}
                 />
@@ -714,7 +714,8 @@ export default function DraftPostPage({
           <div>
             <div className="flex justify-between mb-1">
               <label className="text-sm font-medium">
-                Script (For Video Post):
+                Script:
+                {/* (For Video Post): */}
               </label>
               <span className="text-xs text-gray-400">{scriptWords} words</span>
             </div>
@@ -725,9 +726,9 @@ export default function DraftPostPage({
               rows={8}
               className="w-full border rounded-lg p-3 text-sm focus:ring-1 focus:ring-purple-500"
             />
-            <p className="text-xs text-gray-400 text-right mt-1">
+            {/* <p className="text-xs text-gray-400 text-right mt-1">
               Text inside [ ] brackets will be shown as On-Screen Text.
-            </p>
+            </p> */}
           </div>
         </div>
 

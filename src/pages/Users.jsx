@@ -97,7 +97,7 @@ export default function Users() {
           <div>
             <h1 className="text-xl font-semibold">All Users</h1>
             <p className="text-sm text-gray-500">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              View and manage all your users in one place.
             </p>
           </div>
         </div>

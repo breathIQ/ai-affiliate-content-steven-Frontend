@@ -22,7 +22,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
-      post_type: "carousel",
+      post_type: "single",
     },
   });
 
@@ -199,7 +199,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
                 {/* Chapter */}
                 <div>
                   <label className="text-sm font-medium mb-1 block">
-                    Select Chapter
+                    Select Chapter <span className="text-red-500">*</span>
                   </label>
                   <select
                     {...register("chapter_id", {
@@ -224,7 +224,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
                 {/* AI Model */}
                 <div>
                   <label className="text-sm font-medium mb-1 block">
-                    AI Model
+                    AI Model <span className="text-red-500">*</span>
                   </label>
                   <select
                     {...register("model", {
@@ -245,7 +245,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
                 {/* Custom Prompt */}
                 <div>
                   <label className="text-sm font-medium mb-1 block flex items-center">
-                    Custom Prompt
+                    Custom Prompt <span className="text-red-500 ms-1">*</span>
 
                     <div className="relative group cursor-pointer inline-block ms-2">
                       <span className="text-gray-400 hover:text-gray-600">
@@ -297,7 +297,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
                 <div className="grid grid-cols-2 gap-4">
                   {/* Post Type */}
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Post Type</label>
+                    <label className="text-sm font-medium mb-2 block">Post Type <span className="text-red-500">*</span></label>
                     <div className="flex gap-6">
                       <label className="flex items-center gap-2 text-sm">
                         <input
@@ -324,7 +324,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
                     {postType === "carousel" && (
                       <>
                         <label className="text-sm font-medium mb-1 block">
-                          No. of Carousel Slides
+                          No. of Carousel Slides {postType === "carousel" ? <span className="text-red-500">*</span> : ''}
                         </label>
                         <select
                           {...register("slides", {
@@ -490,7 +490,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium mb-1 block">Image Style</label>
+                    <label className="text-sm font-medium mb-1 block">Image Style <span className="text-red-500">*</span></label>
                     <select
                       {...register("image_style", { required: "Image style is required" })}
                       className="w-full border rounded-lg px-3 py-2 text-sm"
@@ -514,7 +514,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
                     )}
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-1 block">Content Angle</label>
+                    <label className="text-sm font-medium mb-1 block">Content Angle <span className="text-red-500">*</span></label>
                     <select
                       {...register("content_angle", { required: "Content angle is required" })}
                       className="w-full border rounded-lg px-3 py-2 text-sm"
@@ -533,7 +533,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
                     )}
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-1 block">Human Presence</label>
+                    <label className="text-sm font-medium mb-1 block">Human Presence <span className="text-red-500">*</span></label>
                     <select
                       {...register("human_presence", { required: "Human presence is required" })}
                       className="w-full border rounded-lg px-3 py-2 text-sm"
@@ -550,7 +550,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
                     )}
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-1 block">Visual Mood</label>
+                    <label className="text-sm font-medium mb-1 block">Visual Mood <span className="text-red-500">*</span></label>
                     <select
                       {...register("visual_mood", { required: "Visual mood is required" })}
                       className="w-full border rounded-lg px-3 py-2 text-sm"
