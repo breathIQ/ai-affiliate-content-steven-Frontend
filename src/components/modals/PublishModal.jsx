@@ -96,6 +96,32 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
     return "";
   };
 
+  const isVideoMedia = (item) => {
+    if (!item) return false;
+
+    // new unified structure
+    if (typeof item === "object") {
+      if (item.media_type === "video") return true;
+
+      if (item.file?.type?.startsWith("video/")) return true;
+
+      if (item.url && /\.(mp4|webm|ogg)(\?|$)/i.test(item.url)) return true;
+    }
+
+    // backward compatibility
+    if (item instanceof File) {
+      return item.type.startsWith("video/");
+    }
+
+    // plain URL string
+    if (typeof item === "string") {
+      return /\.(mp4|webm|ogg)(\?|$)/i.test(item);
+    }
+
+    return false;
+  };
+
+
   const getHashtagText = (t) => {
     if (!t) return "";
     // support already formatted "#tag" or "tag"
@@ -135,13 +161,35 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
           {/* Media Preview */}
           <div className="flex justify-center">
             <div className="flex flex-wrap gap-3">
-              {preview.media?.map((item, i) => (
-                <img
-                  key={i}
-                  src={getMediaSrc(item)}
-                  className="w-[120px] h-[150px] rounded-lg object-cover"
-                />
-              ))}
+              {preview.media?.map((item, i) => {
+                const src = getMediaSrc(item);
+                const isVideo = isVideoMedia(item);
+
+                return (
+                  <div
+                    key={i}
+                    className="w-[120px] h-[150px] rounded-lg overflow-hidden bg-gray-200"
+                  >
+                    {isVideo ? (
+                      <video
+                        src={src}
+                        className="w-full h-full object-contain"
+                        autoPlay
+                        // controls
+                        muted
+                        playsInline
+                      />
+                    ) : (
+                      <img
+                        src={src}
+                        className="w-full h-full object-cover"
+                        alt="preview"
+                      />
+                    )}
+                  </div>
+                );
+              })}
+
             </div>
           </div>
 
@@ -169,8 +217,8 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
                 setError("");
               }}
               className={`w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 ${error
-                  ? "border-red-500 focus:ring-red-500"
-                  : "focus:ring-purple-500"
+                ? "border-red-500 focus:ring-red-500"
+                : "focus:ring-purple-500"
                 }`}
               required
             />
@@ -269,8 +317,8 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
             onClick={handleSubmit}
             disabled={!reviewLink.trim() || !isValidUrl(reviewLink.trim())}
             className={`px-4 py-2 text-sm rounded-md text-white ${reviewLink.trim() && isValidUrl(reviewLink.trim())
-                ? "bg-purple-600 hover:bg-purple-700"
-                : "bg-gray-400 cursor-not-allowed"
+              ? "bg-purple-600 hover:bg-purple-700"
+              : "bg-gray-400 cursor-not-allowed"
               }`}
           >
             Publish
