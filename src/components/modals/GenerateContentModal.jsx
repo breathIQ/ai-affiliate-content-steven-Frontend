@@ -210,7 +210,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
                     <option value="">Select Chapter</option>
                     {chapters.map((item) => (
                       <option key={item.id} value={item.id}>
-                        {item.chapter} :: {item.chapter_title}
+                        {item.chapter}: {item.chapter_title}
                       </option>
                     ))}
                   </select>
@@ -538,7 +538,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
                       {...register("human_presence", { required: "Human presence is required" })}
                       className="w-full border rounded-lg px-3 py-2 text-sm"
                     >
-                      <option value="">Select Option</option>
+                      <option value="">Select Presence</option>
                       <option value="No People">No People</option>
                       <option value="Single Person">Single Person</option>
                       <option value="Everyday People">Everyday People</option>

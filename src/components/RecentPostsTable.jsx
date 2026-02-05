@@ -211,7 +211,7 @@ export default function RecentPostsTable({
                         <div
                           id="btns"
                           onClick={(e) => e.stopPropagation()}
-                          className="absolute left-[-60px] mt-2 w-36 bg-white border rounded-lg shadow-lg z-50"
+                          className="absolute right-[0px] mt-[-5px] w-36 bg-white border rounded-lg shadow-lg z-50"
                         >
                           <button
                             className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50"
