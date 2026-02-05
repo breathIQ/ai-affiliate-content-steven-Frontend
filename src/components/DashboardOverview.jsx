@@ -98,12 +98,12 @@ export default function DashboardOverview({ data }) {
           </div>
 
           <div role="button" onClick={() => window.open(data?.book_url, "_blank", "noopener,noreferrer")} className="col-span-2 bg-emerald-500 rounded-2xl p-6 text-white flex items-center justify-between relative">
-            <div>
+            <div className="w-[55%]">
               <h3 className="text-lg font-semibold mb-1">
                 <img src="/icons/ic-book-dashboard.svg" alt="book icon" className="inline-block mr-2" />
                 Read CO2 Book
               </h3>
-              <p className="text-sm text-emerald-100">
+              <p className="text-sm text-emerald-100 w-[90%]">
                 Access the full digital <br />
                 version for reference while creating content.
               </p>

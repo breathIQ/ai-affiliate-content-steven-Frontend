@@ -36,7 +36,8 @@ export default function RecentPostsTable({
         return;
       }
 
-      toast.success("Post deleted successfully");
+      toast.success(res?.message);
+      setOpenMadal(false);
       setOpen({});
       loadPost();
     } catch (err) {

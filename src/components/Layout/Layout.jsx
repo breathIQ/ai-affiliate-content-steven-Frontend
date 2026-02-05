@@ -10,7 +10,7 @@ export default function Layout({ children }) {
         <div>
             <Header/>
             <TopNavTabs/>
-            {children}
+            <div className="px-[10px]">{children}</div>
             <Footer/>
         </div>
           

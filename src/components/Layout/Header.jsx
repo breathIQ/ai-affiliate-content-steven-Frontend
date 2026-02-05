@@ -3,6 +3,7 @@ import InviteModal from "../modals/InviteModal";
 import { ProfileEditModal } from "../modals/ProfileEditModal";
 import { ChangePasswordModal } from "../modals/ChangePasswordModal";
 import { useLoader } from "../../context/LoaderContext";
+import { FaPlus } from "react-icons/fa";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
@@ -41,9 +42,9 @@ const Header = () => {
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 ms-2">
           {/* Profile */}
-          <div ref={profileRef} className="relative">
+          <div ref={profileRef} className="relative w-[36px] h-[36px]">
             <img
               src={profile?.avatar || "/images/defaultImage.png"}
               alt="profile"
@@ -114,10 +115,10 @@ const Header = () => {
           {/* Invite Button */}
           <button
             onClick={() => setOpen(true)}
-            className="hidden sm:flex items-center gap-1 bg-purple-600 hover:bg-purple-700 text-white px-[10px] py-[8px]
+            className="flex items-center gap-1 bg-purple-600 hover:bg-purple-700 text-white px-[10px] py-[8px]
              rounded-md text-sm font-medium transition"
           >
-            <img src="/icons/ic-add.svg" alt="profile" className="text-white" />{" "}
+            <FaPlus size={12} />
             Invite
           </button>
         </div>
