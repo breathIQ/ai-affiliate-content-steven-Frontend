@@ -234,6 +234,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
                   >
                     <option value="gpt-4-turbo">ChatGPT</option>
                     <option value="claude-3-haiku-20240307">Claude</option>
+                    <option value="gemini">Gemini</option>
                   </select>
                   {errors.model && (
                     <p className="text-xs text-red-500 mt-1">
