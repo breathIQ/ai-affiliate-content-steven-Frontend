@@ -11,6 +11,10 @@ export default function SignUpWithOTP() {
   const [isLoading, setISloading] = useState(false); // 1 = signup, 2 = otp
   const [showPassword, setShowPassword] = useState(false);
 const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const [errors, setErrors] = useState({});
+const validateEmail = (email) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
 
   const [form, setForm] = useState({
     name: "",
@@ -22,6 +26,15 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    if (e.target.name === "email") {
+    if (!e.target.value) {
+      setErrors((prev) => ({ ...prev, email: "Email is required" }));
+    } else if (!validateEmail(e.target.value)) {
+      setErrors((prev) => ({ ...prev, email: "Enter a valid email address" }));
+    } else {
+      setErrors((prev) => ({ ...prev, email: "" }));
+    }
+  }
   };
 
   const handleSignup = async (e) => {
@@ -165,6 +178,9 @@ const validatePassword = (value) => {
                     className="w-full border rounded-lg px-3 py-2 mt-1"
                     required
                   />
+                  {errors.email && (
+    <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+  )}
                 </div>
 
               <div>
