@@ -89,6 +89,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
       const payload = {
         chapter: formData.chapter_id,
         model: formData.model,
+        text_format: formData.text_format,
         prompt: formData.prompt,
         post_type: formData.post_type,
         slides: postType === "single" ? 1 : Number(formData.slides),
@@ -239,6 +240,30 @@ export default function GenerateContentModal({ setGeneratedData }) {
                   {errors.model && (
                     <p className="text-xs text-red-500 mt-1">
                       {errors.model.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Text Format */}
+                <div>
+                  <label className="text-sm font-medium mb-1 block">
+                    Text Format <span className="text-red-500">*</span>
+                  </label>
+
+                  <select
+                    {...register("text_format", {
+                      required: "Text format is required",
+                    })}
+                    className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="">Select Text Format</option>
+                    <option value="paragraph">Paragraph</option>
+                    <option value="bullet_points">Bullet Points</option>
+                  </select>
+
+                  {errors.text_format && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.text_format.message}
                     </p>
                   )}
                 </div>
