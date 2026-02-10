@@ -8,6 +8,7 @@ const statusStyles = {
   Published: "bg-green-100 text-green-700",
   Failed: "bg-red-100 text-red-700",
   Pending: "bg-yellow-100 text-yellow-700",
+  Processing: "bg-yellow-100 text-yellow-700",
 };
 
 export default function RecentPostsTable({
@@ -174,20 +175,24 @@ export default function RecentPostsTable({
                   </td>
 
                   <td className="p-3 text-lg">
-                    {item.ai_generated ? (
-                      <img src="/icons/ic-chatgpt.svg" />
-                    ) : (
+                    {item.ai_model === "Gemini" ? (
+                      <img src="/icons/ic-gemini.svg" />
+                    ) : item.ai_model === "Claude" ? (
                       <img src="/icons/ic-claude.svg" />
+                    ) : (
+                      <img src="/icons/ic-chatgpt.svg" />
                     )}
                   </td>
 
                   <td className="p-3">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        statusStyles[item.status]
+                        statusStyles[
+                          item.status?.replace(/^./, c => c.toUpperCase())
+                        ]
                       }`}
                     >
-                      {item.status}
+                      {item.status?.replace(/^./, c => c.toUpperCase())}
                     </span>
                   </td>
 

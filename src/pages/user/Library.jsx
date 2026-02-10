@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { getSinglePost } from "../../services/post.api";
 import Lightbox from "yet-another-react-lightbox";
 import Video from "yet-another-react-lightbox/plugins/video";
+import Swal from "sweetalert2";
 
 import "yet-another-react-lightbox/styles.css";
 
@@ -223,9 +224,29 @@ export default function DraftPostPage({
   const scriptWords = script.trim().split(/\s+/).filter(Boolean).length;
 
   // ✅ Upload and store as {type:file} in mediaItems, also keep files state updated
-  const uploadFiles = (e) => {
+  const uploadFiles = async (e) => {
     const incoming = Array.from(e.target.files || []).filter(Boolean);
     if (!incoming.length) return;
+
+    // ⚠️ ALERT before replacing existing media in SINGLE mode
+    if (mediaType === "single" && mediaItems.length > 0) {
+      const result = await Swal.fire({
+        title: "Replace existing media?",
+        text: "Uploading a new image will replace the current media.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, replace it",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#7C3AED", // purple
+        cancelButtonColor: "#9CA3AF",
+        reverseButtons: true,
+      });
+
+      if (!result.isConfirmed) {
+        e.target.value = "";
+        return;
+      }
+    }
 
     // IMPORTANT: allow selecting same file again later
     e.target.value = "";
@@ -590,9 +611,9 @@ export default function DraftPostPage({
 
                     <button
                       onClick={(e) => {
-                      e.stopPropagation();
-                      toggleMedia(index);
-                    }}
+                        e.stopPropagation();
+                        toggleMedia(index);
+                      }}
                       className={`absolute top-2 left-2 w-5 h-5 rounded border flex items-center justify-center ${isSelected
                         ? "bg-purple-600 border-purple-600"
                         : "bg-white border-gray-300"

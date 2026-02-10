@@ -523,6 +523,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
                     >
                       <option value="">Select Style</option>
                       <option value="Minimalist / Modern">Minimalist / Modern</option>
+                      <option value="Ancient History">Ancient History</option>
                       <option value="Clinical / Physiological">Clinical / Physiological</option>
                       <option value="Scientific / Conceptual">Scientific / Conceptual</option>
                       <option value="Human / Real People">Human / Real People</option>
