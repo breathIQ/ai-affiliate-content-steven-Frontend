@@ -15,7 +15,7 @@ export default function ChapterBubbleChart({ useddetails }) {
   const [filter, setFilter] = useState(""); // Default filter
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(true);
-  console.log("useddetails",filter, useddetails?.most_used_chapters);
+  // console.log("useddetails",filter, useddetails?.most_used_chapters);
   const isFirstRender = useRef(true);
 
   useEffect(() => {
@@ -74,65 +74,132 @@ export default function ChapterBubbleChart({ useddetails }) {
     "#EAB308",
   ];
 
-  const data = {
-    datasets: most_used_chapters.map((item, index) => ({
-      label: `${item.label || `Ch - ${item.id}`}`,
+  const normalizeBubbleData = (chapters = []) => {
+  return chapters.map((item, index) => {
+    const point = item.data?.[0];
+
+    // convert date → day number
+    const day = point?.x
+      ? new Date(point.x).getDate()
+      : index + 1;
+
+    return {
+      label: item.label || `Ch-${index + 1}`,
       data: [
         {
-          // X is decided by index (multiplied by a factor to spread them)
-          x: index + 1,
-          // Y is decided strictly by the usage 'total'
-          y: item.data?.posts_count,
-          // Radius is decided by usage (scaled for visibility)
-          r: item.data?.posts_count / 15 + 10,
+          x: day,
+          y: point?.y ?? 0,
+          r: point?.r ?? 8,
         },
       ],
       backgroundColor: chartColors[index % chartColors.length],
       hoverBackgroundColor: chartColors[index % chartColors.length],
-    })),
-  };
+    };
+  });
+};
+
+const data = {
+  datasets: normalizeBubbleData(most_used_chapters),
+};
+
+
+  // const data = {
+  //   datasets: most_used_chapters.map((item, index) => ({
+  //     label: `${item.label || `Ch - ${item.id}`}`,
+  //     data: [
+  //       {
+  //         // X is decided by index (multiplied by a factor to spread them)
+  //         x: index + 1,
+  //         // Y is decided strictly by the usage 'total'
+  //         y: item.data?.posts_count,
+  //         // Radius is decided by usage (scaled for visibility)
+  //         r: item.data?.posts_count / 15 + 10,
+  //       },
+  //     ],
+  //     backgroundColor: chartColors[index % chartColors.length],
+  //     hoverBackgroundColor: chartColors[index % chartColors.length],
+  //   })),
+  // };
+
+  // const options = {
+  //   responsive: true,
+  //   maintainAspectRatio: false,
+  //   scales: {
+  //     x: {
+  //       grid: { display: false },
+  //       ticks: {
+  //         display: true,
+  //         color: "#9CA3AF",
+  //         // This shows the X-axis numbers similar to your screenshot
+  //         callback: (value) => (value > 0 ? value : ""),
+  //       },
+  //       min: 0,
+  //       max: filter == "week" ? 7 : 31,
+  //     },
+  //     y: {
+  //       beginAtZero: true,
+  //       grid: {
+  //         display: true,
+  //         color: "#F3F4F6",
+  //         borderDash: [5, 5], // Dotted lines from your image
+  //         drawBorder: false,
+  //       },
+  //       ticks: { color: "#9CA3AF" },
+  //       min: 0,
+  //       max: 700,
+  //     },
+  //   },
+  //   plugins: {
+  //     legend: { display: false }, // Custom legend handled in JSX
+  //     tooltip: {
+  //       callbacks: {
+  //         label: (context) => `Usage: ${context.raw.y}`,
+  //       },
+  //     },
+  //   },
+  // };
 
   const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        grid: { display: false },
-        ticks: {
-          display: true,
-          color: "#9CA3AF",
-          // This shows the X-axis numbers similar to your screenshot
-          callback: (value) => (value > 0 ? value : ""),
-        },
-        min: 0,
-        max: filter == "week" ? 7 : 31,
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    x: {
+      grid: { display: false },
+      ticks: {
+        color: "#9CA3AF",
       },
-      y: {
-        beginAtZero: true,
-        grid: {
-          display: true,
-          color: "#F3F4F6",
-          borderDash: [5, 5], // Dotted lines from your image
-          drawBorder: false,
-        },
-        ticks: { color: "#9CA3AF" },
-        min: 0,
-        max: 700,
+      min: 0,
+      max: filter === "week" ? 7 : 31,
+    },
+    y: {
+      beginAtZero: true,
+      grid: {
+        color: "#F3F4F6",
+        borderDash: [5, 5],
+        drawBorder: false,
+      },
+      ticks: { color: "#9CA3AF" },
+    },
+  },
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: {
+        label: (ctx) =>
+          `${ctx.dataset.label} → Usage: ${ctx.raw.y}`,
       },
     },
-    plugins: {
-      legend: { display: false }, // Custom legend handled in JSX
-      tooltip: {
-        callbacks: {
-          label: (context) => `Usage: ${context.raw.y}`,
-        },
-      },
-    },
-  };
-  const legends = most_used_chapters?.slice(0, 12).map((item, index) => ({
-    label: item?.label || `Ch - ${item.id}`,
-    color: chartColors[index],
-  }));
+  },
+};
+
+  // const legends = most_used_chapters?.slice(0, 12).map((item, index) => ({
+  //   label: item?.label || `Ch - ${item.id}`,
+  //   color: chartColors[index],
+  // }));
+const legends = most_used_chapters.map((item, index) => ({
+  label: item.label || `Ch-${index + 1}`,
+  color: chartColors[index % chartColors.length],
+}));
 
   return (
     <div className="bg-white rounded-xl shadow p-5 w-full h">
