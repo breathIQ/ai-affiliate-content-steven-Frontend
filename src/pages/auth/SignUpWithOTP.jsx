@@ -4,10 +4,14 @@ import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { apibase } from "../../services/contants";
 import { instagramSignin, tiktokSignin } from "../../services/socialMediaAuth.api";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function SignUpWithOTP() {
   const [step, setStep] = useState(1); // 1 = signup, 2 = otp
   const [isLoading, setISloading] = useState(false); // 1 = signup, 2 = otp
+  const [showPassword, setShowPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -163,31 +167,54 @@ const validatePassword = (value) => {
                   />
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium">Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={form.password}
-                    onChange={handleChange}
-                    className="w-full border rounded-lg px-3 py-2 mt-1"
-                    required
-                  />
-                </div>
+              <div>
+  <label className="text-sm font-medium">Password</label>
 
-                <div>
-                  <label className="text-sm font-medium">
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    name="password_confirmation"
-                    value={form.password_confirmation}
-                    onChange={handleChange}
-                    className="w-full border rounded-lg px-3 py-2 mt-1"
-                    required
-                  />
-                </div>
+  <div className="relative mt-1">
+    <input
+      type={showPassword ? "text" : "password"}
+      name="password"
+      value={form.password}
+      onChange={handleChange}
+      className="w-full border rounded-lg px-3 pr-10 py-2"
+      required
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
+    >
+      {showPassword ? <FaEye /> : <FaEyeSlash />}
+    </button>
+  </div>
+</div>
+
+<div>
+  <label className="text-sm font-medium">Confirm Password</label>
+
+  <div className="relative mt-1">
+    <input
+      type={showConfirmPassword ? "text" : "password"}
+      name="password_confirmation"
+      value={form.password_confirmation}
+      onChange={handleChange}
+      className="w-full border rounded-lg px-3 pr-10 py-2"
+      required
+    />
+
+    <button
+      type="button"
+      onClick={() =>
+        setShowConfirmPassword(!showConfirmPassword)
+      }
+      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
+    >
+      {showConfirmPassword ? <FaEye /> : <FaEyeSlash />}
+    </button>
+  </div>
+</div>
+
 
                 <button className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-lg py-2">
                   {isLoading ? "Loading..." : "Sign Up"}
