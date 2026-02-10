@@ -75,6 +75,18 @@ if (!passwordRegex.test(form.password)) {
     newOtp[index] = value;
     setOtp(newOtp);
   };
+  const [error, setError] = useState("");
+
+const validatePassword = (value) => {
+  if (!value) return "Password is required";
+  if (value.length < 8) return "Minimum 8 characters required";
+  if (!/[A-Z]/.test(value)) return "Add uppercase letter";
+  if (!/[a-z]/.test(value)) return "Add lowercase letter";
+  if (!/\d/.test(value)) return "Add a number";
+  if (!/[!@#$%^&*]/.test(value)) return "Add special character";
+
+  return "";
+};
 
   const verifyOtp = async () => {
     try {
@@ -131,6 +143,7 @@ if (!passwordRegex.test(form.password)) {
                   <label className="text-sm font-medium">Name</label>
                   <input
                     name="name"
+                    // max={}
                     value={form.name}
                     onChange={handleChange}
                     className="w-full border rounded-lg px-3 py-2 mt-1"
