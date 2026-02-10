@@ -4,10 +4,34 @@ import ClicksConversion from "./ClicksConversion";
 import { Link, NavLink } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
 import AffiliateClicksChart from "./AffiliateClicksChart";
-import { CheckmarkIcon } from "react-hot-toast";
+import toast, { CheckmarkIcon } from "react-hot-toast";
 
-export default function DashboardOverview({data}) {
+import { instagramAccountLink } from "../services/socialMediaAuth.api";
+import { tiktokAccountLink } from "../services/socialMediaAuth.api";
+
+export default function DashboardOverview({ data }) {
   console.log("DashboardOverview data:", data);
+  const instagramLinkAccount = async () => {
+    try {
+      const res = await instagramAccountLink();
+      window.location.href = res.data;
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to link Instagram account"
+      );
+    }
+  };
+
+  const tiktokLinkAccount = async () => {
+    try {
+      const res = await tiktokAccountLink();
+      window.location.href = res.data;
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to link TikTok account"
+      );
+    }
+  };
   return (
     <div className="pt-8">
       <div className=" grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -74,13 +98,13 @@ export default function DashboardOverview({data}) {
           </div>
 
           <div role="button" onClick={() => window.open(data?.book_url, "_blank", "noopener,noreferrer")} className="col-span-2 bg-emerald-500 rounded-2xl p-6 text-white flex items-center justify-between relative">
-            <div>
+            <div className="w-[55%]">
               <h3 className="text-lg font-semibold mb-1">
                 <img src="/icons/ic-book-dashboard.svg" alt="book icon" className="inline-block mr-2" />
                 Read CO2 Book
               </h3>
-              <p className="text-sm text-emerald-100">
-                Access the full digital <br/>
+              <p className="text-sm text-emerald-100 w-[90%]">
+                Access the full digital <br />
                 version for reference while creating content.
               </p>
             </div>
@@ -147,39 +171,49 @@ export default function DashboardOverview({data}) {
             <div className="flex gap-3">
               {/* Instagram */}
               <button
-                className={`flex items-center w-full gap-2 border rounded-md px-3 py-2 text-sm bg-white`}
+                className={`flex items-center w-full gap-2 border rounded-md px-3 py-2 text-sm bg-white ${data?.social_accounts_status?.instagram?.connected ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                onClick={() => {
+                  if (!data?.social_accounts_status?.instagram?.connected) {
+                    instagramLinkAccount();
+                  }
+                }}
               >
                 <img src="/icons/insta.svg" alt="Instagram" />
 
-                {/* {social?.instagram?.connected ? (
-                <span className="flex items-center gap-1 font-medium">
-                  {social.instagram.username}
-                  <CheckmarkIcon size={14} />
-                </span>
-              ) : (
-                <span className="text-gray-600">Connect Instagram</span>
-              )} */}
-                <span className="flex items-center gap-1 text-[#0000008A]">
+                {data?.social_accounts_status?.instagram?.connected ? (
+                  <span className="flex items-center gap-1 font-medium">
+                    {data?.social_accounts_status?.instagram?.username}
+                    <CheckmarkIcon size={14} />
+                  </span>
+                ) : (
+                  <span className="text-gray-600">Connect Instagram</span>
+                )}
+                {/* <span className="flex items-center gap-1 text-[#0000008A]">
                   @johndoe
                   <CheckmarkIcon size={14} />
-                </span>
+                </span> */}
               </button>
 
               {/* TikTok */}
               <button
-                className={`flex items-center w-full gap-2 border rounded-md px-3 py-2 text-sm bg-white`}
+                className={`flex items-center w-full gap-2 border rounded-md px-3 py-2 text-sm bg-white ${data?.social_accounts_status?.tiktok?.connected ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                onClick={() => {
+                  if (!data?.social_accounts_status?.tiktok?.connected) {
+                    tiktokLinkAccount();
+                  }
+                }}
               >
                 <img src="/icons/tiktok.svg" alt="TikTok" />
 
-                {/* {social?.tiktok?.connected ? (
-                <span className="flex items-center gap-1 font-medium">
-                  {social.tiktok.username}
-                  <CheckmarkIcon size={14} />
-                </span>
-              ) : (
-                <span className="text-gray-600">Connect TikTok</span>
-              )} */}
-                <span className="text-[#0000008A]">Connect TikTok</span>
+                {data?.social_accounts_status?.tiktok?.connected ? (
+                  <span className="flex items-center gap-1 font-medium">
+                    {data?.social_accounts_status?.tiktok?.username}
+                    <CheckmarkIcon size={14} />
+                  </span>
+                ) : (
+                  <span className="text-gray-600">Connect TikTok</span>
+                )}
+                {/* <span className="text-[#0000008A]">Connect TikTok</span> */}
               </button>
             </div>
           </div>

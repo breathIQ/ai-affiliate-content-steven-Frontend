@@ -6,6 +6,11 @@ import { set, useForm } from "react-hook-form";
 import { createPost } from "../../services/post.api";
 import toast from "react-hot-toast";
 import { getSinglePost } from "../../services/post.api";
+import Lightbox from "yet-another-react-lightbox";
+import Video from "yet-another-react-lightbox/plugins/video";
+import Swal from "sweetalert2";
+
+import "yet-another-react-lightbox/styles.css";
 
 export default function DraftPostPage({
   generatedData,
@@ -27,6 +32,8 @@ export default function DraftPostPage({
   const [viewMedia, setViewMedia] = useState([]); // keep for edit mode UI (we'll fill it)
   const [userData, setUser] = useState({});
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   // ✅ NEW: unified media list for preview + payload
   // each item: { type: "file", file: File, preview: string } OR { type: "url", url: string, media_type?: "video"|"image" }
@@ -39,6 +46,49 @@ export default function DraftPostPage({
   const { id } = useParams();
   const isEditMode = Boolean(id);
   const navigate = useNavigate();
+
+  const lightboxSlides =
+    viewMedia.length > 0
+      ? viewMedia.map((item) => {
+        if (item.media_type === "video") {
+          return {
+            type: "video",
+            sources: [
+              {
+                src: item.url,
+                type: "video/mp4",
+              },
+            ],
+          };
+        }
+        return {
+          src: item.url,
+        };
+      })
+      : mediaItems.map((m) => {
+        const src = m.type === "url" ? m.url : m.preview;
+
+        const isVideo =
+          m.media_type === "video" ||
+          (m.type === "file" && m.file?.type?.startsWith("video/")) ||
+          /\.(mp4|webm|ogg)(\?|$)/i.test(src || "");
+
+        return isVideo
+          ? {
+            type: "video",
+            sources: [
+              {
+                src,
+                type: "video/mp4",
+              },
+            ],
+          }
+          : {
+            src,
+          };
+      });
+
+
 
   useEffect(() => {
     if (!isEditMode) return;
@@ -174,9 +224,29 @@ export default function DraftPostPage({
   const scriptWords = script.trim().split(/\s+/).filter(Boolean).length;
 
   // ✅ Upload and store as {type:file} in mediaItems, also keep files state updated
-  const uploadFiles = (e) => {
+  const uploadFiles = async (e) => {
     const incoming = Array.from(e.target.files || []).filter(Boolean);
     if (!incoming.length) return;
+
+    // ⚠️ ALERT before replacing existing media in SINGLE mode
+    if (mediaType === "single" && mediaItems.length > 0) {
+      const result = await Swal.fire({
+        title: "Replace existing media?",
+        text: "Uploading a new image will replace the current media.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, replace it",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#7C3AED", // purple
+        cancelButtonColor: "#9CA3AF",
+        reverseButtons: true,
+      });
+
+      if (!result.isConfirmed) {
+        e.target.value = "";
+        return;
+      }
+    }
 
     // IMPORTANT: allow selecting same file again later
     e.target.value = "";
@@ -239,16 +309,40 @@ export default function DraftPostPage({
   };
 
 
+  // const toggleMedia = (index) => {
+  //   if (mediaType === "single") {
+  //     setSelectedMedia([index]); // always single
+  //     return;
+  //   }
+
+  //   setSelectedMedia((prev) =>
+  //     prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+  //   );
+  // };
+
   const toggleMedia = (index) => {
+    // SINGLE MODE → never allow deselect
     if (mediaType === "single") {
-      setSelectedMedia([index]); // always single
+      setSelectedMedia([index]);
       return;
     }
 
-    setSelectedMedia((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
-    );
+    // CAROUSEL MODE
+    setSelectedMedia((prev) => {
+      const isSelected = prev.includes(index);
+
+      // 🚫 Prevent removing the LAST selected media
+      if (isSelected && prev.length === 1) {
+        // toast.error("At least one media is required");
+        return prev;
+      }
+
+      return isSelected
+        ? prev.filter((i) => i !== index)
+        : [...prev, index];
+    });
   };
+
 
   useEffect(() => {
     if (mediaType === "single") {
@@ -347,7 +441,7 @@ export default function DraftPostPage({
     })
     .filter(Boolean);
 
-  return (
+  return (<>
     <Layout>
       <div className="max-w-7xl mx-auto min-h-screen">
         <div className="bg-white rounded-xl p-6 space-y-6">
@@ -439,7 +533,10 @@ export default function DraftPostPage({
                       >
                         <div
                           className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer bg-black/20 hover:bg-black/40 transition-colors"
-                          onClick={() => setSelectedVideo(url?.url)}
+                          onClick={() => {
+                            setLightboxIndex(index);
+                            setLightboxOpen(true);
+                          }}
                         >
                           <img
                             src="/icons/ic-play2.svg"
@@ -461,7 +558,11 @@ export default function DraftPostPage({
                       >
                         <img
                           src={url?.url}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover cursor-pointer"
+                          onClick={() => {
+                            setLightboxIndex(index);
+                            setLightboxOpen(true);
+                          }}
                         />
                       </div>
                     )}
@@ -489,18 +590,33 @@ export default function DraftPostPage({
                     {isVideo ? (
                       <video
                         src={src}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover cursor-pointer"
                         muted
+                        onClick={() => {
+                          setLightboxIndex(index);
+                          setLightboxOpen(true);
+                        }}
                       />
                     ) : (
-                      <img src={src} className="w-full h-full object-cover" />
+                      <img
+                        src={src}
+                        className="w-full h-full object-cover cursor-pointer"
+                        onClick={() => {
+                          setLightboxIndex(index);
+                          setLightboxOpen(true);
+                        }}
+                      />
                     )}
 
+
                     <button
-                      onClick={() => toggleMedia(index)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleMedia(index);
+                      }}
                       className={`absolute top-2 left-2 w-5 h-5 rounded border flex items-center justify-center ${isSelected
-                          ? "bg-purple-600 border-purple-600"
-                          : "bg-white border-gray-300"
+                        ? "bg-purple-600 border-purple-600"
+                        : "bg-white border-gray-300"
                         }`}
                     >
                       {isSelected && (
@@ -525,7 +641,7 @@ export default function DraftPostPage({
                 <input
                   type="file"
                   multiple={mediaType === "carousel"}
-                  accept="image/*,video/*"
+                  accept="image/*"
                   className="hidden"
                   onChange={uploadFiles}
                 />
@@ -619,7 +735,8 @@ export default function DraftPostPage({
           <div>
             <div className="flex justify-between mb-1">
               <label className="text-sm font-medium">
-                Script (For Video Post):
+                Script:
+                {/* (For Video Post): */}
               </label>
               <span className="text-xs text-gray-400">{scriptWords} words</span>
             </div>
@@ -630,9 +747,9 @@ export default function DraftPostPage({
               rows={8}
               className="w-full border rounded-lg p-3 text-sm focus:ring-1 focus:ring-purple-500"
             />
-            <p className="text-xs text-gray-400 text-right mt-1">
+            {/* <p className="text-xs text-gray-400 text-right mt-1">
               Text inside [ ] brackets will be shown as On-Screen Text.
-            </p>
+            </p> */}
           </div>
         </div>
 
@@ -671,5 +788,12 @@ export default function DraftPostPage({
         </div>
       )}
     </Layout>
-  );
+    <Lightbox
+      open={lightboxOpen}
+      close={() => setLightboxOpen(false)}
+      index={lightboxIndex}
+      slides={lightboxSlides}
+      plugins={[Video]}
+    />
+  </>);
 }

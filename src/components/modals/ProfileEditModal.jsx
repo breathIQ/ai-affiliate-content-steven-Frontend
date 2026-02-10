@@ -5,6 +5,8 @@ import {
   getProfileByRole,
   updateProfileByRole,
 } from "../../services/profile.service";
+import { instagramAccountLink } from "../../services/socialMediaAuth.api";
+import { tiktokAccountLink } from "../../services/socialMediaAuth.api";
 import { useLoader } from "../../context/LoaderContext";
 
 const DEFAULT_IMAGE = "/images/defaultImage.png";
@@ -31,6 +33,28 @@ export function ProfileEditModal({ isOpen, onClose }) {
   } = useForm();
 
   const affiliate = watch("affiliate");
+
+  const instagramLinkAccount = async () => {
+    try {
+      const res = await instagramAccountLink();
+      window.location.href = res.data;
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to link Instagram account"
+      );
+    }
+  };
+
+  const tiktokLinkAccount = async () => {
+    try {
+      const res = await tiktokAccountLink();
+      window.location.href = res.data;
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to link TikTok account"
+      );
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -118,7 +142,7 @@ export function ProfileEditModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-[550px] rounded-xl shadow-lg p-5 relative">
+      <div className="bg-white max-w-[550px] w-full rounded-xl shadow-lg p-5 relative">
         <button onClick={onClose} className="absolute right-4 top-4">
           <img src="/icons/ic-close-circle.svg" />
         </button>
@@ -195,16 +219,30 @@ export function ProfileEditModal({ isOpen, onClose }) {
         {user?.role_id == 2 && (
           <>
             <label className="text-sm">Affiliate ID</label>
-            <div className="flex border rounded-md mb-4 bg-gray-100">
-              <span className="px-3 py-2 text-sm pe-0">
+            <div className="flex items-center border rounded-md mb-4 bg-gray-100">
+              {/* URL – always visible */}
+              <span className="px-3 py-2 text-sm pe-0 shrink-0">
                 https://www.co2book.com/
               </span>
+
+              {/* INPUT – truncate when screen is small */}
               <input
                 {...register("affiliate")}
                 disabled
-                className="flex-1 px-2 py-2 ps-0 text-sm bg-gray-100 cursor-not-allowed"
+                className="
+      flex-1 min-w-0
+      px-2 py-2 ps-0 text-sm
+      bg-gray-100 cursor-not-allowed
+      truncate
+    "
               />
-              <button type="button" onClick={copyLink} className="px-3">
+
+              {/* Copy button – fixed */}
+              <button
+                type="button"
+                onClick={copyLink}
+                className="px-3 w-[45px] shrink-0"
+              >
                 {copied ? (
                   <img src="/icons/ic-check.svg" />
                 ) : (
@@ -212,6 +250,7 @@ export function ProfileEditModal({ isOpen, onClose }) {
                 )}
               </button>
             </div>
+
           </>
         )}
 
@@ -220,10 +259,15 @@ export function ProfileEditModal({ isOpen, onClose }) {
           <>
             <p className="text-sm font-medium mb-2">Social Accounts</p>
             <div className="flex gap-3 mb-4">
-              <div className="flex items-center w-full justify-center gap-2 border rounded-md px-3 py-2 text-sm">
+              <div className={`flex items-center w-full justify-center gap-2 border rounded-md px-3 py-2 text-sm ${social.instagram?.connected ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                onClick={() => {
+                  if (!social.instagram?.connected) {
+                    instagramLinkAccount();
+                  }
+                }}>
                 <img src="/icons/insta.svg" />
                 {social.instagram?.connected ? (
-                  <span>
+                  <span className="flex">
                     {social.instagram.username}
                     <CheckmarkIcon size={14} className="ml-1 text-green-500" />
                   </span>
@@ -232,10 +276,15 @@ export function ProfileEditModal({ isOpen, onClose }) {
                 )}
               </div>
 
-              <div className="flex items-center w-full justify-center gap-2 border rounded-md px-3 py-2 text-sm">
+              <div className={`flex items-center w-full justify-center gap-2 border rounded-md px-3 py-2 text-sm ${social.tiktok?.connected ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                onClick={() => {
+                  if (!social.tiktok?.connected) {
+                    tiktokLinkAccount();
+                  }
+                }}>
                 <img src="/icons/tiktok.svg" />
                 {social.tiktok?.connected ? (
-                  <span>
+                  <span className="flex">
                     {social.tiktok.username}
                     <CheckmarkIcon size={14} className="ml-1 text-green-500" />
                   </span>

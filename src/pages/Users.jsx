@@ -91,13 +91,13 @@ export default function Users() {
   }, []);
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto min-h-screen py-8">
+      <div className="max-w-7xl mx-auto min-h-screen pt-8">
         {/* Header */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold">All Users</h1>
             <p className="text-sm text-gray-500">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              View and manage all your users in one place.
             </p>
           </div>
         </div>

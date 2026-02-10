@@ -52,7 +52,7 @@ export default function UsersLabs() {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto min-h-screen py-8">
+      <div className="max-w-7xl mx-auto min-h-screen pt-8">
         {/* Header */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -60,7 +60,7 @@ export default function UsersLabs() {
               {state?.name ||profile?.name|| "USER "}'s Posts
             </h1>
             <p className="text-sm text-gray-500">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              View and manage all your posts in one place.
             </p>
           </div>
           {state?.id ? "" : <GenerateContentModal setGeneratedData={setGeneratedData} />}
@@ -73,7 +73,7 @@ export default function UsersLabs() {
             loadPost={loadPost}
             pagination={
               <>
-                <div className="flex border-top flex-col md:flex-row md:items-center md:justify-between p-4 text-sm text-gray-500 gap-3">
+                <div className="flex border-top md:flex-row items-center justify-between p-4 text-sm text-gray-500 gap-3">
                   <div>
                     Rows per page:
                     <select

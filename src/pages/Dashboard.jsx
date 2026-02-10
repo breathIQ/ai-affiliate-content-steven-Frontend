@@ -39,7 +39,7 @@ function Dashboard() {
             <PublishingSuccess details={details}/>
             <ClicksConversion details={details} />
           </div>
-          <div className="grid pb-10 grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <TopAffiliates details={details} />
             {
               // details?.most_used_chapters?.length &&

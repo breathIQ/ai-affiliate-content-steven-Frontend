@@ -3,6 +3,7 @@ import InviteModal from "../modals/InviteModal";
 import { ProfileEditModal } from "../modals/ProfileEditModal";
 import { ChangePasswordModal } from "../modals/ChangePasswordModal";
 import { useLoader } from "../../context/LoaderContext";
+import { FaPlus } from "react-icons/fa";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
@@ -16,6 +17,8 @@ const Header = () => {
   const profileRef = useRef(null);
   const [openProfile, setOpenProfile] = useState(false);
   const [openPassword, setOpenPassword] = useState(false);
+
+  const closeDropdown = () => setProfileOpen(false);
   // close dropdown on outside click
   useEffect(() => {
     if (!access_token) {
@@ -39,9 +42,9 @@ const Header = () => {
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 ms-2">
           {/* Profile */}
-          <div ref={profileRef} className="relative">
+          <div ref={profileRef} className="relative w-[36px] h-[36px]">
             <img
               src={profile?.avatar || "/images/defaultImage.png"}
               alt="profile"
@@ -52,7 +55,11 @@ const Header = () => {
             {profileOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border z-50">
                 <div
-                  onClick={() => setOpenProfile((v) => !v)}
+                  // onClick={() => setOpenProfile((v) => !v)}
+                  onClick={() => {
+                    closeDropdown();
+                    setOpenProfile(true);
+                  }}
                   className="w-full flex gap-2 border-bottom cursor-pointer align-items-center px-4 py-2 font-semibold hover:bg-gray-100"
                 >
                   <img
@@ -65,7 +72,11 @@ const Header = () => {
                 </div>
                 <hr />
                 <button
-                  onClick={() => setOpenPassword((v) => !v)}
+                  // onClick={() => setOpenPassword((v) => !v)}
+                  onClick={() => {
+                    closeDropdown();
+                    setOpenPassword(true);
+                  }}
                   className="w-full flex gap-2 align-items-center px-4 py-2 font-semibold hover:bg-gray-100"
                 >
                   <img src="/icons/ic-password.svg" />
@@ -73,7 +84,11 @@ const Header = () => {
                 </button>
                 {user?.role_id == 2 && (
                   <button
-                    onClick={() => setOpenProfile((v) => !v)}
+                    // onClick={() => setOpenProfile((v) => !v)}
+                    onClick={() => {
+                      closeDropdown();
+                      setOpenProfile(true);
+                    }}
                     className="w-full flex gap-2 align-items-center px-4 py-2 font-semibold hover:bg-gray-100"
                   >
                     <img src="/icons/ic-extension.svg" />
@@ -83,9 +98,10 @@ const Header = () => {
                 <hr />
                 <button
                   onClick={() => {
+                    closeDropdown();
+                    localStorage.clear();
                     window.location =
                       user?.role_id == 2 ? "/login" : "/admin/login";
-                    localStorage.clear();
                   }}
                   className="w-full flex gap-2 align-items-center px-4 py-2 font-semibold text-red-600 hover:bg-red-50"
                 >
@@ -99,10 +115,10 @@ const Header = () => {
           {/* Invite Button */}
           <button
             onClick={() => setOpen(true)}
-            className="hidden sm:flex items-center gap-1 bg-purple-600 hover:bg-purple-700 text-white px-[10px] py-[8px]
+            className="flex items-center gap-1 bg-purple-600 hover:bg-purple-700 text-white px-[10px] py-[8px]
              rounded-md text-sm font-medium transition"
           >
-            <img src="/icons/ic-add.svg" alt="profile" className="text-white" />{" "}
+            <FaPlus size={12} />
             Invite
           </button>
         </div>

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { apibase } from "../../services/contants";
+import { instagramSignin, tiktokSignin } from "../../services/socialMediaAuth.api";
 
 export default function SignUpWithOTP() {
   const [step, setStep] = useState(1); // 1 = signup, 2 = otp
@@ -48,6 +49,26 @@ if (!passwordRegex.test(form.password)) {
     }
   };
 
+  const instagramLogin = async () => {
+      try {
+        const res = await instagramSignin();
+        console.log("Instagram Signin Response:", res);
+        window.location.href = res.data;
+      } catch (error) {
+        console.error("Instagram Signin Error:", error);
+      }
+    };
+
+    const tiktokLogin = async () => {
+        try {
+          const res = await tiktokSignin();
+          console.log("TikTok Signin Response:", res);
+          window.location.href = res.data;
+        } catch (error) {
+          console.error("TikTok Signin Error:", error);
+        }
+      };
+
   const handleOtpChange = (index, value) => {
     if (!/^[0-9]?$/.test(value)) return;
     const newOtp = [...otp];
@@ -86,7 +107,7 @@ if (!passwordRegex.test(form.password)) {
                 Create your account to get started
               </p>
 
-              <button className="w-full border rounded-lg py-2 mb-3 flex items-center justify-center gap-2 text-sm">
+              <button className="w-full border rounded-lg py-2 mb-3 flex items-center justify-center gap-2 text-sm" onClick={instagramLogin}>
                 <img
                   src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png"
                   className="w-4"
@@ -94,7 +115,7 @@ if (!passwordRegex.test(form.password)) {
                 Sign Up with Instagram
               </button>
 
-              <button className="w-full border rounded-lg py-2 mb-4 flex items-center justify-center gap-2 text-sm">
+              <button className="w-full border rounded-lg py-2 mb-4 flex items-center justify-center gap-2 text-sm" onClick={tiktokLogin}>
                 <img src="/icons/tiktok.svg" className="w-4" />
                 Sign Up with TikTok
               </button>

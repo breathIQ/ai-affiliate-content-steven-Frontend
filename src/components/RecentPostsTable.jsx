@@ -6,8 +6,9 @@ import ConfirmDeleteModal from "./modals/ConfirmDeleteModal";
 
 const statusStyles = {
   Published: "bg-green-100 text-green-700",
-  Scheduled: "bg-blue-100 text-blue-700",
-  "Saved in Draft": "bg-yellow-100 text-yellow-700",
+  Failed: "bg-red-100 text-red-700",
+  Pending: "bg-yellow-100 text-yellow-700",
+  Processing: "bg-yellow-100 text-yellow-700",
 };
 
 export default function RecentPostsTable({
@@ -15,6 +16,7 @@ export default function RecentPostsTable({
   posts,
   pagination,
   handleSearch,
+  showSearch = true,
   loadPost,
 }) {
   const [open, setOpen] = useState({ 1: false });
@@ -36,7 +38,8 @@ export default function RecentPostsTable({
         return;
       }
 
-      toast.success("Post deleted successfully");
+      toast.success(res?.message);
+      setOpenMadal(false);
       setOpen({});
       loadPost();
     } catch (err) {
@@ -72,21 +75,21 @@ export default function RecentPostsTable({
         <h2 className="font-semibold text-gray-800">
           {title || "Recent Posts"}
         </h2>
-        <div className="relative">
+        {showSearch && <div className="relative">
           {/* <span className="absolute right-3 top-2 text-gray-400">
             <img src="/icons/ic-search.svg" />
           </span> */}
           <input
             type="text"
-            onChange={handleSearch}
+            onChange={(e) => handleSearch(e.target.value)}
             placeholder="Search"
             className="pl-4 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
-        </div>
+        </div>}
       </div>
 
       {/* Table */}
-      <div className="overfl-auto">
+      <div className="overflow-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-500">
             <tr>
@@ -173,20 +176,24 @@ export default function RecentPostsTable({
                   </td>
 
                   <td className="p-3 text-lg">
-                    {item.ai_generated ? (
-                      <img src="/icons/ic-chatgpt.svg" />
-                    ) : (
+                    {item.ai_model === "Gemini" ? (
+                      <img src="/icons/ic-gemini.svg" />
+                    ) : item.ai_model === "Claude" ? (
                       <img src="/icons/ic-claude.svg" />
+                    ) : (
+                      <img src="/icons/ic-chatgpt.svg" />
                     )}
                   </td>
 
                   <td className="p-3">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        statusStyles[item.status]
+                        statusStyles[
+                          item.status?.replace(/^./, c => c.toUpperCase())
+                        ]
                       }`}
                     >
-                      {item.status}
+                      {item.status?.replace(/^./, c => c.toUpperCase())}
                     </span>
                   </td>
 
@@ -211,7 +218,7 @@ export default function RecentPostsTable({
                         <div
                           id="btns"
                           onClick={(e) => e.stopPropagation()}
-                          className="absolute left-[-60px] mt-2 w-36 bg-white border rounded-lg shadow-lg z-50"
+                          className="absolute right-[0px] mt-[-5px] w-36 bg-white border rounded-lg shadow-lg z-50"
                         >
                           <button
                             className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50"
