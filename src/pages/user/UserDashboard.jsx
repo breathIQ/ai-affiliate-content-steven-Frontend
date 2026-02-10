@@ -64,7 +64,7 @@ function UserDashboard() {
         <DashboardOverview data={dashboardData} />
 
         <div className=" pt-6">
-          <RecentPostsTable loadPost={fetchDashboardData} posts={dashboardData?.recent_posts} />
+          <RecentPostsTable loadPost={fetchDashboardData} posts={dashboardData?.recent_posts} showSearch={false} />
         </div>
       </div>
     </Layout>

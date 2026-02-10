@@ -16,6 +16,7 @@ export default function RecentPostsTable({
   posts,
   pagination,
   handleSearch,
+  showSearch = true,
   loadPost,
 }) {
   const [open, setOpen] = useState({ 1: false });
@@ -74,17 +75,17 @@ export default function RecentPostsTable({
         <h2 className="font-semibold text-gray-800">
           {title || "Recent Posts"}
         </h2>
-        <div className="relative">
+        {showSearch && <div className="relative">
           {/* <span className="absolute right-3 top-2 text-gray-400">
             <img src="/icons/ic-search.svg" />
           </span> */}
           <input
             type="text"
-            onChange={handleSearch}
+            onChange={(e) => handleSearch(e.target.value)}
             placeholder="Search"
             className="pl-4 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
-        </div>
+        </div>}
       </div>
 
       {/* Table */}
