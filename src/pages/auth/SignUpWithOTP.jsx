@@ -179,8 +179,8 @@ const validatePassword = (value) => {
                     required
                   />
                   {errors.email && (
-    <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-  )}
+                    <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                  )}
                 </div>
 
               <div>
