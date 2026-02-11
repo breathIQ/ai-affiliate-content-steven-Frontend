@@ -361,7 +361,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
                           className="w-full border rounded-lg px-3 py-2 text-sm"
                         >
                           <option value="">Select Slides</option>
-                          {[1, 2, 3, 4, 5].map((num) => (
+                          {[1, 2, 3, 4].map((num) => (
                             <option key={num} value={num}>
                               {num}
                             </option>
