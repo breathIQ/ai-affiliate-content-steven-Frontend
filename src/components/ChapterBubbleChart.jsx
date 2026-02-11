@@ -4,12 +4,13 @@ import {
   PointElement,
   Tooltip,
   Legend,
+  TimeScale,
 } from "chart.js";
 import { Bubble } from "react-chartjs-2";
 import API from "../services/api";
 import { useEffect, useRef, useState } from "react";
 
-ChartJS.register(LinearScale, PointElement, Tooltip, Legend);
+ChartJS.register(LinearScale, PointElement, TimeScale, Tooltip, Legend);
 
 export default function ChapterBubbleChart({ useddetails }) {
   const [filter, setFilter] = useState(""); // Default filter
@@ -21,9 +22,9 @@ export default function ChapterBubbleChart({ useddetails }) {
   useEffect(() => {
     // ✅ First render → use props data
     if (!filter) {
-      console.log("cliekc");
-      
-      setDetails({most_used_chapters :useddetails?.most_used_chapters || []} );
+      // console.log("cliekc");
+
+      setDetails({ most_used_chapters: useddetails?.most_used_chapters || [] });
       setLoading(false);
       return; // ❌ stop API call
     }
@@ -33,7 +34,7 @@ export default function ChapterBubbleChart({ useddetails }) {
       setLoading(true);
       try {
         const response = await API.get(
-          `admin/most-used-chapter?filter_by=${filter}`
+          `admin/most-used-chapter?filter_by=${filter}`,
         );
         setDetails(response?.data?.data || []);
       } catch (error) {
@@ -43,23 +44,12 @@ export default function ChapterBubbleChart({ useddetails }) {
       }
     };
 
-    if(filter){
+    if (filter) {
       fetchChartData();
     }
   }, [filter, useddetails]);
   // console.log(details?.most_used_chapters);
-  const most_used_chapters = details?.most_used_chapters || [
-    { id: 1, chapter: "CHAPTER 1", total: 45 },
-    { id: 2, chapter: "CHAPTER 2", total: 12 },
-    { id: 3, chapter: "CHAPTER 3", total: 88 },
-    { id: 4, chapter: "CHAPTER 4", total: 34 },
-    { id: 5, chapter: "CHAPTER 5", total: 56 },
-    { id: 6, chapter: "CHAPTER 6", total: 22 },
-    { id: 7, chapter: "CHAPTER 7", total: 95 },
-    { id: 8, chapter: "CHAPTER 8", total: 10 },
-    { id: 9, chapter: "CHAPTER 9", total: 67 },
-    { id: 10, chapter: "CHAPTER 10", total: 41 },
-  ];
+  const most_used_chapters = details?.most_used_chapters || [];
 
   const chartColors = [
     "#10B981",
@@ -75,131 +65,142 @@ export default function ChapterBubbleChart({ useddetails }) {
   ];
 
   const normalizeBubbleData = (chapters = []) => {
-  return chapters.map((item, index) => {
-    const point = item.data?.[0];
+    return chapters.map((item, index) => {
+      const point = item.data?.[0];
+      // convert date → day number
+    //    if (!point?.x) return null;
 
-    // convert date → day number
-    const day = point?.x
-      ? new Date(point.x).getDate()
-      : index + 1;
+    // const bubbleDate = new Date(point.x);
 
-    return {
-      label: item.label || `Ch-${index + 1}`,
-      data: [
-        {
-          x: day,
-          y: point?.y ?? 0,
-          r: point?.r ?? 8,
-        },
-      ],
-      backgroundColor: chartColors[index % chartColors.length],
-      hoverBackgroundColor: chartColors[index % chartColors.length],
-    };
+    // // find matching axis date index
+    // const axisIndex = axisDates.findIndex(d =>
+    //   d.toDateString() === bubbleDate.toDateString()
+    // );
+    // console.log("axisIndex" ,axisIndex);
+    
+      const day = point?.x ? new Date(point.x).getDate() : index + 1;
+      return {
+        label: item.label || `Ch-${index + 1}`,
+        date: point?.x, // Store actual date for tooltip
+        data: [
+          {
+            x: day, // X is day number
+            y: point?.y ?? 0,
+            r: point?.y*3 ?? 8,
+          },
+        ],
+        backgroundColor: chartColors[index % chartColors.length],
+        hoverBackgroundColor: chartColors[index % chartColors.length],
+      };
+    });
+  };
+
+  const data = {
+    datasets: normalizeBubbleData(most_used_chapters),
+  };
+
+
+const getWeekDates = () => {
+  const today = new Date();
+
+  // start of current week (Sunday)
+  const start = new Date(today);
+  start.setDate(today.getDate() - today.getDay());
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    return d;
   });
 };
 
-const data = {
-  datasets: normalizeBubbleData(most_used_chapters),
+const getMonthDates = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+
+  const days = new Date(year, month + 1, 0).getDate();
+
+  return Array.from({ length: days }, (_, i) => {
+    return new Date(year, month, i + 1);
+  });
 };
 
+const axisDates =
+  filter === "week" ? getWeekDates() : getMonthDates();
 
-  // const data = {
-  //   datasets: most_used_chapters.map((item, index) => ({
-  //     label: `${item.label || `Ch - ${item.id}`}`,
-  //     data: [
-  //       {
-  //         // X is decided by index (multiplied by a factor to spread them)
-  //         x: index + 1,
-  //         // Y is decided strictly by the usage 'total'
-  //         y: item.data?.posts_count,
-  //         // Radius is decided by usage (scaled for visibility)
-  //         r: item.data?.posts_count / 15 + 10,
-  //       },
-  //     ],
-  //     backgroundColor: chartColors[index % chartColors.length],
-  //     hoverBackgroundColor: chartColors[index % chartColors.length],
-  //   })),
-  // };
-
-  // const options = {
-  //   responsive: true,
-  //   maintainAspectRatio: false,
-  //   scales: {
-  //     x: {
-  //       grid: { display: false },
-  //       ticks: {
-  //         display: true,
-  //         color: "#9CA3AF",
-  //         // This shows the X-axis numbers similar to your screenshot
-  //         callback: (value) => (value > 0 ? value : ""),
-  //       },
-  //       min: 0,
-  //       max: filter == "week" ? 7 : 31,
-  //     },
-  //     y: {
-  //       beginAtZero: true,
-  //       grid: {
-  //         display: true,
-  //         color: "#F3F4F6",
-  //         borderDash: [5, 5], // Dotted lines from your image
-  //         drawBorder: false,
-  //       },
-  //       ticks: { color: "#9CA3AF" },
-  //       min: 0,
-  //       max: 700,
-  //     },
-  //   },
-  //   plugins: {
-  //     legend: { display: false }, // Custom legend handled in JSX
-  //     tooltip: {
-  //       callbacks: {
-  //         label: (context) => `Usage: ${context.raw.y}`,
-  //       },
-  //     },
-  //   },
-  // };
 
   const options = {
-  responsive: true,
-  maintainAspectRatio: false,
-  scales: {
-    x: {
-      grid: { display: false },
-      ticks: {
-        color: "#9CA3AF",
-      },
-      min: 0,
-      max: filter === "week" ? 7 : 31,
-    },
-    y: {
-      beginAtZero: true,
-      grid: {
-        color: "#F3F4F6",
-        borderDash: [5, 5],
-        drawBorder: false,
-      },
-      ticks: { color: "#9CA3AF" },
-    },
-  },
-  plugins: {
-    legend: { display: false },
-    tooltip: {
-      callbacks: {
-        label: (ctx) =>
-          `${ctx.dataset.label} → Usage: ${ctx.raw.y}`,
-      },
-    },
-  },
-};
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      // x: {
+      //   grid: { display: false },
+      //   ticks: {
+      //     color: "#9CA3AF",
+      //   },
+      //   min: 0,
+      //   max: filter === "week" ? 7 : 31,
+      // },
+      x: {
+          grid: { display: false },
+          min: 1,
+          max: axisDates.length,
 
-  // const legends = most_used_chapters?.slice(0, 12).map((item, index) => ({
-  //   label: item?.label || `Ch - ${item.id}`,
-  //   color: chartColors[index],
-  // }));
-const legends = most_used_chapters.map((item, index) => ({
-  label: item.label || `Ch-${index + 1}`,
-  color: chartColors[index % chartColors.length],
-}));
+          ticks: {
+            color: "#9CA3AF",
+            callback: (value) => {
+              const date = axisDates[value - 1];
+              if (!date) return "";
+
+              return filter === "week"
+                ? date.toLocaleDateString(undefined, {  day: "numeric",
+                    month: "short", })
+                : date.toLocaleDateString(undefined, {
+                    day: "numeric",
+                    month: "short",
+                  });
+            },
+          },
+        },
+
+
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: "#F3F4F6",
+          borderDash: [5, 5],
+          drawBorder: false,
+        },
+        ticks: { color: "#9CA3AF" },
+      },
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          title: (items) => {
+                        // console.log(items , "<<<");
+            if (!items.length) return "";
+            const date = new Date(items[0].dataset.date);
+            return `Date: ${date.toLocaleDateString()}`;
+          },
+          label: (ctx) =>{
+            // console.log(ctx , "<<<");
+
+            return `${ctx.dataset.label} → Usage: ${ctx.raw.y}`;
+          },
+        },
+      },
+    },
+   
+  };
+
+  const legends = most_used_chapters.map((item, index) => ({
+    label: item.label || `Ch-${index + 1}`,
+    color: chartColors[index % chartColors.length],
+  }));
+
 
   return (
     <div className="bg-white rounded-xl shadow p-5 w-full h">
@@ -208,7 +209,7 @@ const legends = most_used_chapters.map((item, index) => ({
         <div className="flex gap-2 text-xs">
           <button
             className={`px-2 py-1  ${
-              (filter === "month" || filter == "") ? " bg-gray-100" : ""
+              filter === "month" || filter == "" ? " bg-gray-100" : ""
             } rounded`}
             onClick={() => setFilter("month")}
           >
@@ -230,7 +231,6 @@ const legends = most_used_chapters.map((item, index) => ({
         ) : (
           <Bubble data={data} options={options} />
         )}
-        {/* <Bubble data={data} options={options} /> */}
       </div>
       <div className="flex flex-wrap gap-x-10 gap-y-4 pt-4 mt-0 text-sm text-gray-600">
         {legends.map((item, index) => (
