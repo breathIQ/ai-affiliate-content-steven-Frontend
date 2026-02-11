@@ -211,7 +211,7 @@ const FileUpload = () => {
                         <div>
                           <p
                             className={`px-3 py-1 flex align-items-center justify-center gap-2 w-[100px] rounded-full text-xs font-medium ${
-                              filePriview.status === 0
+                              filePriview.status === 1
                                 ? "bg-green-100 text-green-700"
                                 : "bg-yellow-100 text-yellow-700"
                             }`}
