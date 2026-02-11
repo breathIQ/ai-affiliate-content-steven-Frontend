@@ -27,10 +27,13 @@ export default function RecentPostsTable({
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : {};
+
+    console.log(user );
+    
   const handleDelete = async (id) => {
     try {
       setLoading(true);
-      const res = await deletePost(openModal);
+      const res = await deletePost(openModal,user?.role_id);
       setLoading(false);
 
       if (!res?.success) {
