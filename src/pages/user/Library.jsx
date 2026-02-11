@@ -142,7 +142,11 @@ export default function DraftPostPage({
             media_type: m.media_type, // useful for video detection
           }));
           setMediaItems(urlItems);
-          setSelectedMedia(urlItems.map((_, idx) => idx)); // select all by default
+          if (post.media_assets === "single") {
+            setSelectedMedia([0]);
+          } else {
+            setSelectedMedia(urlItems.map((_, idx) => idx));
+          }// select all by default
 
           // keep files empty in edit mode (uploads disabled anyway)
           setFiles([]);
@@ -227,6 +231,16 @@ export default function DraftPostPage({
   const uploadFiles = async (e) => {
     const incoming = Array.from(e.target.files || []).filter(Boolean);
     if (!incoming.length) return;
+
+    if (mediaType === "carousel") {
+      const totalFiles = mediaItems.length + incoming.length;
+
+      if (totalFiles > 10) {
+        toast.error("You can upload a maximum of 10 files in carousel mode.");
+        e.target.value = "";
+        return;
+      }
+    }
 
     // ⚠️ ALERT before replacing existing media in SINGLE mode
     if (mediaType === "single" && mediaItems.length > 0) {
@@ -343,30 +357,25 @@ export default function DraftPostPage({
     });
   };
 
-
   useEffect(() => {
+    if (!mediaItems.length) return;
+
     if (mediaType === "single") {
-      // ensure only one selection
-      setSelectedMedia((prev) => (prev.length ? [prev[0]] : []));
-      // ensure only one media item
-      setMediaItems((prev) => (prev.length > 1 ? [prev[0]] : prev));
-      // ensure only one file in files state (if files exist)
-      setFiles((prev) => (prev.length > 1 ? [prev[0]] : prev));
+      setSelectedMedia([0]);
+    } else {
+      setSelectedMedia(mediaItems.map((_, index) => index));
     }
   }, [mediaType]);
 
-  // ✅ Clean up object URLs for uploaded files
   useEffect(() => {
     return () => {
       mediaItems.forEach((m) => {
         if (m?.type === "file" && m?.preview) {
-          try {
-            URL.revokeObjectURL(m.preview);
-          } catch (e) { }
+          URL.revokeObjectURL(m.preview);
         }
       });
     };
-  }, [mediaItems]);
+  }, []);
 
   const handlePublishSubmit = async ({ platforms, reviewLink }) => {
     try {
@@ -387,7 +396,12 @@ export default function DraftPostPage({
       // ✅ media payload exactly like screenshot:
       // media[0][file] = File OR URL string
       // media[0][media_order] = 1
-      const uniqueSelected = Array.from(new Set(selectedMedia));
+      const indexesToSend =
+      mediaType === "single"
+        ? selectedMedia.slice(0, 1) // only first selected
+        : selectedMedia;
+
+      const uniqueSelected = Array.from(new Set(indexesToSend));
 
       uniqueSelected.forEach((index, i) => {
         const item = mediaItems[index];
@@ -641,7 +655,7 @@ export default function DraftPostPage({
                 <input
                   type="file"
                   multiple={mediaType === "carousel"}
-                  accept="image/*"
+                  accept="image/png, image/jpeg, image/jpg, image/webp"
                   className="hidden"
                   onChange={uploadFiles}
                 />

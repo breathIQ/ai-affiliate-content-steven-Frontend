@@ -84,7 +84,7 @@ export default function DashboardOverview({ data }) {
             //   className="w-[100%] h-[90%]"
             />
             <h3 className="text-2xl font-bold my-3">{data?.stats?.generated}</h3>
-            <p className="text-sm">Posts Published</p>
+            <p className="text-sm">Posts Generated</p>
           </div>
 
           <div className="bg-purple-600 text-white rounded-2xl p-5">
