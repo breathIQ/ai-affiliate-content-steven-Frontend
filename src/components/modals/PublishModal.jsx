@@ -230,7 +230,7 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
 
           {/* Publish To */}
           <div>
-            <p className="text-sm font-medium mb-2">Publish To:</p>
+            <p className="text-sm font-medium mb-2">Publish To:<span className="text-red-500">*</span></p>
 
             <div className="space-y-2">
               <label className="flex items-center justify-between">
