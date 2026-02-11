@@ -68,6 +68,16 @@ export default function ChapterBubbleChart({ useddetails }) {
     return chapters.map((item, index) => {
       const point = item.data?.[0];
       // convert date → day number
+    //    if (!point?.x) return null;
+
+    // const bubbleDate = new Date(point.x);
+
+    // // find matching axis date index
+    // const axisIndex = axisDates.findIndex(d =>
+    //   d.toDateString() === bubbleDate.toDateString()
+    // );
+    // console.log("axisIndex" ,axisIndex);
+    
       const day = point?.x ? new Date(point.x).getDate() : index + 1;
       return {
         label: item.label || `Ch-${index + 1}`,
@@ -139,7 +149,6 @@ const axisDates =
 
           ticks: {
             color: "#9CA3AF",
-
             callback: (value) => {
               const date = axisDates[value - 1];
               if (!date) return "";
@@ -191,6 +200,7 @@ const axisDates =
     label: item.label || `Ch-${index + 1}`,
     color: chartColors[index % chartColors.length],
   }));
+
 
   return (
     <div className="bg-white rounded-xl shadow p-5 w-full h">
