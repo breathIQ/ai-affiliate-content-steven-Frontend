@@ -19,7 +19,7 @@ const Terms = () => {
     }, []);
     return (
         <Layout>
-        <div className="max-w-7xl mx-auto min-h-screen pt-5">
+        <div className="max-w-7xl mx-auto min-h-screen pt-5 termsprivacy">
             <h5 className="font-bold mb-4 text-[22px]">Terms & Conditions</h5>
             <div className="bg-[#fff] rounded-[12px] py-6 px-8" dangerouslySetInnerHTML={{__html: termsContent}} />
         </div>

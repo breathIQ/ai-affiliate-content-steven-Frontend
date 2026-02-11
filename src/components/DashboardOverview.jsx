@@ -50,7 +50,7 @@ export default function DashboardOverview({ data }) {
             <p className="text-sm mb-8 text-[#99A1B7]">
               Turn book chapters into ready-to-publish Instagram and TikTok content using AI.
             </p>
-            <Link to={"/u/library?generate=true"} className="bg-pink-600 hover:bg-pink-700 py-[10px] px-[16px] rounded-lg text-sm font-medium flex items-center gap-2 w-fit">
+            <Link to={"/u/library?generate=true"} className="bg-[#F8285A]  py-[10px] px-[16px] rounded-lg text-sm font-medium flex items-center gap-2 w-fit">
               <FaPlus size={20} className="bg-[#ffffff24] p-[5px] rounded-[4px]" /> Generate Content
             </Link>
             <h3 className="text-md mt-10 font-semibold">
@@ -77,7 +77,7 @@ export default function DashboardOverview({ data }) {
 
         {/* COLUMN 2 – Stats Grid */}
         <div className="grid grid-cols-2 gap-6">
-          <div className="bg-rose-500 text-white rounded-2xl p-5">
+          <div className="bg-[#F8285A] text-white rounded-2xl p-5">
             <img
               src="/icons/ic-posts2.svg"
               alt="book"
