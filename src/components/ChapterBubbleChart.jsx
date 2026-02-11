@@ -129,6 +129,7 @@ const getWeekDates = () => {
   return chapters.map((item, index) => {
     return {
       label: item.label || `Ch-${index + 1}`,
+      date: item.data?.[0]?.x || null,
       data: item.data.map((point) => {
         const bubbleDate = new Date(point.x);
 
