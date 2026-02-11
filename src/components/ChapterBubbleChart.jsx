@@ -16,6 +16,7 @@ export default function ChapterBubbleChart({ useddetails }) {
   const [filter, setFilter] = useState(""); // Default filter
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+  console.log("detailsdetails", details);
   // console.log("useddetails",filter, useddetails?.most_used_chapters);
   const isFirstRender = useRef(true);
 
@@ -51,54 +52,17 @@ export default function ChapterBubbleChart({ useddetails }) {
   // console.log(details?.most_used_chapters);
   const most_used_chapters = details?.most_used_chapters || [];
 
-  const chartColors = [
-    "#10B981",
-    "#3B82F6",
-    "#8B5CF6",
-    "#FACC15",
-    "#EC4899",
-    "#EF4444",
-    "#06B6D4",
-    "#D946EF",
-    "#22C55E",
-    "#EAB308",
-  ];
+const getMonthDates = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
 
-  const normalizeBubbleData = (chapters = []) => {
-    return chapters.map((item, index) => {
-      const point = item.data?.[0];
-      // convert date → day number
-    //    if (!point?.x) return null;
+  const days = new Date(year, month + 1, 0).getDate();
 
-    // const bubbleDate = new Date(point.x);
-
-    // // find matching axis date index
-    // const axisIndex = axisDates.findIndex(d =>
-    //   d.toDateString() === bubbleDate.toDateString()
-    // );
-    // console.log("axisIndex" ,axisIndex);
-    
-      const day = point?.x ? new Date(point.x).getDate() : index + 1;
-      return {
-        label: item.label || `Ch-${index + 1}`,
-        date: point?.x, // Store actual date for tooltip
-        data: [
-          {
-            x: day, // X is day number
-            y: point?.y ?? 0,
-            r: point?.y*3 ?? 8,
-          },
-        ],
-        backgroundColor: chartColors[index % chartColors.length],
-        hoverBackgroundColor: chartColors[index % chartColors.length],
-      };
-    });
-  };
-
-  const data = {
-    datasets: normalizeBubbleData(most_used_chapters),
-  };
-
+  return Array.from({ length: days }, (_, i) => {
+    return new Date(year, month, i + 1);
+  });
+};
 
 const getWeekDates = () => {
   const today = new Date();
@@ -114,20 +78,81 @@ const getWeekDates = () => {
   });
 };
 
-const getMonthDates = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
+  const axisDates =
+  filter === "week" ? getWeekDates() : getMonthDates();
 
-  const days = new Date(year, month + 1, 0).getDate();
+  const chartColors = [
+    "#10B981",
+    "#3B82F6",
+    "#8B5CF6",
+    "#FACC15",
+    "#EC4899",
+    "#EF4444",
+    "#06B6D4",
+    "#D946EF",
+    "#22C55E",
+    "#EAB308",
+  ];
 
-  return Array.from({ length: days }, (_, i) => {
-    return new Date(year, month, i + 1);
+  // const normalizeBubbleData = (chapters = []) => {
+  //   return chapters.map((item, index) => {
+  //     const point = item.data?.[0];
+  //     // convert date → day number
+  //   //    if (!point?.x) return null;
+
+  //   // const bubbleDate = new Date(point.x);
+
+  //   // // find matching axis date index
+  //   // const axisIndex = axisDates.findIndex(d =>
+  //   //   d.toDateString() === bubbleDate.toDateString()
+  //   // );
+  //   // console.log("axisIndex" ,axisIndex);
+    
+  //     const day = point?.x ? new Date(point.x).getDate() : index + 1;
+  //     return {
+  //       label: item.label || `Ch-${index + 1}`,
+  //       date: point?.x, // Store actual date for tooltip
+  //       data: [
+  //         {
+  //           x: day, // X is day number
+  //           y: point?.y ?? 0,
+  //           r: point?.y*3 ?? 8,
+  //         },
+  //       ],
+  //       backgroundColor: chartColors[index % chartColors.length],
+  //       hoverBackgroundColor: chartColors[index % chartColors.length],
+  //     };
+  //   });
+  // };
+
+  const normalizeBubbleData = (chapters = []) => {
+  return chapters.map((item, index) => {
+    return {
+      label: item.label || `Ch-${index + 1}`,
+      data: item.data.map((point) => {
+        const bubbleDate = new Date(point.x);
+
+        // find matching axis index
+        const axisIndex = axisDates.findIndex(
+          (d) => d.toDateString() === bubbleDate.toDateString()
+        );
+
+        return {
+          x: axisIndex !== -1 ? axisIndex + 1 : 0, // map to axis position
+          y: point?.y ?? 0,
+          r: (point?.y ?? 1) * 5,
+        };
+      }),
+      backgroundColor: chartColors[index % chartColors.length],
+      hoverBackgroundColor: chartColors[index % chartColors.length],
+    };
   });
 };
 
-const axisDates =
-  filter === "week" ? getWeekDates() : getMonthDates();
+
+  const data = {
+    datasets: normalizeBubbleData(most_used_chapters),
+  };
 
 
   const options = {
