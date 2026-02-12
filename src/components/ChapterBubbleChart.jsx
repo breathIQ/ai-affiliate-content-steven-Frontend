@@ -171,8 +171,8 @@ const getWeekDates = () => {
       // },
       x: {
           grid: { display: false },
-          min: 1,
-          max: axisDates.length,
+         min: 0, 
+  max: axisDates.length - 1,
 
           // ticks: {
           //   color: "#9CA3AF",
