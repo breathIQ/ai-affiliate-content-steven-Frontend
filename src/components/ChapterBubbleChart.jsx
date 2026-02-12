@@ -139,9 +139,10 @@ const getWeekDates = () => {
         );
 
         return {
-          x: axisIndex !== -1 ? axisIndex + 1 : 0, // map to axis position
+          x: axisIndex !== -1 ? axisIndex  : 0, // map to axis position
           y: point?.y ?? 0,
           r: (point?.y ?? 1) * 5,
+          date: point.x
         };
       }),
       backgroundColor: chartColors[index % chartColors.length],
@@ -173,21 +174,29 @@ const getWeekDates = () => {
           min: 1,
           max: axisDates.length,
 
-          ticks: {
-            color: "#9CA3AF",
-            callback: (value) => {
-              const date = axisDates[value - 1];
-              if (!date) return "";
+          // ticks: {
+          //   color: "#9CA3AF",
+          //   callback: (value) => {
+          //     const date = axisDates[value - 1];
+          //     if (!date) return "";
 
-              return filter === "week"
-                ? date.toLocaleDateString(undefined, {  day: "numeric",
-                    month: "short", })
-                : date.toLocaleDateString(undefined, {
-                    day: "numeric",
-                    month: "short",
-                  });
-            },
-          },
+          //     return filter === "week"
+          //       ? date.toLocaleDateString(undefined, {  day: "numeric",
+          //           month: "short", })
+          //       : date.toLocaleDateString(undefined, {
+          //           day: "numeric",
+          //           month: "short",
+          //         });
+          //   },
+          // },
+          ticks: {
+    color: "#9CA3AF",
+    callback: function(value) {
+      const date = axisDates[value]; // value corresponds to the index
+      if (!date) return "";
+      return date.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+    },
+  },
         },
 
 
@@ -203,21 +212,35 @@ const getWeekDates = () => {
     },
     plugins: {
       legend: { display: false },
-      tooltip: {
-        callbacks: {
-          title: (items) => {
-                        // console.log(items , "<<<");
-            if (!items.length) return "";
-            const date = new Date(items[0].dataset.date);
-            return `Date: ${date.toLocaleDateString()}`;
-          },
-          label: (ctx) =>{
-            // console.log(ctx , "<<<");
+      // tooltip: {
+      //   callbacks: {
+      //     title: (items) => {
+      //                   // console.log(items , "<<<");
+      //       if (!items.length) return "";
+      //       const date = new Date(items[0].dataset.date);
+      //       return `Date: ${date.toLocaleDateString()}`;
+      //     },
+      //     label: (ctx) =>{
+      //       // console.log(ctx , "<<<");
 
-            return `${ctx.dataset.label} → Usage: ${ctx.raw.y}`;
-          },
-        },
-      },
+      //       return `${ctx.dataset.label} → Usage: ${ctx.raw.y}`;
+      //     },
+      //   },
+      // },
+      tooltip: {
+  callbacks: {
+    title: (context) => {
+      if (!context.length) return "";
+      // Get the 'date' property we added to the point in normalizeBubbleData
+      const dateStr = context[0].raw.date; 
+      const date = new Date(dateStr);
+      return `Date: ${date.toLocaleDateString()}`;
+    },
+    label: (ctx) => {
+      return `${ctx.dataset.label} → Usage: ${ctx.raw.y}`;
+    },
+  },
+},
     },
    
   };
