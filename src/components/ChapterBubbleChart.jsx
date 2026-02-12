@@ -52,34 +52,33 @@ export default function ChapterBubbleChart({ useddetails }) {
   // console.log(details?.most_used_chapters);
   const most_used_chapters = details?.most_used_chapters || [];
 
-const getMonthDates = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
+  const getMonthDates = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
 
-  const days = new Date(year, month + 1, 0).getDate();
+    const days = new Date(year, month + 1, 0).getDate();
 
-  return Array.from({ length: days }, (_, i) => {
-    return new Date(year, month, i + 1);
-  });
-};
+    return Array.from({ length: days }, (_, i) => {
+      return new Date(year, month, i + 1);
+    });
+  };
 
-const getWeekDates = () => {
-  const today = new Date();
+  const getWeekDates = () => {
+    const today = new Date();
 
-  // start of current week (Sunday)
-  const start = new Date(today);
-  start.setDate(today.getDate() - today.getDay());
+    // start of current week (Sunday)
+    const start = new Date(today);
+    start.setDate(today.getDate() - today.getDay());
 
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    return d;
-  });
-};
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      return d;
+    });
+  };
 
-  const axisDates =
-  filter === "week" ? getWeekDates() : getMonthDates();
+  const axisDates = filter === "week" ? getWeekDates() : getMonthDates();
 
   const chartColors = [
     "#10B981",
@@ -94,112 +93,141 @@ const getWeekDates = () => {
     "#EAB308",
   ];
 
-  // const normalizeBubbleData = (chapters = []) => {
-  //   return chapters.map((item, index) => {
-  //     const point = item.data?.[0];
-  //     // convert date → day number
-  //   //    if (!point?.x) return null;
-
-  //   // const bubbleDate = new Date(point.x);
-
-  //   // // find matching axis date index
-  //   // const axisIndex = axisDates.findIndex(d =>
-  //   //   d.toDateString() === bubbleDate.toDateString()
-  //   // );
-  //   // console.log("axisIndex" ,axisIndex);
-    
-  //     const day = point?.x ? new Date(point.x).getDate() : index + 1;
-  //     return {
-  //       label: item.label || `Ch-${index + 1}`,
-  //       date: point?.x, // Store actual date for tooltip
-  //       data: [
-  //         {
-  //           x: day, // X is day number
-  //           y: point?.y ?? 0,
-  //           r: point?.y*3 ?? 8,
-  //         },
-  //       ],
-  //       backgroundColor: chartColors[index % chartColors.length],
-  //       hoverBackgroundColor: chartColors[index % chartColors.length],
-  //     };
-  //   });
-  // };
-
   const normalizeBubbleData = (chapters = []) => {
-  return chapters.map((item, index) => {
-    return {
-      label: item.label || `Ch-${index + 1}`,
-      date: item.data?.[0]?.x || null,
-      data: item.data.map((point) => {
-        const bubbleDate = new Date(point.x);
+    return chapters.map((item, index) => {
+      return {
+        label: item.label || `Ch-${index + 1}`,
+        date: item.data?.[0]?.x || null,
+        data: item.data.map((point) => {
+          const bubbleDate = new Date(point.x);
 
-        // find matching axis index
-        const axisIndex = axisDates.findIndex(
-          (d) => d.toDateString() === bubbleDate.toDateString()
-        );
+          // find matching axis index
+          const axisIndex = axisDates.findIndex(
+            (d) => d.toDateString() === bubbleDate.toDateString(),
+          );
 
-        return {
-          x: axisIndex !== -1 ? axisIndex  : 0, // map to axis position
-          y: point?.y ?? 0,
-          r: (point?.y ?? 1) * 5,
-          date: point.x
-        };
-      }),
-      backgroundColor: chartColors[index % chartColors.length],
-      hoverBackgroundColor: chartColors[index % chartColors.length],
-    };
-  });
-};
-
+          return {
+            x: axisIndex !== -1 ? axisIndex : 0, // map to axis position
+            y: point?.y ?? 0,
+            r: (point?.y ?? 1) * 5,
+            date: point.x,
+          };
+        }),
+        backgroundColor: chartColors[index % chartColors.length],
+        hoverBackgroundColor: chartColors[index % chartColors.length],
+      };
+    });
+  };
 
   const data = {
     datasets: normalizeBubbleData(most_used_chapters),
   };
 
-
   const options = {
     responsive: true,
     maintainAspectRatio: false,
+    layout: {
+    padding: {
+      bottom: 20 // Adjust this value if the rotated years are touching the legend
+    }
+  },
     scales: {
-      // x: {
-      //   grid: { display: false },
-      //   ticks: {
-      //     color: "#9CA3AF",
-      //   },
-      //   min: 0,
-      //   max: filter === "week" ? 7 : 31,
-      // },
-      x: {
-          grid: { display: false },
-         min: 0, 
+    //   x: {
+    //     type: "linear",
+    //     grid: { display: false },
+    //     min: 0,
+    //     max: axisDates.length - 1,
+    //     //   color: "#9CA3AF",
+    //     //   callback: (value) => {
+    //     //     const date = axisDates[value - 1];
+    //     //     if (!date) return "";
+
+    //     //     return filter === "week"
+    //     //       ? date.toLocaleDateString(undefined, {  day: "numeric",
+    //     //           month: "short", })
+    //     //       : date.toLocaleDateString(undefined, {
+    //     //           day: "numeric",
+    //     //           month: "short",
+    //     //         });
+    //     //   },
+    //     // },
+    //     ticks: {
+    //       color: "#9CA3AF",
+    //       autoSkip: true, 
+    // // ✅ Adjusting this limit fixes the crowding you saw in your image
+    // maxTicksLimit: filter === "week" ? 7 : 20, 
+    // // ✅ Ensures the labels stay horizontal
+    // maxRotation: 0,
+    // minRotation: 0,
+    //       callback: function (value) {
+    //         const date = axisDates[value]; // value corresponds to the index
+    //         if (!date) return "";
+    //         return date.toLocaleDateString(undefined, {
+    //           day: "numeric",
+    //           month: "short",
+    //         });
+    //       },
+    //     },
+    //   },
+// x: {
+//   type: 'linear',
+//   grid: { display: false },
+//   min: 0,
+//   max: axisDates.length - 1,
+//   ticks: {
+//     color: "#9CA3AF",
+//     // 1. Rotation settings
+//     minRotation: 45, // Rotates labels to 45 degrees
+//     maxRotation: 45,
+    
+//     // 2. Overlap & Skipping logic
+//     autoSkip: true, 
+//     maxTicksLimit: filter === "week" ? 7 : 20, // Limits total labels to prevent crowding
+    
+//     callback: function(value, index, values) {
+//       const date = axisDates[Math.round(value)];
+//       if (!date) return "";
+
+//       // 3. Optional: Logic to hide the second-to-last label if it's too close to the end
+//       const isLast = index === values.length - 1;
+//       const isSecondToLast = index === values.length - 2;
+      
+//       // If the second to last tick is very close to the end (e.g., within 2 days), skip it
+//       // if (isSecondToLast && (axisDates.length - 1 - value) < 3) {
+//       //   return "";
+//       // }
+
+//       return date.toLocaleDateString(undefined, { 
+//         day: "numeric", 
+//         month: "short",
+//       });
+//     },
+//   },
+// },
+x: {
+  type: 'linear',
+  grid: { display: false },
+  // ✅ Offset adds padding to the start and end of the axis
+  // offset: true, 
+  min: 0,
   max: axisDates.length - 1,
-
-          // ticks: {
-          //   color: "#9CA3AF",
-          //   callback: (value) => {
-          //     const date = axisDates[value - 1];
-          //     if (!date) return "";
-
-          //     return filter === "week"
-          //       ? date.toLocaleDateString(undefined, {  day: "numeric",
-          //           month: "short", })
-          //       : date.toLocaleDateString(undefined, {
-          //           day: "numeric",
-          //           month: "short",
-          //         });
-          //   },
-          // },
-          ticks: {
+  ticks: {
     color: "#9CA3AF",
+    // ✅ This forces the chart to attempt to show every single index
+    stepSize: 1, 
+    autoSkip: false, // Prevents Chart.js from hiding dates
+    minRotation: 45,
+    maxRotation: 45,
     callback: function(value) {
-      const date = axisDates[value]; // value corresponds to the index
+      const date = axisDates[Math.round(value)];
       if (!date) return "";
-      return date.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+      return date.toLocaleDateString(undefined, { 
+        day: "numeric", 
+        month: "short",
+      });
     },
   },
-        },
-
-
+},
       y: {
         beginAtZero: true,
         grid: {
@@ -228,28 +256,79 @@ const getWeekDates = () => {
       //   },
       // },
       tooltip: {
-  callbacks: {
-    title: (context) => {
-      if (!context.length) return "";
-      // Get the 'date' property we added to the point in normalizeBubbleData
-      const dateStr = context[0].raw.date; 
-      const date = new Date(dateStr);
-      return `Date: ${date.toLocaleDateString()}`;
+        callbacks: {
+          title: (context) => {
+            if (!context.length) return "";
+            // Get the 'date' property we added to the point in normalizeBubbleData
+            const dateStr = context[0].raw.date;
+            const date = new Date(dateStr);
+            return `Date: ${date.toLocaleDateString()}`;
+          },
+          label: (ctx) => {
+            return `${ctx.dataset.label} → Usage: ${ctx.raw.y}`;
+          },
+        },
+      },
     },
-    label: (ctx) => {
-      return `${ctx.dataset.label} → Usage: ${ctx.raw.y}`;
-    },
-  },
-},
-    },
-   
   };
+
+//   const options = {
+//   responsive: true,
+//   maintainAspectRatio: false,
+//   scales: {
+//     x: {
+//       // type: 'linear', // Ensure this is linear to use indices
+//       grid: { display: false },
+//       min: 0,
+//       max: axisDates.length - 1,
+//       ticks: {
+//         color: "#9CA3AF",
+//         // ✅ This prevents dates from overlapping
+//        autoSkip: true, 
+//     // ✅ Adjusting this limit fixes the crowding you saw in your image
+//     maxTicksLimit: filter === "week" ? 7 : 8, 
+//     // ✅ Ensures the labels stay horizontal
+//     maxRotation: 0,
+//     minRotation: 0,
+//         callback: function(value) {
+//           console.log("value",axisDates ,value);
+          
+//           const date = axisDates[value];
+//           if (!date) return "";
+//           return date.toLocaleDateString(undefined, { 
+//             day: "numeric", 
+//             month: "short" 
+//           });
+//         },
+//       },
+//     },
+//     y: {
+//       beginAtZero: true,
+//       suggestedMax: 5, // Gives some breathing room at the top
+//       grid: {
+//         color: "#F3F4F6",
+//         borderDash: [5, 5],
+//       },
+//     },
+//   },
+//   plugins: {
+//     legend: { display: false },
+//     tooltip: {
+//       callbacks: {
+//         title: (context) => {
+//           const dateStr = context[0].raw.fullDate;
+//           return `Date: ${new Date(dateStr).toLocaleDateString()}`;
+//         },
+//         label: (ctx) => `${ctx.dataset.label} → Usage: ${ctx.raw.y}`,
+//       },
+//     },
+//   },
+// };
 
   const legends = most_used_chapters.map((item, index) => ({
     label: item.label || `Ch-${index + 1}`,
     color: chartColors[index % chartColors.length],
   }));
-
 
   return (
     <div className="bg-white rounded-xl shadow p-5 w-full h">
@@ -272,7 +351,9 @@ const getWeekDates = () => {
           </button>
         </div>
       </div>
-      <div className="h-[300px]">
+      <div style={filter != "week" ?{overflowX:"scroll"}:{}}>
+
+      <div className={`h-[300px] ${filter != "week" ? "w-[700px]":""} `}>
         {loading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50">
             Loading...
@@ -280,6 +361,7 @@ const getWeekDates = () => {
         ) : (
           <Bubble data={data} options={options} />
         )}
+      </div>
       </div>
       <div className="flex flex-wrap gap-x-10 gap-y-4 pt-4 mt-0 text-sm text-gray-600">
         {legends.map((item, index) => (

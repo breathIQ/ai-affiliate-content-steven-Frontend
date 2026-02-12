@@ -10,7 +10,6 @@ import { instagramAccountLink } from "../services/socialMediaAuth.api";
 import { tiktokAccountLink } from "../services/socialMediaAuth.api";
 
 export default function DashboardOverview({ data }) {
-  console.log("DashboardOverview data:", data);
   const instagramLinkAccount = async () => {
     try {
       const res = await instagramAccountLink();
