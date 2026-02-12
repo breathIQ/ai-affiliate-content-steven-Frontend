@@ -92,7 +92,7 @@ export default function RecentPostsTable({
       </div>
 
       {/* Table */}
-      <div className="overflow-auto">
+      <div className="overflow-">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-500">
             <tr>
