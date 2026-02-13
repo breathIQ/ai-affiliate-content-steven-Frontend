@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { CheckmarkIcon } from "react-hot-toast";
 import { getSocialMediaStatus, instagramAccountLink, tiktokAccountLink } from "../../services/socialMediaAuth.api";
 import toast from "react-hot-toast";
+import { FaInfoCircle } from "react-icons/fa";
 
 export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
   const [platforms, setPlatforms] = useState({
@@ -51,17 +52,20 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
   };
 
   const handleSubmit = () => {
-    if (!platforms.instagram && !platforms.tiktok) {
-      toast.error("Please select at least one platform to publish");
+    const trimmedLink = reviewLink.trim();
+
+    // ✅ Only validate if user entered something
+    if (trimmedLink) {
+     const amazonRegex = /^https:\/\/(www\.)?amazon\.com/;
+
+    if (!amazonRegex.test(trimmedLink)) {
+      toast.error("Review link must start with https://amazon.com or https://www.amazon.com");
       return;
     }
-    if (!reviewLink.trim()) {
-      setError("Review link is required");
-      return;
     }
 
-    if (!isValidUrl(reviewLink.trim())) {
-      setError("Please enter a valid URL (https://example.com)");
+    if (!platforms.instagram && !platforms.tiktok) {
+      toast.error("Please select at least one platform to publish");
       return;
     }
     console.log("Submitting with platforms:", platforms, "and reviewLink:", reviewLink);
@@ -70,7 +74,6 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
       reviewLink: reviewLink.trim(),
     });
 
-    setError("");
     onClose();
   };
 
@@ -204,8 +207,32 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
 
           {/* Review Link */}
           <div>
-            <label className="text-sm font-medium mb-1 block">
-              Review Link <span className="text-red-500">*</span>
+            <label className="text-sm font-medium mb-1 flex items-center">
+              Amazon Review Link
+              <div className="relative group cursor-pointer inline-block ms-2">
+                <span className="text-gray-400 hover:text-gray-600">
+                  <FaInfoCircle className="text-md" />
+                </span>
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2
+                hidden group-hover:block
+                bg-black text-white text-xs px-3 py-2 rounded-md
+                w-56 text-center z-50"
+                >
+                  Kindly enter the CO2 book review URL in the text field provided below.
+
+                  {/* Notch / Arrow */}
+                  <div
+                    className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0"
+                    style={{
+                      borderLeft: "7px solid transparent",
+                      borderRight: "7px solid transparent",
+                      borderTop: "7px solid black",
+                      borderBottom: "0",
+                    }}
+                  />
+                </div>
+              </div>
             </label>
 
             <input
@@ -214,18 +241,9 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
               value={reviewLink}
               onChange={(e) => {
                 setReviewLink(e.target.value);
-                setError("");
               }}
-              className={`w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 ${error
-                ? "border-red-500 focus:ring-red-500"
-                : "focus:ring-purple-500"
-                }`}
-              required
+              className={`w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"`}
             />
-
-            {error && (
-              <p className="text-xs text-red-500 mt-1">{error}</p>
-            )}
           </div>
 
           {/* Publish To */}
@@ -315,11 +333,7 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
 
           <button
             onClick={handleSubmit}
-            disabled={!reviewLink.trim() || !isValidUrl(reviewLink.trim())}
-            className={`px-4 py-2 text-sm rounded-md text-white ${reviewLink.trim() && isValidUrl(reviewLink.trim())
-              ? "bg-purple-600 hover:bg-purple-700"
-              : "bg-gray-400 cursor-not-allowed"
-              }`}
+            className={`px-4 py-2 text-sm rounded-md text-white bg-purple-600 hover:bg-purple-700`}
           >
             Publish
           </button>
