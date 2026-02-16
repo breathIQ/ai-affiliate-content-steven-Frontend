@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { deletePost } from "../services/post.api";
+import { deletePost, rePost } from "../services/post.api";
 import ConfirmDeleteModal from "./modals/ConfirmDeleteModal";
+import { FaRetweet } from "react-icons/fa";
 
 const statusStyles = {
   Published: "bg-green-100 text-green-700",
@@ -70,6 +71,22 @@ export default function RecentPostsTable({
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
+
+  const handleRepost = async (id) => {
+    try {
+      const res = await rePost(id);
+      if (res?.success) {
+        toast.success(res?.message || "Post reposted successfully");
+        loadPost();
+      } else {
+        toast.error(res?.message || "Failed to repost");
+      }
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.error || err?.message || "Something went wrong"
+      );
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm border">
@@ -223,6 +240,15 @@ export default function RecentPostsTable({
                           onClick={(e) => e.stopPropagation()}
                           className="absolute right-[0px] mt-[-5px] w-36 bg-white border rounded-lg shadow-lg z-50"
                         >
+                          {item.status.toLowerCase() === "failed" && user?.role_id == 2 && (
+                            <button
+                              className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-yellow-50"
+                              onClick={() => handleRepost(item.id)}
+                            >
+                              <FaRetweet size={22} />
+                              Repost
+                            </button>
+                          )}
                           <button
                             className="w-full font-bold text-gray-600 flex align-center gap-2 px-4 py-2 hover:bg-gray-50"
                             onClick={() => {

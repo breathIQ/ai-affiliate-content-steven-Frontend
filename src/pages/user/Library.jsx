@@ -28,7 +28,7 @@ export default function DraftPostPage({
   const [chapter, setChapter] = useState(null);
   const [aiModel, setAiModel] = useState("");
   const [hashtagInput, setHashtagInput] = useState("");
-  const [script, setScript] = useState("");
+  // const [script, setScript] = useState("");
   const [viewMedia, setViewMedia] = useState([]); // keep for edit mode UI (we'll fill it)
   const [userData, setUser] = useState({});
   const [selectedVideo, setSelectedVideo] = useState(null);
@@ -106,7 +106,7 @@ export default function DraftPostPage({
 
         // Prefill fields
         setCaption(post.caption || "");
-        setScript(post.script || "");
+        // setScript(post.script || "");
         setAiModel(post.ai_model || "");
         setUser(post.user || "");
 
@@ -163,7 +163,7 @@ export default function DraftPostPage({
 
   const hasUnsavedData =
     !isEditMode &&
-    (caption || script || files.length > 0 || hashtags.length > 0);
+    (caption || files.length > 0 || hashtags.length > 0);
 
   useEffect(() => {
     if (!hasUnsavedData) return;
@@ -184,7 +184,7 @@ export default function DraftPostPage({
     if (!generatedData) return;
 
     setCaption(generatedData.caption || "");
-    setScript(generatedData.script || "");
+    // setScript(generatedData.script || "");
 
     if (generatedData.hashtags) {
       const tagsArray = generatedData.hashtags
@@ -225,7 +225,7 @@ export default function DraftPostPage({
   const { handleSubmit } = useForm();
 
   const captionWords = caption.trim().split(/\s+/).filter(Boolean).length;
-  const scriptWords = script.trim().split(/\s+/).filter(Boolean).length;
+  // const scriptWords = script.trim().split(/\s+/).filter(Boolean).length;
 
   // ✅ Upload and store as {type:file} in mediaItems, also keep files state updated
   const uploadFiles = async (e) => {
@@ -377,29 +377,29 @@ export default function DraftPostPage({
     };
   }, []);
 
-  const handlePublishSubmit = async ({ platforms, reviewLink }) => {
+  const handlePublishSubmit = async ({ platforms }) => {
     try {
       const formData = new FormData();
 
       formData.append("chapter_id", chapter?.id);
       formData.append("caption", caption);
-      formData.append("script", script);
+      // formData.append("script", script);
       formData.append("media_assets", mediaType);
       formData.append("status", "published");
       formData.append("ai_model", aiModel);
       formData.append("ai_prompt", generatedData?.ai_prompt);
 
-      if (reviewLink) {
-        formData.append("affiliate_url", reviewLink);
-      }
+      // if (reviewLink) {
+      //   formData.append("affiliate_url", reviewLink);
+      // }
 
       // ✅ media payload exactly like screenshot:
       // media[0][file] = File OR URL string
       // media[0][media_order] = 1
       const indexesToSend =
-      mediaType === "single"
-        ? selectedMedia.slice(0, 1) // only first selected
-        : selectedMedia;
+        mediaType === "single"
+          ? selectedMedia.slice(0, 1) // only first selected
+          : selectedMedia;
 
       const uniqueSelected = Array.from(new Set(indexesToSend));
 
@@ -746,11 +746,10 @@ export default function DraftPostPage({
           </div>
 
           {/* Script */}
-          <div>
+          {/* <div>
             <div className="flex justify-between mb-1">
               <label className="text-sm font-medium">
                 Script:
-                {/* (For Video Post): */}
               </label>
               <span className="text-xs text-gray-400">{scriptWords} words</span>
             </div>
@@ -761,10 +760,7 @@ export default function DraftPostPage({
               rows={8}
               className="w-full border rounded-lg p-3 text-sm focus:ring-1 focus:ring-purple-500"
             />
-            {/* <p className="text-xs text-gray-400 text-right mt-1">
-              Text inside [ ] brackets will be shown as On-Screen Text.
-            </p> */}
-          </div>
+          </div> */}
         </div>
 
         <PublishModal

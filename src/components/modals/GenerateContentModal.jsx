@@ -5,6 +5,7 @@ import { FaPlus, FaInfoCircle } from "react-icons/fa";
 import { generateAIPost } from "../../services/post.api";
 import { useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useLoader } from "../../context/LoaderContext";
 
 export default function GenerateContentModal({ setGeneratedData }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +14,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
   const [searchParams] = useSearchParams();
   const generate = searchParams.get("generate");
   const isGenerate = generate === "true";
+  const { profile } = useLoader();
 
   const {
     register,
@@ -174,7 +176,8 @@ export default function GenerateContentModal({ setGeneratedData }) {
 
       {/* Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        // <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
           {/* Overlay */}
           <div
             className="absolute inset-0 bg-black/40"
@@ -182,7 +185,8 @@ export default function GenerateContentModal({ setGeneratedData }) {
           />
 
           {/* Modal Box */}
-          <div className="relative bg-white w-full max-w-xl h-screen rounded-xl shadow-lg z-50 overflow-y-auto">
+          {/* <div className="relative bg-white w-full max-w-xl h-screen rounded-xl shadow-lg z-50 overflow-y-auto"> */}
+          <div className="relative bg-white w-full max-w-4xl max-h-[90vh] rounded-xl shadow-lg z-50 overflow-y-auto">
             {/* Header */}
             <div className="flex justify-between items-center px-6 py-4 border-b">
               <h2 className="text-lg font-semibold">Generate Content</h2>
@@ -223,49 +227,51 @@ export default function GenerateContentModal({ setGeneratedData }) {
                 </div>
 
                 {/* AI Model */}
-                <div>
-                  <label className="text-sm font-medium mb-1 block">
-                    AI Model <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    {...register("model", {
-                      required: "AI model is required",
-                    })}
-                    className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  >
-                    <option value="gpt-4-turbo">ChatGPT</option>
-                    <option value="claude-3-haiku-20240307">Claude</option>
-                    <option value="gemini">Gemini</option>
-                  </select>
-                  {errors.model && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.model.message}
-                    </p>
-                  )}
-                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">
+                      AI Model <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      {...register("model", {
+                        required: "AI model is required",
+                      })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="gpt-4-turbo">ChatGPT</option>
+                      <option value="claude-3-haiku-20240307">Claude</option>
+                      <option value="gemini">Gemini</option>
+                    </select>
+                    {errors.model && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.model.message}
+                      </p>
+                    )}
+                  </div>
 
-                {/* Text Format */}
-                <div>
-                  <label className="text-sm font-medium mb-1 block">
-                    Text Format <span className="text-red-500">*</span>
-                  </label>
+                  {/* Text Format */}
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">
+                      Text Format <span className="text-red-500">*</span>
+                    </label>
 
-                  <select
-                    {...register("text_format", {
-                      required: "Text format is required",
-                    })}
-                    className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  >
-                    <option value="">Select Text Format</option>
-                    <option value="paragraph">Paragraph</option>
-                    <option value="bullet_points">Bullet Points</option>
-                  </select>
+                    <select
+                      {...register("text_format", {
+                        required: "Text format is required",
+                      })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="">Select Text Format</option>
+                      <option value="paragraph">Paragraph</option>
+                      <option value="bullet_points">Bullet Points</option>
+                    </select>
 
-                  {errors.text_format && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.text_format.message}
-                    </p>
-                  )}
+                    {errors.text_format && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.text_format.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Custom Prompt */}
@@ -319,6 +325,13 @@ export default function GenerateContentModal({ setGeneratedData }) {
                     </p>
                   )}
                 </div>
+
+                <div>
+                    <label className="text-sm font-medium mb-1 block">
+                      Affiliate URL
+                    </label>
+                    <input type="text" value={profile?.affiliate_link || ''} disabled className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-100" />
+                  </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   {/* Post Type */}

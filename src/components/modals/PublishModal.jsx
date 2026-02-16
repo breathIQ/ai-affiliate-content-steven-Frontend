@@ -11,7 +11,7 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
   });
   const [mediaStatus, setMediaStatus] = useState({});
 
-  const [reviewLink, setReviewLink] = useState("");
+  // const [reviewLink, setReviewLink] = useState("");
   const [error, setError] = useState("");
 
   const instagramStatus = mediaStatus?.instagram;
@@ -52,26 +52,26 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
   };
 
   const handleSubmit = () => {
-    const trimmedLink = reviewLink.trim();
+    // const trimmedLink = reviewLink.trim();
 
-    // ✅ Only validate if user entered something
-    if (trimmedLink) {
-     const amazonRegex = /^https:\/\/(www\.)?amazon\.com/;
+    // // ✅ Only validate if user entered something
+    // if (trimmedLink) {
+    //  const amazonRegex = /^https:\/\/(www\.)?amazon\.com/;
 
-    if (!amazonRegex.test(trimmedLink)) {
-      toast.error("Review link must start with https://amazon.com or https://www.amazon.com");
-      return;
-    }
-    }
+    // if (!amazonRegex.test(trimmedLink)) {
+    //   toast.error("Review link must start with https://amazon.com or https://www.amazon.com");
+    //   return;
+    // }
+    // }
 
     if (!platforms.instagram && !platforms.tiktok) {
       toast.error("Please select at least one platform to publish");
       return;
     }
-    console.log("Submitting with platforms:", platforms, "and reviewLink:", reviewLink);
+    // console.log("Submitting with platforms:", platforms, "and reviewLink:", reviewLink);
     onSubmit({
       platforms,
-      reviewLink: reviewLink.trim(),
+      // reviewLink: reviewLink.trim(),
     });
 
     onClose();
@@ -206,7 +206,7 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
           </p>
 
           {/* Review Link */}
-          <div>
+          {/* <div>
             <label className="text-sm font-medium mb-1 flex items-center">
               Amazon Review Link
               <div className="relative group cursor-pointer inline-block ms-2">
@@ -220,8 +220,6 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
                 w-56 text-center z-50"
                 >
                   Kindly enter the CO2 book review URL in the text field provided below.
-
-                  {/* Notch / Arrow */}
                   <div
                     className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0"
                     style={{
@@ -244,7 +242,7 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
               }}
               className={`w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"`}
             />
-          </div>
+          </div> */}
 
           {/* Publish To */}
           <div>

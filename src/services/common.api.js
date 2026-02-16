@@ -9,3 +9,8 @@ export const getPrivacy = async () => {
   const res = await API.get("/content/privacy-policy");
   return res.data;
 };
+
+export const trackAffiliateClick = async (affiliateId) => {
+  const res = await API.get(`/affiliate-clicks/${affiliateId}`);
+  return res.data;
+};

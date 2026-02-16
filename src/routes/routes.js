@@ -12,6 +12,7 @@ import ResetPassword from "../pages/auth/ResetPassword"
 import NotFound from "../pages/NotFound"
 import Privacy from "../pages/common/Privacy"
 import Terms from "../pages/common/Terms"
+import AffiliateUserLandingPage from "../pages/AffiliateUserLandingPage"
 
 
 // const allRoutes = [
@@ -111,6 +112,8 @@ const allRoutes = [
     { component: <Library />, path: "/u/post/view/:id", role: "public" },
     { component: <Library />, path: "/admin/u/post/view/:id", role: "public" },
     // { component: <Library />, path: "/u/post/view/:id", role: 2 },
+
+    { component: <AffiliateUserLandingPage />, path: "/:affiliateId", role: "public" },
 
     // COMMON/NOT FOUND
     { component: <NotFound />, path: "/*", role: "public" },

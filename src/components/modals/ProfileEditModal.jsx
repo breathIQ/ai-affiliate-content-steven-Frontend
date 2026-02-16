@@ -57,27 +57,22 @@ export function ProfileEditModal({ isOpen, onClose }) {
   };
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !profile) return;
 
-    const loadProfile = async () => {
-      try {
-        // const profile = await getProfileByRole();
-        reset({
-          name: profile.name,
-          email: profile.email,
-          affiliate: profile.affiliate?.trim() || "",
-        });
+    reset({
+      name: profile?.name || "",
+      email: profile?.email || "",
+      affiliate_id: profile?.affiliate_id || "",
+      other_affiliate_id: profile?.other_affiliate_id ?? "",
+      amazon_link: profile?.amazon_link || "",
+    });
 
-        setImage(profile.avatar || DEFAULT_IMAGE);
-        setImageFile(null);
-        setSocial(profile.social_accounts);
-      } catch (err) {
-        console.error(err);
-      }
-    };
+    setImage(profile?.avatar || DEFAULT_IMAGE);
+    setImageFile(null);
+    setSocial(profile?.social_accounts || null);
 
-    loadProfile();
-  }, [isOpen, reset]);
+  }, [isOpen, profile, reset]);
+
 
   if (!isOpen) return null;
 
@@ -115,6 +110,9 @@ export function ProfileEditModal({ isOpen, onClose }) {
 
     // ✅ Only allowed field
     formData.append("name", data.name);
+    formData.append("amazon_link", data.amazon_link || "");
+    formData.append("other_affiliate_id", data.other_affiliate_id || "");
+    formData.append("affiliate_id", data.affiliate_id || "");
 
     // ✅ New avatar
     if (imageFile) {
@@ -139,10 +137,12 @@ export function ProfileEditModal({ isOpen, onClose }) {
       setLoading(false);
     }
   };
-
+console.log("profile:", profile)
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white max-w-[550px] w-full rounded-xl shadow-lg p-5 relative">
+    // <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    // <div className="bg-white max-w-[550px] w-full rounded-xl shadow-lg p-5 relative"></div>
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 overflow-y-auto p-4">
+      <div className="bg-white max-w-[550px] w-full max-h-[90vh] overflow-y-auto rounded-xl shadow-lg p-5 relative">
         <button onClick={onClose} className="absolute right-4 top-4">
           <img src="/icons/ic-close-circle.svg" />
         </button>
@@ -218,23 +218,18 @@ export function ProfileEditModal({ isOpen, onClose }) {
         {/* Affiliate user?.role_id == 1 */}
         {user?.role_id == 2 && (
           <>
-            <label className="text-sm">Affiliate ID</label>
+            <label className="text-sm">Affiliate URL</label>
             <div className="flex items-center border rounded-md mb-4 bg-gray-100">
               {/* URL – always visible */}
               <span className="px-3 py-2 text-sm pe-0 shrink-0">
-                https://www.co2book.com/
+                https://www.co2body.com/
               </span>
 
               {/* INPUT – truncate when screen is small */}
               <input
-                {...register("affiliate")}
-                disabled
-                className="
-      flex-1 min-w-0
-      px-2 py-2 ps-0 text-sm
-      bg-gray-100 cursor-not-allowed
-      truncate
-    "
+                {...register("affiliate_id")}
+                disabled={Number(profile?.affiliate_id_editable) !== 1}
+                className={`flex-1 min-w-0 px-2 py-2 ps-0 text-sm`}
               />
 
               {/* Copy button – fixed */}
@@ -250,6 +245,33 @@ export function ProfileEditModal({ isOpen, onClose }) {
                 )}
               </button>
             </div>
+
+            <label className="text-sm">Affiliate ID</label>
+            <input
+              type="number"
+              min={0}
+              {...register("other_affiliate_id", { valueAsNumber: true })}
+              disabled={profile?.other_affiliate_id !== null && profile?.other_affiliate_id !== undefined}
+              className={`w-full border px-3 py-2 rounded-md mb-4`}
+            />
+
+            <label className="text-sm">Amazon Link</label>
+            <input
+              {...register("amazon_link", {
+                validate: (value) => {
+                  if (!value) return true; // not required
+                  return value.startsWith("https://www.amazon.com/")
+                    || "Link must start with https://www.amazon.com/";
+                },
+              })}
+              className={`w-full border px-3 py-2 rounded-md ${errors.amazon_link ? 'border-red-500 mb-0' : 'mb-4'}`}
+            />
+
+            {errors.amazon_link && (
+              <p className="text-xs text-red-500 mb-4">
+                {errors.amazon_link.message}
+              </p>
+            )}
 
           </>
         )}

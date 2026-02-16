@@ -57,7 +57,7 @@ export default function UsersLabs() {
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold">
-              {state?.name ||profile?.name|| "USER "}'s Posts
+              {state?.name ||profile?.name|| "USER"}'s Posts
             </h1>
             <p className="text-sm text-gray-500">
               View and manage all your posts in one place.
