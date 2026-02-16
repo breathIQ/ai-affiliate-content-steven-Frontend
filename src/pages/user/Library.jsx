@@ -438,6 +438,9 @@ export default function DraftPostPage({
         loadPost();
         setGeneratedData(null);
         setPublishOpen(false);
+        navigate("/u/library", {
+          state: { generate: false }  // navigation state
+        });
       }
     } catch (error) {
       console.error("CREATE POST ERROR ❌", error);

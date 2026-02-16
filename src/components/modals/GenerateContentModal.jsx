@@ -3,17 +3,15 @@ import { set, useForm } from "react-hook-form";
 import { getChapter } from "../../services/post.api";
 import { FaPlus, FaInfoCircle } from "react-icons/fa";
 import { generateAIPost } from "../../services/post.api";
-import { useSearchParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useLoader } from "../../context/LoaderContext";
 
 export default function GenerateContentModal({ setGeneratedData }) {
   const [isOpen, setIsOpen] = useState(false);
   const [chapters, setChapters] = useState([]);
+  const location = useLocation();
 
-  const [searchParams] = useSearchParams();
-  const generate = searchParams.get("generate");
-  const isGenerate = generate === "true";
   const { profile } = useLoader();
 
   const {
@@ -43,13 +41,13 @@ export default function GenerateContentModal({ setGeneratedData }) {
   //     : postType === "single"
   //       ? 1
   //       : 0;
-
   useEffect(() => {
-    if (isGenerate) {
+    if (location.state?.generate) {
       setIsOpen(true);
-      searchParams.delete("generate");
+    }else {
+      setIsOpen(false);
     }
-  }, [isGenerate]);
+  }, [location.state]);
 
   /* 🔹 Fetch chapters when modal opens */
   useEffect(() => {

@@ -32,7 +32,7 @@ export function ProfileEditModal({ isOpen, onClose }) {
     formState: { errors },
   } = useForm();
 
-  const affiliate = watch("affiliate");
+  const affiliate_id = watch("affiliate_id");
 
   const instagramLinkAccount = async () => {
     try {
@@ -76,8 +76,9 @@ export function ProfileEditModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(`https://www.co2book.com/${affiliate}`);
+  const copyLink = (e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(`https://co2body.com/${affiliate_id}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
@@ -222,7 +223,7 @@ console.log("profile:", profile)
             <div className="flex items-center border rounded-md mb-4 bg-gray-100">
               {/* URL – always visible */}
               <span className="px-3 py-2 text-sm pe-0 shrink-0">
-                https://www.co2body.com/
+                https://co2body.com/
               </span>
 
               {/* INPUT – truncate when screen is small */}
@@ -235,7 +236,7 @@ console.log("profile:", profile)
               {/* Copy button – fixed */}
               <button
                 type="button"
-                onClick={copyLink}
+                onClick={(e) => copyLink(e)}
                 className="px-3 w-[45px] shrink-0"
               >
                 {copied ? (

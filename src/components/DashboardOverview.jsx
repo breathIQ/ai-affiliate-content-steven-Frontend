@@ -5,11 +5,20 @@ import { Link, NavLink } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
 import AffiliateClicksChart from "./AffiliateClicksChart";
 import toast, { CheckmarkIcon } from "react-hot-toast";
-
+import { useNavigate } from "react-router-dom";
 import { instagramAccountLink } from "../services/socialMediaAuth.api";
 import { tiktokAccountLink } from "../services/socialMediaAuth.api";
 
 export default function DashboardOverview({ data }) {
+  const navigate = useNavigate();
+
+  const handleGenerateClick = () => {
+    // set any local state here if needed
+
+    navigate("/u/library", {
+      state: { generate: true }  // navigation state
+    });
+  };
   const instagramLinkAccount = async () => {
     try {
       const res = await instagramAccountLink();
@@ -49,9 +58,16 @@ export default function DashboardOverview({ data }) {
             <p className="text-sm mb-8 text-[#99A1B7]">
               Turn book chapters into ready-to-publish Instagram and TikTok content using AI.
             </p>
-            <Link to={"/u/library?generate=true"} className="bg-[#F8285A]  py-[10px] px-[16px] rounded-lg text-sm font-medium flex items-center gap-2 w-fit">
-              <FaPlus size={20} className="bg-[#ffffff24] p-[5px] rounded-[4px]" /> Generate Content
-            </Link>
+            <button
+              onClick={handleGenerateClick}
+              className="bg-[#F8285A] py-[10px] px-[16px] rounded-lg text-sm font-medium flex items-center gap-2 w-fit"
+            >
+              <FaPlus
+                size={20}
+                className="bg-[#ffffff24] p-[5px] rounded-[4px]"
+              />
+              Generate Content
+            </button>
             <h3 className="text-md mt-10 font-semibold">
               How the Referral Program Works
             </h3>
