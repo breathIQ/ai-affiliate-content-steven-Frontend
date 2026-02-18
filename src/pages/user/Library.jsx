@@ -509,7 +509,7 @@ export default function DraftPostPage({
             {!isEditMode && (
               <button
                 onClick={() => setPublishOpen(true)}
-                className={`bg-pink-500 text-white py-[10px] px-[16px] rounded-lg flex gap-2 ${hasFailedMedia ? "opacity-50 cursor-not-allowed" : ""}`}
+                className={`bg-purple-600 text-white py-[10px] px-[16px] rounded-lg flex gap-2 ${hasFailedMedia ? "opacity-50 cursor-not-allowed" : ""}`}
                 disabled={hasFailedMedia}
               >
                 <img src="/icons/publish.svg" /> Publish
@@ -543,7 +543,7 @@ export default function DraftPostPage({
             </label>
           </div>
 
-          {hasFailedMedia && (
+          {!hasFailedMedia && (
             <div
               style={{
                 background: "#b40606",
