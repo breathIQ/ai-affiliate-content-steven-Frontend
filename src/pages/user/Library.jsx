@@ -548,7 +548,7 @@ export default function DraftPostPage({
               style={{
                 background: "#b40606",
                 color: "#fff",
-                padding: "16px 20px",
+                padding: "10px 20px",
                 borderRadius: "4px",
                 marginTop: "12px",
                 display: "flex",
