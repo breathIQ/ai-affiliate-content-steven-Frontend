@@ -543,7 +543,7 @@ export default function DraftPostPage({
             </label>
           </div>
 
-          {!hasFailedMedia && (
+          {hasFailedMedia && (
             <div
               style={{
                 background: "#b40606",
