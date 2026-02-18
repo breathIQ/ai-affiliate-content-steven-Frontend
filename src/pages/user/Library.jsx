@@ -558,8 +558,9 @@ export default function DraftPostPage({
               }}
             >
               <img src="/icons/brokenImage.png" style={{width: '40px', height: '40px'}} />
-              <p>Some generated images failed to process due to {generatedData?.model} model server is down. Please regenerate them before publishing.
-                {/* <span role="button" className="bg-purple-600 border-purple-600 p-3 ms-2 rounded-md cursor-pointer" onClick={() => ''}>Generate Here</span> */}
+              <p>
+                Image processing failed because the {generatedData?.model} AI server is currently down. Please regenerate the images before publishing. 
+                <span role="button" style={{whiteSpace: 'nowrap'}} className="bg-purple-600 border-purple-600 p-[7px] text-[12px] ms-2 rounded-sm cursor-pointer" onClick={() => setGeneratedData(null)}>Click Here</span>
               </p>
             </div>
           )}
