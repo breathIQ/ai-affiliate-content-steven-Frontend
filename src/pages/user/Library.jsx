@@ -39,6 +39,8 @@ export default function DraftPostPage({
   // each item: { type: "file", file: File, preview: string } OR { type: "url", url: string, media_type?: "video"|"image" }
   const [mediaItems, setMediaItems] = useState([]);
 
+  console.log("mediaItems:", mediaItems);
+
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : {};
@@ -89,7 +91,9 @@ export default function DraftPostPage({
       });
 
 
-
+  const hasFailedMedia = mediaItems.some(
+    (item) => item.status === false
+  );
   useEffect(() => {
     if (!isEditMode) return;
 
@@ -209,6 +213,7 @@ export default function DraftPostPage({
         type: "url",
         url: img.image_url,
         media_type: "image",
+        status: img.status
       }));
 
       setMediaItems(urlItems);
@@ -504,7 +509,8 @@ export default function DraftPostPage({
             {!isEditMode && (
               <button
                 onClick={() => setPublishOpen(true)}
-                className="bg-pink-500 text-white py-[10px] px-[16px] rounded-lg flex gap-2"
+                className={`bg-pink-500 text-white py-[10px] px-[16px] rounded-lg flex gap-2 ${hasFailedMedia ? "opacity-50 cursor-not-allowed" : ""}`}
+                disabled={hasFailedMedia}
               >
                 <img src="/icons/publish.svg" /> Publish
               </button>
@@ -537,6 +543,24 @@ export default function DraftPostPage({
             </label>
           </div>
 
+          {hasFailedMedia && (
+            <div
+              style={{
+                background: "#b40606",
+                color: "#fff",
+                padding: "16px 20px",
+                borderRadius: "4px",
+                marginTop: "12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                width: "100%",
+              }}
+            >
+              <img src="/icons/brokenImage.png" style={{width: '40px', height: '40px'}} />
+              Some generated images failed to process due to {generatedData?.model} model server is down. Please review or regenerate them before publishing.
+            </div>
+          )}
           {/* MEDIA GRID */}
           <div className="flex gap-4 flex-wrap">
             {viewMedia.length > 0 &&
@@ -619,6 +643,7 @@ export default function DraftPostPage({
                         src={src}
                         className="w-full h-full object-cover cursor-pointer"
                         onClick={() => {
+                          if (hasFailedMedia) return;
                           setLightboxIndex(index);
                           setLightboxOpen(true);
                         }}
