@@ -558,7 +558,9 @@ export default function DraftPostPage({
               }}
             >
               <img src="/icons/brokenImage.png" style={{width: '40px', height: '40px'}} />
-              Some generated images failed to process due to {generatedData?.model} model server is down. Please review or regenerate them before publishing.
+              <p>Some generated images failed to process due to {generatedData?.model} model server is down. Please regenerate them before publishing.
+                {/* <span role="button" className="bg-purple-600 border-purple-600 p-3 ms-2 rounded-md cursor-pointer" onClick={() => ''}>Generate Here</span> */}
+              </p>
             </div>
           )}
           {/* MEDIA GRID */}
