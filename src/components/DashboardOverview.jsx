@@ -76,7 +76,7 @@ export default function DashboardOverview({ data }) {
             <p className="text-sm mb-0 text-[#99A1B7]">Sign up to become an official Carbogenetics affiliate.</p>
             <br />
             <p className="text-sm mb-0 text-[#99A1B7]">Receive Your Custom Referral Link</p>
-            <p className="text-sm mb-0 text-[#99A1B7]">You’ll get a personalized URL (for example: co2body.com/yourname).</p>
+            <p className="text-sm mb-0 text-[#99A1B7]">You’ll get a personalized URL (for example: affiliate.co2body.com/yourname).</p>
             <br />
             <p className="text-sm mb-0 text-[#99A1B7]">Share Educational Content</p>
             <p className="text-sm mb-0 text-[#99A1B7]">Create and schedule educational Instagram and TikTok posts using ideas, concepts, and excerpts from The Carbonated Body.</p>
