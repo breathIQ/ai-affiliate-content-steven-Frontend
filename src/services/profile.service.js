@@ -5,29 +5,29 @@ import { mapProfileResponse } from "./profile.mapper";
 export const getProfileByRole = async () => {
   const user = JSON.parse(localStorage.getItem("user"));
 
-  if (!user?.role_id) {
+  if (!Number(user?.role_id)) {
     throw new Error("User role not found");
   }
 
   let response;
 
-  if (user.role_id === 1) {
+  if (Number(user.role_id) === 1) {
     response = await getAdminProfile();
-  } else if (user.role_id === 2) {
+  } else if (Number(user.role_id) === 2) {
     response = await getUserProfile();
   }
 
-  return mapProfileResponse(response, user.role_id);
+  return mapProfileResponse(response, Number(Number(user.role_id)));
 };
 
 export const updateProfileByRole = async (formData) => {
   const user = JSON.parse(localStorage.getItem("user"));
 
-  if (user?.role_id === 1) {
+  if (Number(user?.role_id) === 1) {
     return updateAdminProfile(formData);
   }
 
-  if (user?.role_id === 2) {
+  if (Number(user?.role_id) === 2) {
     return updateUserProfile(formData);
   }
 
@@ -37,15 +37,15 @@ export const updateProfileByRole = async (formData) => {
 export const updatePasswordByRole = async (payload) => {
   const user = JSON.parse(localStorage.getItem("user"));
 
-  if (!user?.role_id) {
+  if (!Number(user?.role_id)) {
     throw new Error("User role not found");
   }
 
-  if (user.role_id === 1) {
+  if (Number(user.role_id) === 1) {
     return updateAdminPassword(payload);
   }
 
-  if (user.role_id === 2) {
+  if (Number(user.role_id) === 2) {
     return updateUserPassword(payload);
   }
 
