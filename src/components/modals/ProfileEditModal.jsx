@@ -78,7 +78,7 @@ export function ProfileEditModal({ isOpen, onClose }) {
 
   const copyLink = (e) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(`https://affiliate.co2body.com/${affiliate_id}`);
+    navigator.clipboard.writeText(`https://co2body.com/${affiliate_id}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
@@ -223,7 +223,7 @@ console.log("profile:", profile)
             <div className="flex items-center border rounded-md mb-4 bg-gray-100">
               {/* URL – always visible */}
               <span className="px-3 py-2 text-sm pe-0 shrink-0">
-                https://affiliate.co2body.com/
+                https://co2body.com/
               </span>
 
               {/* INPUT – truncate when screen is small */}
