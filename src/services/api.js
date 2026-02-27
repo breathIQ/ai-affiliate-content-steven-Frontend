@@ -39,9 +39,9 @@ API.interceptors.response.use(
     console.log(error);
     if (status === 401) {
       // Token expired / unauthorized
-      //   localStorage.removeItem("token");
-      // // Optional: redirect to login
-      //   window.location.href = "/login";
+        // localStorage.removeItem("token");
+      // Optional: redirect to login
+        // window.location.href = "/login";
     }
 
     if (status === 403) {

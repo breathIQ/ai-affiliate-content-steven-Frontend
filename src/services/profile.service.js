@@ -17,7 +17,7 @@ export const getProfileByRole = async () => {
     response = await getUserProfile();
   }
 
-  return mapProfileResponse(response, Number(Number(user.role_id)));
+  return mapProfileResponse(response, Number(user.role_id));
 };
 
 export const updateProfileByRole = async (formData) => {

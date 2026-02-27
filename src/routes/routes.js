@@ -15,62 +15,6 @@ import Terms from "../pages/common/Terms"
 import AffiliateUserLandingPage from "../pages/AffiliateUserLandingPage"
 
 
-// const allRoutes = [
-//     {
-//         component:<Dashboard/> ,
-//         path:"/"
-//     },
-//     {
-//         component:<Dashboard/> ,
-//         path:"/dashboard"
-//     },
-   
-//     {
-//         component:<UserDashboard/> ,
-//         path:"/u/dashboard"
-//     },
-//     {
-//         component:<UsersLabs/> ,
-//         path:"/u/library"
-//     },
-//     {
-//         component:<Library/> ,
-//         path:"/u/post/view/:id"
-//     },
-//     {
-//         component:<ResetPassword/> ,
-//         path:"/reset-password"
-//     },
-//     {
-//         component:<ViewPdf/> ,
-//         path:"/pdf-view"
-//     },
-//     {
-//         component:<NotFound/> ,
-//         path:"/*"
-//     },
-//     {
-//         component:<FileUpload/> ,
-//         path:"/files"
-//     },
-//     {
-//         component:<Users/> ,
-//         path:"/users"
-//     },
-//     {
-//         component:<Login/> ,
-//         path:"/admin/login"
-//     },
-//     {
-//         component:<Login/> ,
-//         path:"/login"
-//     },
-//     {
-//         component:<SignUpWithOTP/> ,
-//         path:"/signup"
-//     },
-// ]
-
 const allRoutes = [
     // PUBLIC ROUTES
     { component: <Login />, path: "/login", role: "public" },
