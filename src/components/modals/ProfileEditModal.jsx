@@ -256,7 +256,7 @@ console.log("profile:", profile)
               className={`w-full border px-3 py-2 rounded-md mb-4`}
             />
 
-            <label className="text-sm">Amazon Link</label>
+            <label className="text-sm">Amazon Link to Your Personal Review of the Book</label>
             <input
               {...register("amazon_link", {
                 validate: (value) => {
