@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
     return (
@@ -6,8 +7,8 @@ const Footer = () => {
             <div className="max-w-7xl mx-auto flex items-center justify-between text-[#6E6C81] text-[14px]">
                 <div>&copy; {new Date().getFullYear()}, The Carbonated Body. All Rights Reserved. Made by CV Infotech</div>
                 <div className="flex gap-4">
-                    <a href="/terms" className="hover:underline">Terms & Conditions</a>
-                    <a href="/privacy" className="hover:underline">Privacy Policy</a>
+                    <Link to="/terms" className="hover:underline">Terms & Conditions</Link>
+                    <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
                 </div>
             </div>
         </footer>

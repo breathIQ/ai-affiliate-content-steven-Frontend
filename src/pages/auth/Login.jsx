@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import InstagramLoginBtn from "./InstagramAuth";
 import TiktokLogin from "./TiktokAuth";
+import Footer from "../../components/Layout/Footer";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -132,7 +133,7 @@ export default function Login() {
     }
   };
 
-  return (
+  return (<>
     <div className="min-h-screen bg-white grid grid-cols-1 lg:grid-cols-2">
       {/* Left - Form Section */}
       <div className="flex items-center justify-center px-6 py-20">
@@ -300,5 +301,6 @@ export default function Login() {
         </div>
       </div>
     </div>
-  );
+    <Footer/>
+  </>);
 }
