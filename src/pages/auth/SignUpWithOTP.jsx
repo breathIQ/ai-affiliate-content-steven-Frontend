@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { apibase } from "../../services/contants";
 import { instagramSignin, tiktokSignin } from "../../services/socialMediaAuth.api";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import Footer from "../../components/Layout/Footer";
 
 export default function SignUpWithOTP() {
   const [step, setStep] = useState(1); // 1 = signup, 2 = otp
@@ -122,7 +123,7 @@ const validatePassword = (value) => {
     }
   };
 
-  return (
+  return (<>
     <div className="min-h-screen bg-white grid grid-cols-1 lg:grid-cols-2">
       {/* Left - Form */}
       <div className="flex items-center justify-center px-6 py-20">
@@ -311,5 +312,6 @@ const validatePassword = (value) => {
         </div>
       </div>
     </div>
-  );
+    <Footer/>
+  </>);
 }

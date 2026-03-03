@@ -5,6 +5,7 @@ import { apibase } from "../../services/contants";
 import toast from "react-hot-toast";
 import { useLocation } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import Footer from "../../components/Layout/Footer";
 
 export default function ResetPassword() {
   const { token } = useParams();
@@ -115,7 +116,7 @@ export default function ResetPassword() {
     }
   };
 
-  return (
+  return (<>
     <div className="min-h-screen bg-white grid grid-cols-1 lg:grid-cols-2">
       <div className="flex items-center justify-center px-6 py-20">
         <div className="w-full max-w-md bg-white rounded-xl shadow-lg border border-gray-100 p-8">
@@ -244,5 +245,6 @@ export default function ResetPassword() {
         </div>
       </div>
     </div>
-  );
+    <Footer/>
+  </>);
 }
