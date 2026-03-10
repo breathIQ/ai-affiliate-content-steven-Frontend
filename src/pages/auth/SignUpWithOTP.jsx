@@ -12,6 +12,7 @@ export default function SignUpWithOTP() {
   const [isLoading, setISloading] = useState(false); // 1 = signup, 2 = otp
   const [showPassword, setShowPassword] = useState(false);
 const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const [agreePolicy, setAgreePolicy] = useState(false);
 const [errors, setErrors] = useState({});
 const validateEmail = (email) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -40,6 +41,10 @@ const validateEmail = (email) => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    if (!agreePolicy) {
+      toast.error("Please agree to the Privacy Policy and Terms and Conditions.");
+      return;
+    }
     if (form.password !== form.password_confirmation) {
       toast.error("Passwords do not match");
       return;
@@ -230,6 +235,26 @@ const validatePassword = (value) => {
       {showConfirmPassword ? <FaEye /> : <FaEyeSlash />}
     </button>
   </div>
+</div>
+
+<div className="flex items-start gap-2 ">
+  <input
+    type="checkbox"
+    checked={agreePolicy}
+    onChange={(e) => setAgreePolicy(e.target.checked)}
+    className="accent-[#9333ea]"
+    style={{marginTop: '2px'}}
+  />
+  <label className="text-xs text-gray-600 leading-4">
+    I agree to the{" "}
+    <Link to="/privacy" className="text-purple-600 hover:underline">
+      Privacy Policy
+    </Link>{" "}
+    and{" "}
+    <Link to="/terms" className="text-purple-600 hover:underline">
+      Terms and Conditions
+    </Link>.
+  </label>
 </div>
 
 

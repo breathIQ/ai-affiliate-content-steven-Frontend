@@ -12,6 +12,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setISloading] = useState(false);
+  const [agreePolicy, setAgreePolicy] = useState(false);
     const [showPass, setShowPass] = useState(false);
   
   // View states: 'login' or 'forgot'
@@ -88,6 +89,10 @@ export default function Login() {
   // Handle Login
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!agreePolicy) {
+      toast.error("Please agree to the Privacy Policy and Terms and Conditions.");
+      return;
+    }
     try {
       setISloading(true);
       const res = await axios.post(
@@ -211,6 +216,26 @@ export default function Login() {
                   className="text-right text-sm text-purple-600 hover:text-purple-700 font-medium cursor-pointer"
                 >
                   Forgot Password?
+                </div>
+
+                <div className="flex items-start gap-2 ">
+                  <input
+                    type="checkbox"
+                    checked={agreePolicy}
+                    onChange={(e) => setAgreePolicy(e.target.checked)}
+                    className="accent-[#9333ea]"
+                    style={{marginTop: '2px'}}
+                  />
+                  <label className="text-xs text-gray-600 leading-4">
+                    I agree to the{" "}
+                    <Link to="/privacy" className="text-purple-600 hover:underline">
+                      Privacy Policy
+                    </Link>{" "}
+                    and{" "}
+                    <Link to="/terms" className="text-purple-600 hover:underline">
+                      Terms and Conditions
+                    </Link>.
+                  </label>
                 </div>
 
                 <button
