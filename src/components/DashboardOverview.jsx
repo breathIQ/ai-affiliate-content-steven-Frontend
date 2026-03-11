@@ -112,7 +112,7 @@ export default function DashboardOverview({ data }) {
             <p className="text-sm">Affiliate Clicks</p>
           </div>
 
-          <div role="button" onClick={() => window.open(data?.book_url, "_blank", "noopener,noreferrer")} className="col-span-2 bg-emerald-500 rounded-2xl p-6 text-white flex items-center justify-between relative">
+          {/* <div role="button" onClick={() => window.open(data?.book_url, "_blank", "noopener,noreferrer")} className="col-span-2 bg-emerald-500 rounded-2xl p-6 text-white flex items-center justify-between relative">
             <div className="w-[55%]">
               <h3 className="text-lg font-semibold mb-1">
                 <img src="/icons/ic-book-dashboard.svg" alt="book icon" className="inline-block mr-2" />
@@ -128,7 +128,7 @@ export default function DashboardOverview({ data }) {
               alt="book"
               className="absolute bottom-0 right-10 w-[170px] rounded-lg"
             />
-          </div>
+          </div> */}
           <div className="col-span-2 bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
 
             {/* Header */}
