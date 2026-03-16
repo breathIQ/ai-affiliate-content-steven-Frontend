@@ -382,7 +382,8 @@ export default function DraftPostPage({
     };
   }, []);
 
-  const handlePublishSubmit = async ({ platforms }) => {
+  const handlePublishSubmit = async (data) => {
+    const { platforms, ...tiktokSettings } = data;
     try {
       const formData = new FormData();
 
@@ -432,6 +433,42 @@ export default function DraftPostPage({
           formData.append(`platforms[${i}]`, key);
         }
       });
+
+      // ✅ Append TikTok settings ONLY if TikTok selected
+      if (platforms.tiktok) {
+
+        if (tiktokSettings.privacy_level) {
+          formData.append("privacy_level", tiktokSettings.privacy_level);
+        }
+
+        if (tiktokSettings.allow_comment !== undefined) {
+          formData.append("allow_comment", tiktokSettings.allow_comment);
+        }
+
+        if (tiktokSettings.allow_duet !== undefined) {
+          formData.append("allow_duet", tiktokSettings.allow_duet);
+        }
+
+        if (tiktokSettings.allow_stitch !== undefined) {
+          formData.append("allow_stitch", tiktokSettings.allow_stitch);
+        }
+
+        if (tiktokSettings.content_disclose !== undefined) {
+          formData.append("content_disclose", tiktokSettings.content_disclose);
+        }
+
+        if (tiktokSettings.content_disclose) {
+
+          if (tiktokSettings.brand_organic !== undefined) {
+            formData.append("brand_organic", tiktokSettings.brand_organic);
+          }
+
+          if (tiktokSettings.branded_content !== undefined) {
+            formData.append("branded_content", tiktokSettings.branded_content);
+          }
+
+        }
+      }
 
       const response = await createPost(formData);
 
