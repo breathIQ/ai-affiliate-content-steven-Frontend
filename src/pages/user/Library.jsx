@@ -463,7 +463,8 @@ export default function DraftPostPage({
             formData.append("brand_organic", tiktokSettings.brand_organic);
           }
 
-          if (tiktokSettings.branded_content !== undefined) {
+          if (tiktokSettings.branded_content !== undefined &&
+      tiktokSettings.privacy_level !== "SELF_ONLY") {
             formData.append("branded_content", tiktokSettings.branded_content);
           }
 
@@ -543,7 +544,7 @@ export default function DraftPostPage({
               </h1>
             </div>
 
-            {!isEditMode && (
+            {/* {!isEditMode && ( */}
               <button
                 onClick={() => setPublishOpen(true)}
                 className={`bg-purple-600 text-white py-[10px] px-[16px] rounded-lg flex gap-2 ${hasFailedMedia ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -551,7 +552,7 @@ export default function DraftPostPage({
               >
                 <img src="/icons/publish.svg" /> Publish
               </button>
-            )}
+            {/* )} */}
           </div>
 
           {/* MEDIA TYPE */}
