@@ -16,11 +16,11 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
   const [contentDisclosure, setContentDisclosure] = useState(false)
   // const [reviewLink, setReviewLink] = useState("");
   const [error, setError] = useState("");
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm();
 
   const selectedPrivacy = watch("privacy_level");
   const seeBrandedContent = watch("branded_content");
-  const seeBrandOrganic= watch("brand_organic");
+  const seeBrandOrganic = watch("brand_organic");
 
   const { profile } = useLoader();
 
@@ -91,6 +91,13 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
     if (platforms.tiktok && !data.privacy_level) {
       toast.error("Please select Privacy Status");
       return;
+    }
+
+    if (platforms.tiktok && contentDisclosure) {
+      if (!data.brand_organic && !data.branded_content) {
+        toast.error("Please select at least one: Your brand or Branded content");
+        return;
+      }
     }
 
     let payload = {
@@ -189,6 +196,12 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
   useEffect(() => {
     fetchMediaStatus();
   }, []);
+
+  useEffect(() => {
+    if (selectedPrivacy === "SELF_ONLY") {
+      setValue("branded_content", false);
+    }
+  }, [selectedPrivacy, setValue]);
 
   if (!isOpen) return null;
 
@@ -379,8 +392,15 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
                     .replace(/_/g, " ")
                     .replace(/\b\w/g, (c) => c.toUpperCase());
 
+
+                  const isDisabled = option === "SELF_ONLY" && watch("branded_content");
+
                   return (
-                    <option key={option} value={option}>
+                    <option key={option} value={option} disabled={isDisabled} title={
+                      isDisabled
+                        ? "Branded content visibility cannot be set to private."
+                        : ""
+                    }>
                       {label}
                     </option>
                   );
@@ -423,10 +443,10 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
                 <div className="flex items-center">
                   <button
                     type="button"
-                    disabled={!selectedPrivacy}
+                    // disabled={!selectedPrivacy}
                     onClick={() => setContentDisclosure(!contentDisclosure)}
                     className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${contentDisclosure ? "bg-[#7239EA]" : "bg-gray-300"
-                      } ${!selectedPrivacy ? "opacity-50 cursor-not-allowed" : ""}`}
+                      }`}
                   >
                     <span
                       className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${contentDisclosure ? "translate-x-6" : "translate-x-1"
@@ -505,8 +525,8 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
                           "
                           >
 
-                            {selectedPrivacy === "SELF_ONLY" ? 'To disclose your post as branded content, your post must be set to "Follower Of Creator" or "Mutual Follow Friends".' : 
-                            'You are promoting another brand or a third party. This content will be classified as Branded Content.'}
+                            {selectedPrivacy === "SELF_ONLY" ? 'To disclose your post as branded content, your post must be set to "Public".' :
+                              'You are promoting another brand or a third party. This content will be classified as Branded Content.'}
 
                             {/* Arrow wrapper */}
                             <div className="absolute left-1/2 -translate-x-1/2 top-full -mt-[6px]">
@@ -552,7 +572,7 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
                 {seeBrandedContent && <span><a href="https://www.tiktok.com/legal/page/global/bc-policy/en" target="_blank" rel="noopener noreferrer nofollow" className="text-[#7239EA] hover:underline">
                   Branded Content Policy
                 </a>
-                {" "} and {" "}</span>}
+                  {" "} and {" "}</span>}
                 <a href="https://www.tiktok.com/legal/page/global/music-usage-confirmation/en" target="_blank" rel="noopener noreferrer nofollow" className="text-[#7239EA] hover:underline">
                   Music Usage Confirmation
                 </a>.
