@@ -19,6 +19,8 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
   const selectedPrivacy = watch("privacy_level");
+  const seeBrandedContent = watch("branded_content");
+  const seeBrandOrganic= watch("brand_organic");
 
   const { profile } = useLoader();
 
@@ -521,7 +523,7 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
             <div className="space-y-6">
 
               {/* Info Box */}
-              {/* <div className="mt-[24px] flex items-center gap-3 bg-[#7239EA14] px-4 py-2 rounded-[8px]">
+              {seeBrandOrganic && !seeBrandedContent && <div className="mt-[24px] flex items-center gap-3 bg-[#7239EA14] px-4 py-2 rounded-[8px]">
                 <div className="h-[24px] w-[24px]">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path opacity="0.3" d="M12 1.99899C17.524 1.99899 22.002 6.47699 22.002 12.001C22.002 17.524 17.524 22.002 12 22.002C6.476 22.002 2 17.524 2 12.001C1.999 6.47699 6.476 1.99899 12 1.99899Z" fill="#7239EA" />
@@ -529,17 +531,28 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
                   </svg>
                 </div>
                 <p className="text-[14px] text-[#0D0F17] font-normal">
-                  Your video will be labeled “Promotional content”. This cannot be changed once your video is posted.
+                  Your photo/video will be labeled as “Promotional content”.
                 </p>
-              </div> */}
+              </div>}
+              {seeBrandedContent && <div className="mt-[24px] flex items-center gap-3 bg-[#7239EA14] px-4 py-2 rounded-[8px]">
+                <div className="h-[24px] w-[24px]">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path opacity="0.3" d="M12 1.99899C17.524 1.99899 22.002 6.47699 22.002 12.001C22.002 17.524 17.524 22.002 12 22.002C6.476 22.002 2 17.524 2 12.001C1.999 6.47699 6.476 1.99899 12 1.99899Z" fill="#7239EA" />
+                    <path d="M12.001 6.50001C11.8336 6.49542 11.6671 6.52443 11.5112 6.58532C11.3552 6.64621 11.2131 6.73775 11.0932 6.85453C10.9732 6.9713 10.878 7.11094 10.8129 7.26519C10.7479 7.41943 10.7145 7.58515 10.7146 7.75254C10.7147 7.91993 10.7484 8.0856 10.8137 8.23974C10.879 8.39388 10.9745 8.53337 11.0946 8.64995C11.2147 8.76654 11.357 8.85785 11.513 8.91849C11.669 8.97914 11.8356 9.00788 12.003 9.00301C12.3288 8.99342 12.638 8.85716 12.8649 8.62319C13.0918 8.38922 13.2185 8.07599 13.2181 7.75006C13.2177 7.42413 13.0902 7.1112 12.8628 6.87777C12.6353 6.64434 12.3258 6.50883 12 6.50001H12.001ZM11.996 10.249C11.7509 10.2493 11.5145 10.3397 11.3316 10.5028C11.1487 10.666 11.0321 10.8906 11.004 11.134L10.997 11.25L11.001 16.752L11.007 16.869C11.0352 17.1129 11.1521 17.3379 11.3355 17.5011C11.5188 17.6644 11.7559 17.7544 12.0014 17.7542C12.2469 17.7539 12.4837 17.6634 12.6667 17.4998C12.8498 17.3362 12.9663 17.111 12.994 16.867L13 16.75L12.996 11.249L12.989 11.132C12.9601 10.8888 12.8429 10.6646 12.6597 10.502C12.4764 10.3394 12.2399 10.2498 11.995 10.25L11.996 10.249Z" fill="#7239EA" />
+                  </svg>
+                </div>
+                <p className="text-[14px] text-[#0D0F17] font-normal">
+                  Your photo/video will be labeled as “Paid partnership”.
+                </p>
+              </div>}
 
               {/* Policy Text */}
               <p className="text-[14px] text-[#0D0F17] leading-[28px]">
                 By posting, you agree to TikTok's{" "}
-                {/* <a href="#" className="text-[#7239EA] hover:underline">
+                {seeBrandedContent && <span><a href="https://www.tiktok.com/legal/page/global/bc-policy/en" target="_blank" rel="noopener noreferrer nofollow" className="text-[#7239EA] hover:underline">
                   Branded Content Policy
-                </a>{" "}
-                and{" "} */}
+                </a>
+                {" "} and {" "}</span>}
                 <a href="https://www.tiktok.com/legal/page/global/music-usage-confirmation/en" target="_blank" rel="noopener noreferrer nofollow" className="text-[#7239EA] hover:underline">
                   Music Usage Confirmation
                 </a>.
