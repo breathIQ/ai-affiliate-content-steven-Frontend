@@ -544,7 +544,7 @@ export default function DraftPostPage({
               </h1>
             </div>
 
-            {/* {!isEditMode && ( */}
+            {!isEditMode && (
               <button
                 onClick={() => setPublishOpen(true)}
                 className={`bg-purple-600 text-white py-[10px] px-[16px] rounded-lg flex gap-2 ${hasFailedMedia ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -552,7 +552,7 @@ export default function DraftPostPage({
               >
                 <img src="/icons/publish.svg" /> Publish
               </button>
-            {/* )} */}
+            )}
           </div>
 
           {/* MEDIA TYPE */}
