@@ -463,8 +463,7 @@ export default function DraftPostPage({
             formData.append("brand_organic", tiktokSettings.brand_organic);
           }
 
-          if (tiktokSettings.branded_content !== undefined &&
-      tiktokSettings.privacy_level !== "SELF_ONLY") {
+          if (tiktokSettings.branded_content !== undefined) {
             formData.append("branded_content", tiktokSettings.branded_content);
           }
 
