@@ -129,8 +129,8 @@ export default function Users() {
                   <th className="p-3 text-start">Posts Generated</th>
                   <th className="p-3 text-start">Posts Published</th>
                   <th className="p-3 text-start">Total Clicks</th>
-                  {/* <th className="p-3 text-start">Conversion</th>
-                  <th className="p-3 text-start">Joined On</th> */}
+                  <th className="p-3 text-start w-[250px] max-w-[250px] min-w-[250px]">Affiliate Link</th>
+                  <th className="p-3 text-start">Social Accounts</th>
                   <th className="p-3 text-center">Actions</th>
                 </tr>
               </thead>
@@ -186,8 +186,27 @@ export default function Users() {
                       <td className="p-3">{u.posts_generated || "0"}</td>
                       <td className="p-3">{u.posts_published || "0"}</td>
                       <td className="p-3">{u.total_clicks || "0"}</td>
-                      {/* <td className="p-3">{u.conversion||"0"}</td>
-                    <td className="p-3 text-xs text-gray-500">{u.joinedOn||"0"}</td> */}
+                      <td className="p-3 w-[250px] max-w-[250px] min-w-[250px]">
+                        <div
+                          className={`truncate ${u?.affiliate_link !== "Default"
+                              ? "text-blue-500 underline cursor-pointer"
+                              : ""
+                            }`}
+                          title={u?.affiliate_link !== "Default" ? u?.affiliate_link : ""}
+                          onClick={() => {
+                            if (u?.affiliate_link !== "Default" && u?.affiliate_link) {
+                              window.open(u.affiliate_link, "_blank", "noopener,noreferrer");
+                            }
+                          }}
+                        >
+                          {u?.affiliate_link || ""}
+                        </div>
+                      </td>
+                      <td className="p-3">{u?.social_accounts?.length > 0 ? u?.social_accounts?.map((account) => (
+                        <div key={account.id} className="text-sm flex items-center gap-1">
+                          {account.provider === "instagram" ? <img src="/icons/insta.svg" width={15} /> : account.provider === "tiktok" ? <img src="/icons/ic-tiktok.svg" width={15} /> : "Other"} <span className="text-[13px]">{account.username}</span>
+                        </div>
+                      )) : <div><img src="/icons/ic-close-circle.svg" alt="Not Connected" className="mx-auto" /></div>}</td>
                       <td className="p-3 text-center">
                         <div className="relative inline-block" ref={menuRef}>
                           {/* 3 dots */}
@@ -255,7 +274,7 @@ export default function Users() {
                     </tr>
                   ))
                 )}
-                {}
+                { }
               </tbody>
             </table>
           </div>
