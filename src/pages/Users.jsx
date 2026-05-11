@@ -89,6 +89,8 @@ export default function Users() {
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
+
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto min-h-screen pt-8">
@@ -131,6 +133,7 @@ export default function Users() {
                   <th className="p-3 text-start">Total Clicks</th>
                   <th className="p-3 text-start w-[250px] max-w-[250px] min-w-[250px]">Affiliate Link</th>
                   <th className="p-3 text-start">Social Accounts</th>
+                  <th className="p-3 text-start">Joined On</th>
                   <th className="p-3 text-center">Actions</th>
                 </tr>
               </thead>
@@ -207,6 +210,16 @@ export default function Users() {
                           {account.provider === "instagram" ? <img src="/icons/insta.svg" width={15} /> : account.provider === "tiktok" ? <img src="/icons/ic-tiktok.svg" width={15} /> : "Other"} <span className="text-[13px]">{account.username}</span>
                         </div>
                       )) : <div><img src="/icons/ic-close-circle.svg" alt="Not Connected" className="mx-auto" /></div>}</td>
+                     
+                     <td className="p-3">{ u.created_at
+  ? new Date(u.created_at).toLocaleDateString("en-GB") +
+    " " +
+    new Date(u.created_at).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })
+  : "NA"}</td>
                       <td className="p-3 text-center">
                         <div className="relative inline-block" ref={menuRef}>
                           {/* 3 dots */}
@@ -225,7 +238,7 @@ export default function Users() {
                             <div
                               id="btns"
                               onClick={(e) => e.stopPropagation()}
-                              className="absolute left-[-60px]  mt-2 w-[180px] bg-white border rounded-lg shadow-lg z-50"
+                              className="absolute right-[0px]  mt-2 w-[180px] bg-white border rounded-lg shadow-lg z-50"
                             >
                               <button
                                 onClick={(e) => {

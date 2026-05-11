@@ -27,10 +27,7 @@ export default function RecentPostsTable({
   const [loading, setLoading] = useState(false);
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
-    : {};
-
-    console.log(user );
-    
+    : {};    
   const handleDelete = async (id) => {
     try {
       setLoading(true);

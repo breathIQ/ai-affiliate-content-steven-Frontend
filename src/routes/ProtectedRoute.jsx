@@ -12,7 +12,7 @@ const ProtectedRoute = ({ children, role }) => {
     
     // 2. If user is logged in but trying to access a route they aren't allowed to
     // (e.g., a "user" trying to access an "admin" route)
-    console.log(user , Number(user.role_id) ,role );
+    // console.log(user , Number(user.role_id) ,role );
   if (Number(user.role_id) !== role) {
       return children;
     }else{

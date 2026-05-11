@@ -13,8 +13,10 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [isLoading, setISloading] = useState(false);
   const [agreePolicy, setAgreePolicy] = useState(false);
-    const [showPass, setShowPass] = useState(false);
-  
+  const [showPass, setShowPass] = useState(false);
+  const user = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : {};
   // View states: 'login' or 'forgot'
   const [view, setView] = useState("login");
   const navigate = useNavigate();
@@ -85,6 +87,12 @@ export default function Login() {
     const isadminPath = location.pathname.startsWith("/admin/");
     if (isadminPath) setisadmin(isadminPath);
   }, [location]);
+
+  useEffect(()=>{
+    if(user?.access_token){
+window.location  = "/"
+    }    
+  },[user?.access_token])
 
   // Handle Login
   const handleSubmit = async (e) => {
