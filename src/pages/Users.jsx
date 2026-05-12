@@ -133,7 +133,7 @@ export default function Users() {
                   <th className="p-3 text-start">Total Clicks</th>
                   <th className="p-3 text-start w-[250px] max-w-[250px] min-w-[250px]">Affiliate Link</th>
                   <th className="p-3 text-start">Social Accounts</th>
-                  <th className="p-3 text-start">Joined On</th>
+                  <th className="p-3 text-start w-[160px] max-w-[160px] min-w-[160px]">Joined On</th>
                   <th className="p-3 text-center">Actions</th>
                 </tr>
               </thead>
