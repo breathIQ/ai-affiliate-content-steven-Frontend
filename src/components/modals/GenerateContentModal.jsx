@@ -275,8 +275,8 @@ export default function GenerateContentModal({ setGeneratedData }) {
                 {/* Custom Prompt */}
                 <div>
                   <label className="text-sm font-medium mb-1 block flex items-center">
-                    Custom Prompt <span className="text-red-500 ms-1">*</span>
-
+                    Custom Prompt 
+                    <span className="text-gray-500 ms-1">(Optional)</span>
                     <div className="relative group cursor-pointer inline-block ms-2">
                       <span className="text-gray-400 hover:text-gray-600">
                         <FaInfoCircle className="text-md" />
@@ -303,16 +303,19 @@ export default function GenerateContentModal({ setGeneratedData }) {
                         />
                       </div>
                     </div>
+
                   </label>
 
-                  <textarea
-                    {...register("prompt", {
+
+{/* , {
                       required: "Prompt is required",
                       minLength: {
                         value: 10,
                         message: "Prompt must be at least 10 characters",
                       },
-                    })}
+                    } */}
+                  <textarea
+                    {...register("prompt")}
                     rows={5}
                     placeholder="Write your custom instructions..."
                     className="w-full border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
