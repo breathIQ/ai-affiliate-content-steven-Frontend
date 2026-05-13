@@ -119,6 +119,7 @@ export default function RecentPostsTable({
               <th className="p-3 text-left">Hashtags</th>
               <th className="p-3 text-left">AI</th>
               <th className="p-3 text-left">Status</th>
+<th className="p-3 text-start w-[160px] max-w-[160px] min-w-[160px]">Published At</th>
               <th className="p-3 text-center">Actions</th>
             </tr>
           </thead>
@@ -213,6 +214,16 @@ export default function RecentPostsTable({
                       {item.status?.replace(/^./, c => c.toUpperCase())}
                     </span>
                   </td>
+
+                   <td className="p-3">{ item.published_at
+  ? new Date(item.published_at).toLocaleDateString("en-GB") +
+    " " +
+    new Date(item.published_at).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })
+  : "NA"}</td>
 
                   <td className="p-3 text-center">
                     <div className="relative inline-block" ref={menuRef}>
