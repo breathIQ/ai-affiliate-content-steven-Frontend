@@ -10,6 +10,8 @@ const statusStyles = {
   Failed: "bg-red-100 text-red-700",
   Pending: "bg-yellow-100 text-yellow-700",
   Processing: "bg-yellow-100 text-yellow-700",
+  Draft: "bg-gray-100 text-gray-600",
+  Scheduled: "bg-blue-100 text-blue-700",
 };
 
 export default function RecentPostsTable({
@@ -106,8 +108,8 @@ export default function RecentPostsTable({
       </div>
 
       {/* Table */}
-      <div className="overflow-">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[720px]">
           <thead className="bg-gray-50 text-gray-500">
             <tr>
               {/* <th className="p-3 text-left">
@@ -215,15 +217,54 @@ export default function RecentPostsTable({
                     </span>
                   </td>
 
-                   <td className="p-3">{ item.published_at
-  ? new Date(item.published_at).toLocaleDateString("en-GB") +
-    " " +
-    new Date(item.published_at).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    })
-  : "NA"}</td>
+                   <td className="p-3">
+                    {item.published_at ? (
+                      new Date(item.published_at).toLocaleDateString("en-GB") +
+                      " " +
+                      new Date(item.published_at).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })
+                    ) : item.status?.toLowerCase() === "scheduled" && item.scheduled_at ? (
+                      <button
+                        className="text-blue-600 font-medium hover:underline text-left"
+                        onClick={() => {
+                          if (user?.role_id == 1) {
+                            navigate(`/admin/u/post/view/${item?.id}`, {
+                              state: item,
+                            });
+                          } else {
+                            navigate(`/u/post/view/${item?.id}`);
+                          }
+                        }}
+                      >
+                        Scheduled: {new Date(item.scheduled_at).toLocaleDateString("en-GB")}{" "}
+                        {new Date(item.scheduled_at).toLocaleTimeString("en-US", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        })}
+                      </button>
+                    ) : item.status?.toLowerCase() === "draft" ? (
+                      <button
+                        className="text-purple-600 font-medium hover:underline"
+                        onClick={() => {
+                          if (user?.role_id == 1) {
+                            navigate(`/admin/u/post/view/${item?.id}`, {
+                              state: item,
+                            });
+                          } else {
+                            navigate(`/u/post/view/${item?.id}`);
+                          }
+                        }}
+                      >
+                        Publish
+                      </button>
+                    ) : (
+                      "NA"
+                    )}
+                  </td>
 
                   <td className="p-3 text-center">
                     <div className="relative inline-block" ref={menuRef}>

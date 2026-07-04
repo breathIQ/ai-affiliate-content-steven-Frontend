@@ -14,6 +14,8 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
   const [mediaStatus, setMediaStatus] = useState({});
   // const [enabledContentDisclouserSwitch, setEnabledContentDisclouserSwitch] = useState(true);
   const [contentDisclosure, setContentDisclosure] = useState(false)
+  const [scheduleMode, setScheduleMode] = useState("now"); // "now" | "schedule"
+  const [scheduledAt, setScheduledAt] = useState("");
   // const [reviewLink, setReviewLink] = useState("");
   const [error, setError] = useState("");
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm();
@@ -100,9 +102,25 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
       }
     }
 
+    if (scheduleMode === "schedule") {
+      if (!scheduledAt) {
+        toast.error("Please choose a date and time to schedule this post");
+        return;
+      }
+
+      if (new Date(scheduledAt).getTime() <= Date.now()) {
+        toast.error("Scheduled time must be in the future");
+        return;
+      }
+    }
+
     let payload = {
       platforms,
     };
+
+    if (scheduleMode === "schedule") {
+      payload.scheduled_at = new Date(scheduledAt).toISOString();
+    }
 
     // console.log(platforms)
 
@@ -206,8 +224,8 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-      <div className="bg-white w-[600px] rounded-xl shadow-lg max-w-xl h-screen overflow-y-auto">
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-xl max-h-[90vh] rounded-xl shadow-lg overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b">
           <h2 className="font-semibold text-lg">Publish</h2>
@@ -376,6 +394,41 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
               </label>
 
             </div>
+          </div>
+
+          {/* When to publish */}
+          <div>
+            <p className="text-sm font-medium mb-2">When:</p>
+            <div className="flex gap-4 text-sm mb-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  checked={scheduleMode === "now"}
+                  onChange={() => setScheduleMode("now")}
+                  className="accent-[#7239EA]"
+                />
+                Publish now
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  checked={scheduleMode === "schedule"}
+                  onChange={() => setScheduleMode("schedule")}
+                  className="accent-[#7239EA]"
+                />
+                Schedule for later
+              </label>
+            </div>
+
+            {scheduleMode === "schedule" && (
+              <input
+                type="datetime-local"
+                value={scheduledAt}
+                min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+                onChange={(e) => setScheduledAt(e.target.value)}
+                className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            )}
           </div>
 
           {platforms.tiktok && (<div className="border border-dashed border-[#F1F1F4] p-[12px] mt-[24px!important] rounded-[8px]">
@@ -596,7 +649,7 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
             onClick={handleSubmit(submitForm)}
             className={`px-4 py-2 text-sm rounded-md text-white bg-purple-600 hover:bg-purple-700`}
           >
-            Publish
+            {scheduleMode === "schedule" ? "Schedule Post" : "Publish"}
           </button>
         </div>
       </div>

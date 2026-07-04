@@ -1,55 +1,80 @@
-import { useEffect, useState } from "react";
-import { set, useForm } from "react-hook-form";
-import { getChapter } from "../../services/post.api";
-import { FaPlus, FaInfoCircle } from "react-icons/fa";
-import { generateAIPost } from "../../services/post.api";
+import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { FaPlus } from "react-icons/fa";
+import { getChapter, draftPostText, generateAIPost } from "../../services/post.api";
+import { draftScript, generateVideo, getVideoGenerationStatus, getAvatars } from "../../services/heygen.api";
 import { useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
-import { useLoader } from "../../context/LoaderContext";
+import PublishSettingsFields from "../PublishSettingsFields";
+
+const POLL_INTERVAL_MS = 6000;
 
 export default function GenerateContentModal({ setGeneratedData }) {
   const [isOpen, setIsOpen] = useState(false);
   const [chapters, setChapters] = useState([]);
   const location = useLocation();
 
-  const { profile } = useLoader();
+  // Wizard state
+  const [step, setStep] = useState("type"); // type -> options -> draft -> generating -> done
+  const [contentType, setContentType] = useState(null); // 'image' | 'video'
+  const [draft, setDraft] = useState(null); // {title, caption, hashtags, summary} | {script}
+  const [imageEngine, setImageEngine] = useState("openai"); // which AI actually renders the image - chosen after text is approved
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const [drafting, setDrafting] = useState(false);
+  const [finalizing, setFinalizing] = useState(false);
+  const [videoGeneration, setVideoGeneration] = useState(null);
+  const pollRef = useRef(null);
+
+  // Publish-without-review: lets the user skip the post-render review step
+  // entirely by deciding up front what should happen once the video
+  // finishes - the server (not this modal) handles it from there via
+  // PostAutoPublishService, so nothing in this modal needs to poll or wait
+  // when one of these is chosen.
+  const [publishAction, setPublishAction] = useState("review"); // "review" | "publish_now" | "schedule"
+  const [publishCaption, setPublishCaption] = useState("");
+  const [scheduledAt, setScheduledAt] = useState("");
+  const [publishSettings, setPublishSettings] = useState({ platforms: [] });
+
+  // Avatar picker: HeyGen's account has 1000+ avatars (stock + custom
+  // clones), so we fetch once and filter client-side rather than rendering
+  // a giant native <select>.
+  const [avatars, setAvatars] = useState([]);
+  const [myFavoriteAvatars, setMyFavoriteAvatars] = useState([]);
+  const [globalFavoriteAvatars, setGlobalFavoriteAvatars] = useState([]);
+  const [recentAvatars, setRecentAvatars] = useState([]);
+  const [avatarsLoading, setAvatarsLoading] = useState(false);
+  const [avatarSearch, setAvatarSearch] = useState("");
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState(null);
 
   const {
     register,
     handleSubmit,
     reset,
     watch,
-    formState: { errors, isSubmitting },
+    getValues,
+    setValue,
+    formState: { errors },
   } = useForm({
     defaultValues: {
       post_type: "single",
+      duration_seconds: 30,
+      orientation: "portrait",
+      avatar_id: "",
     },
   });
 
   const postType = watch("post_type");
-  const slidesCount = watch("slides");
 
-  // const slideTexts = watch("slide_texts");
-  // const hasText =
-  //   postType === "single"
-  //     ? slideTexts?.[0]?.trim()
-  //     : Array.isArray(slideTexts) && slideTexts.some(t => t?.trim());
-
-  // const slideInputsCount =
-  //   postType === "carousel"
-  //     ? Number(slidesCount || 0)
-  //     : postType === "single"
-  //       ? 1
-  //       : 0;
   useEffect(() => {
     if (location.state?.generate) {
       setIsOpen(true);
-    }else {
+    } else {
       setIsOpen(false);
     }
   }, [location.state]);
 
-  /* 🔹 Fetch chapters when modal opens */
   useEffect(() => {
     if (!isOpen) return;
 
@@ -65,105 +90,347 @@ export default function GenerateContentModal({ setGeneratedData }) {
     fetchChapters();
   }, [isOpen]);
 
-  /* 🔹 Submit */
-  /* 🔹 Submit */
-  const onSubmit = async (formData) => {
-    try {
-      // Filter slide_texts to only include filled ones and match the count
-      let slideTexts = formData.slide_texts || [];
+  useEffect(() => {
+    if (!isOpen || contentType !== "video" || avatars.length > 0 || avatarsLoading) return;
 
-      if (postType === "carousel") {
-        // Only include texts up to the selected slides count
-        const count = Number(formData.slides || 0);
-        slideTexts = slideTexts.slice(0, count);
-      } else if (postType === "single") {
-        // For single, only take first text
-        slideTexts = slideTexts.slice(0, 1);
+    const fetchAvatars = async () => {
+      setAvatarsLoading(true);
+      try {
+        const res = await getAvatars();
+        setAvatars(res?.data?.all || []);
+        setMyFavoriteAvatars(res?.data?.personal_favorites || []);
+        setGlobalFavoriteAvatars(res?.data?.global_favorites || []);
+        setRecentAvatars(res?.data?.recently_used || []);
+      } catch (error) {
+        console.error("GET AVATARS ERROR ❌", error);
+      } finally {
+        setAvatarsLoading(false);
       }
+    };
 
-      // Filter out empty/whitespace-only values
-      slideTexts = slideTexts.filter(text => text?.trim());
+    fetchAvatars();
+  }, [isOpen, contentType, avatars.length, avatarsLoading]);
 
-      const hasText = slideTexts.length > 0;
+  useEffect(() => () => stopPolling(), []);
 
-      const payload = {
-        chapter: formData.chapter_id,
-        model: formData.model,
-        text_format: formData.text_format,
-        prompt: formData.prompt,
-        post_type: formData.post_type,
-        slides: postType === "single" ? 1 : Number(formData.slides),
-        design: {
-          image_style: formData.image_style,
-          content_angle: formData.content_angle,
-          human_presence: formData.human_presence,
-          visual_mood: formData.visual_mood,
-        },
-      };
-
-      // Only add slide_texts if there are non-empty values
-      // if (hasText) {
-      //   payload.slide_texts = slideTexts;
-      // }
-
-      // // Add design fields ONLY if text exists
-      // if (hasText) {
-      //   payload.design = {
-      //     overlay_color: formData.overlay_color,
-      //     text_placement: formData.text_placement,
-      //     font_family: formData.font_family,
-      //     font_size: formData.font_size,
-      //     font_weight: formData.font_weight,
-      //   };
-      // }
-
-      console.log("Generate Payload 👉", payload);
-
-      const res = await generateAIPost(payload);
-
-      if (res?.success) {
-        setGeneratedData(res.data);
-        setIsOpen(false);
-        reset();
-      } else {
-        toast.error(res?.message || "Failed to generate content");
-      }
-    } catch (error) {
-      console.error("GENERATE CONTENT ERROR ❌", error);
-      toast.error(error?.response?.data?.message || "An error occurred while generating content");
+  const stopPolling = () => {
+    if (pollRef.current) {
+      clearTimeout(pollRef.current);
+      pollRef.current = null;
     }
   };
 
-  // Add this useEffect after your existing useEffects
-  useEffect(() => {
-    if (postType) {
-      // Reset slide_texts array when switching post types
-      reset({
-        ...watch(), // Keep other form values
-        slide_texts: [], // Clear all slide texts
-        slides: postType === "single" ? undefined : watch("slides"), // Clear slides count for single
-      });
-    }
-  }, [postType]);
-  // Add this to handle when slides count changes in carousel mode
-  useEffect(() => {
-    if (postType === "carousel" && slidesCount) {
-      const currentTexts = watch("slide_texts") || [];
-      const count = Number(slidesCount);
+  const resetWizard = () => {
+    stopPolling();
+    setStep("type");
+    setContentType(null);
+    setDraft(null);
+    setShowFeedback(false);
+    setFeedback("");
+    setVideoGeneration(null);
+    setSelectedAvatar(null);
+    setAvatarSearch("");
+    setAvatarPickerOpen(false);
+    reset();
+  };
 
-      // If reducing slides, trim the array
-      if (currentTexts.length > count) {
-        reset({
-          ...watch(),
-          slide_texts: currentTexts.slice(0, count), // Keep only first N texts
+  const chooseAvatar = (avatar) => {
+    setSelectedAvatar(avatar);
+    setValue("avatar_id", avatar.avatar_id);
+    setAvatarPickerOpen(false);
+    setAvatarSearch("");
+  };
+
+  const clearAvatar = () => {
+    setSelectedAvatar(null);
+    setValue("avatar_id", "");
+    setAvatarPickerOpen(false);
+    setAvatarSearch("");
+  };
+
+  // Priority order when not searching: my own favorites, then whatever's
+  // popular across everyone else, then whatever this user has actually
+  // used before, then everything else - each avatar appears in only the
+  // highest-priority section it qualifies for.
+  const myFavoriteIds = new Set(myFavoriteAvatars.map((a) => a.avatar_id));
+  const dedupedGlobal = globalFavoriteAvatars.filter((a) => !myFavoriteIds.has(a.avatar_id));
+  const dedupedRecent = recentAvatars.filter(
+    (a) => !myFavoriteIds.has(a.avatar_id) && !dedupedGlobal.some((g) => g.avatar_id === a.avatar_id)
+  );
+  const usedIds = new Set([
+    ...myFavoriteIds,
+    ...dedupedGlobal.map((a) => a.avatar_id),
+    ...dedupedRecent.map((a) => a.avatar_id),
+  ]);
+  const remainingSlots = Math.max(
+    0,
+    30 - myFavoriteAvatars.length - dedupedGlobal.length - dedupedRecent.length
+  );
+  const otherAvatars = avatars.filter((a) => !usedIds.has(a.avatar_id)).slice(0, remainingSlots);
+
+  const filteredAvatars = avatarSearch.trim()
+    ? avatars.filter((a) => a.avatar_name.toLowerCase().includes(avatarSearch.trim().toLowerCase())).slice(0, 30)
+    : [...myFavoriteAvatars, ...dedupedGlobal, ...dedupedRecent, ...otherAvatars];
+
+  const handleClose = () => {
+    setIsOpen(false);
+    resetWizard();
+  };
+
+  const chooseType = (type) => {
+    setContentType(type);
+    setStep("options");
+  };
+
+  const requestDraft = async (formData) => {
+    setDrafting(true);
+    try {
+      if (contentType === "image") {
+        const res = await draftPostText({
+          chapter: formData.chapter_id,
+          model: formData.model,
+          text_format: formData.text_format,
+          prompt: formData.prompt,
         });
+        if (!res?.success) {
+          toast.error(res?.message || "Could not generate draft");
+          return;
+        }
+        setDraft(res.data);
+        setImageEngine(formData.model === "gemini" ? "gemini" : "openai");
+      } else {
+        const res = await draftScript({
+          chapter: formData.chapter_id,
+          model: formData.model,
+          duration_seconds: Number(formData.duration_seconds),
+          prompt: formData.prompt,
+        });
+        if (!res?.success) {
+          toast.error(res?.message || "Could not generate draft script");
+          return;
+        }
+        setDraft(res.data);
       }
+      setStep("draft");
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Could not generate draft");
+    } finally {
+      setDrafting(false);
     }
-  }, [slidesCount, postType]);
+  };
+
+  useEffect(() => {
+    if (contentType === "video" && draft?.script) {
+      setPublishCaption(draft.script);
+    }
+  }, [contentType, draft]);
+
+  const requestRevision = async () => {
+    if (!feedback.trim()) {
+      toast.error("Describe what you'd like changed first");
+      return;
+    }
+
+    const formData = getValues();
+    setDrafting(true);
+    try {
+      if (contentType === "image") {
+        const res = await draftPostText({
+          chapter: formData.chapter_id,
+          model: formData.model,
+          text_format: formData.text_format,
+          prompt: formData.prompt,
+          feedback,
+          previous_text: draft,
+        });
+        if (!res?.success) {
+          toast.error(res?.message || "Could not regenerate draft");
+          return;
+        }
+        setDraft(res.data);
+      } else {
+        const res = await draftScript({
+          chapter: formData.chapter_id,
+          model: formData.model,
+          duration_seconds: Number(formData.duration_seconds),
+          prompt: formData.prompt,
+          feedback,
+          previous_script: draft.script,
+        });
+        if (!res?.success) {
+          toast.error(res?.message || "Could not regenerate draft script");
+          return;
+        }
+        setDraft(res.data);
+      }
+      setShowFeedback(false);
+      setFeedback("");
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Could not regenerate draft");
+    } finally {
+      setDrafting(false);
+    }
+  };
+
+  const approveDraft = async () => {
+    const formData = getValues();
+    setFinalizing(true);
+
+    try {
+      if (contentType === "image") {
+        const payload = {
+          chapter: formData.chapter_id,
+          model: formData.model,
+          text_format: formData.text_format,
+          post_type: formData.post_type,
+          slides: formData.post_type === "single" ? 1 : Number(formData.slides),
+          design: {
+            image_style: formData.image_style,
+            content_angle: formData.content_angle,
+            human_presence: formData.human_presence,
+            visual_mood: formData.visual_mood,
+          },
+          approved_text: draft,
+          image_model: imageEngine,
+        };
+
+        const res = await generateAIPost(payload);
+
+        if (!res?.success) {
+          toast.error(res?.message || "Failed to generate content");
+          return;
+        }
+
+        setGeneratedData(res.data);
+        handleClose();
+      } else {
+        if (publishAction !== "review") {
+          if (!publishSettings.platforms?.length) {
+            toast.error("Please select at least one platform to publish to");
+            return;
+          }
+          if (publishSettings.platforms.includes("tiktok") && !publishSettings.privacy_level) {
+            toast.error("Please select a TikTok privacy status");
+            return;
+          }
+          if (publishAction === "schedule") {
+            if (!scheduledAt) {
+              toast.error("Please choose a date and time to schedule this video");
+              return;
+            }
+            if (new Date(scheduledAt).getTime() <= Date.now()) {
+              toast.error("Scheduled time must be in the future");
+              return;
+            }
+          }
+        }
+
+        const res = await generateVideo({
+          script: draft.script,
+          duration_seconds: Number(formData.duration_seconds),
+          orientation: formData.orientation,
+          avatar_id: formData.avatar_id || undefined,
+          ...(publishAction !== "review" && {
+            publish_action: publishAction,
+            chapter_id: formData.chapter_id,
+            caption: publishCaption,
+            platforms: publishSettings.platforms,
+            privacy_level: publishSettings.privacy_level,
+            allow_comment: publishSettings.allow_comment,
+            content_disclose: publishSettings.content_disclose,
+            brand_organic: publishSettings.brand_organic,
+            branded_content: publishSettings.branded_content,
+            ...(publishAction === "schedule" && { scheduled_at: new Date(scheduledAt).toISOString() }),
+          }),
+        });
+
+        if (!res?.success) {
+          toast.error(res?.message || "Could not start video generation");
+          return;
+        }
+
+        if (publishAction !== "review") {
+          toast.success(
+            publishAction === "schedule"
+              ? `Video is generating and will be scheduled for ${new Date(scheduledAt).toLocaleString()} once ready.`
+              : "Video is generating and will publish automatically once ready."
+          );
+          handleClose();
+          return;
+        }
+
+        setVideoGeneration({ id: res.data.generation_id, status: res.data.status });
+        setStep("generating");
+        pollRef.current = setTimeout(() => pollVideoStatus(res.data.generation_id), POLL_INTERVAL_MS);
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Something went wrong");
+    } finally {
+      setFinalizing(false);
+    }
+  };
+
+  const pollVideoStatus = async (id) => {
+    try {
+      const res = await getVideoGenerationStatus(id);
+      if (!res?.success) {
+        toast.error(res?.message || "Could not check video status");
+        stopPolling();
+        return;
+      }
+
+      setVideoGeneration(res.data);
+
+      if (res.data.status === "completed") {
+        stopPolling();
+        handOffCompletedVideo(res.data);
+        return;
+      }
+
+      if (res.data.status === "failed") {
+        stopPolling();
+        return;
+      }
+
+      pollRef.current = setTimeout(() => pollVideoStatus(id), POLL_INTERVAL_MS);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Could not check video status");
+      stopPolling();
+    }
+  };
+
+  /* Once a video finishes rendering, hand it to the same review/publish
+     screen used for images, instead of leaving it stuck inside this modal
+     with no way to actually save/publish it. */
+  const handOffCompletedVideo = (generation) => {
+    const formData = getValues();
+    const selectedChapter = chapters.find((c) => String(c.id) === String(formData.chapter_id));
+
+    setGeneratedData({
+      caption: draft?.script || "",
+      hashtags: "",
+      model: "HeyGen",
+      post_type: "single",
+      slides: 1,
+      images: [
+        {
+          slide: 1,
+          image_url: generation.video_url,
+          media_type: "video",
+          image_error: null,
+          status: true,
+        },
+      ],
+      chapter: selectedChapter?.chapter || "",
+      chapter_title: selectedChapter?.chapter_title || "",
+      chapter_id: formData.chapter_id,
+      ai_prompt: draft?.script || "",
+    });
+    handleClose();
+  };
 
   return (
     <>
-      {/* Generate Button */}
       <button
         onClick={() => setIsOpen(true)}
         className="bg-gray-900 text-white py-[10px] px-[16px] flex align-center gap-2 rounded-lg text-sm"
@@ -172,468 +439,584 @@ export default function GenerateContentModal({ setGeneratedData }) {
         Generate
       </button>
 
-      {/* Modal */}
       {isOpen && (
-        // <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
-          {/* Overlay */}
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setIsOpen(false)}
-          />
+          <div className="absolute inset-0 bg-black/40" onClick={handleClose} />
 
-          {/* Modal Box */}
-          {/* <div className="relative bg-white w-full max-w-xl h-screen rounded-xl shadow-lg z-50 overflow-y-auto"> */}
-          <div className="relative bg-white w-full max-w-4xl max-h-[90vh] rounded-xl shadow-lg z-50 overflow-y-auto">
-            {/* Header */}
+          <div className="relative bg-white w-full max-w-4xl max-h-[90vh] rounded-xl shadow-lg z-50 overflow-y-auto text-gray-900">
             <div className="flex justify-between items-center px-6 py-4 border-b">
               <h2 className="text-lg font-semibold">Generate Content</h2>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
+              <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
                 ✕
               </button>
             </div>
 
-            {/* Body */}
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="px-6 py-4 space-y-4">
-                {/* Chapter */}
-                <div>
-                  <label className="text-sm font-medium mb-1 block">
-                    Select Chapter <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    {...register("chapter_id", {
-                      required: "Chapter is required",
-                    })}
-                    className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            {/* STEP 1: Content type */}
+            {step === "type" && (
+              <div className="px-6 py-8">
+                <p className="text-sm text-gray-500 mb-4">What do you want to create?</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <button
+                    onClick={() => chooseType("image")}
+                    className="border-2 border-gray-200 hover:border-purple-500 rounded-xl p-6 text-left transition"
                   >
-                    <option value="">Select Chapter</option>
-                    {chapters.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.chapter}: {item.chapter_title}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.chapter_id && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.chapter_id.message}
-                    </p>
-                  )}
+                    <div className="text-lg font-semibold mb-1">Image Post</div>
+                    <p className="text-sm text-gray-500">A single image or carousel for Instagram/TikTok.</p>
+                  </button>
+                  <button
+                    onClick={() => chooseType("video")}
+                    className="border-2 border-gray-200 hover:border-purple-500 rounded-xl p-6 text-left transition"
+                  >
+                    <div className="text-lg font-semibold mb-1">Video</div>
+                    <p className="text-sm text-gray-500">An AI avatar video, narrated from a script you approve.</p>
+                  </button>
                 </div>
+              </div>
+            )}
 
-                {/* AI Model */}
-                <div className="grid grid-cols-2 gap-4">
+            {/* STEP 2: Options */}
+            {step === "options" && (
+              <form onSubmit={handleSubmit(requestDraft)}>
+                <div className="px-6 py-4 space-y-4">
                   <div>
                     <label className="text-sm font-medium mb-1 block">
-                      AI Model <span className="text-red-500">*</span>
+                      Select Chapter <span className="text-red-500">*</span>
                     </label>
                     <select
-                      {...register("model", {
-                        required: "AI model is required",
-                      })}
+                      {...register("chapter_id", { required: "Chapter is required" })}
                       className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
-                      <option value="gpt-4-turbo">ChatGPT</option>
-                      <option value="claude-3-haiku-20240307">Claude</option>
-                      <option value="gemini">Gemini</option>
+                      <option value="">Select Chapter</option>
+                      {chapters.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.chapter}: {item.chapter_title}
+                        </option>
+                      ))}
                     </select>
-                    {errors.model && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.model.message}
-                      </p>
+                    {errors.chapter_id && (
+                      <p className="text-xs text-red-500 mt-1">{errors.chapter_id.message}</p>
                     )}
                   </div>
 
-                  {/* Text Format */}
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">
-                      Text Format <span className="text-red-500">*</span>
-                    </label>
-
-                    <select
-                      {...register("text_format", {
-                        required: "Text format is required",
-                      })}
-                      className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
-                      <option value="">Select Text Format</option>
-                      <option value="paragraph">Paragraph</option>
-                      <option value="bullet_points">Bullet Points</option>
-                    </select>
-
-                    {errors.text_format && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.text_format.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Custom Prompt */}
-                <div>
-                  <label className="text-sm font-medium mb-1 block flex items-center">
-                    Custom Prompt 
-                    <span className="text-gray-500 ms-1">(Optional)</span>
-                    <div className="relative group cursor-pointer inline-block ms-2">
-                      <span className="text-gray-400 hover:text-gray-600">
-                        <FaInfoCircle className="text-md" />
-                      </span>
-
-                      {/* Tooltip */}
-                      <div
-                        className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2
-                        hidden group-hover:block
-                        bg-black text-white text-xs px-3 py-2 rounded-md
-                        w-56 text-center z-50"
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">
+                        AI Model <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        {...register("model", { required: "AI model is required" })}
+                        className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                       >
-                        This custom prompt is used only to generate the post’s caption, hashtags, and script. It does not affect image generation.
-
-                        {/* Notch / Arrow */}
-                        <div
-                          className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0"
-                          style={{
-                            borderLeft: "7px solid transparent",
-                            borderRight: "7px solid transparent",
-                            borderTop: "7px solid black",
-                            borderBottom: "0",
-                          }}
-                        />
-                      </div>
+                        <option value="gpt-4-turbo">ChatGPT</option>
+                        <option value="claude-3-haiku-20240307">Claude</option>
+                        <option value="gemini">Gemini</option>
+                      </select>
+                      {errors.model && <p className="text-xs text-red-500 mt-1">{errors.model.message}</p>}
                     </div>
 
-                  </label>
-
-
-{/* , {
-                      required: "Prompt is required",
-                      minLength: {
-                        value: 10,
-                        message: "Prompt must be at least 10 characters",
-                      },
-                    } */}
-                  <textarea
-                    {...register("prompt")}
-                    rows={5}
-                    placeholder="Write your custom instructions..."
-                    className="w-full border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                  {errors.prompt && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.prompt.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                    <label className="text-sm font-medium mb-1 block">
-                      Affiliate URL
-                    </label>
-                    <input type="text" value={profile?.affiliate_link || ''} disabled className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-100" />
-                  </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Post Type */}
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Post Type <span className="text-red-500">*</span></label>
-                    <div className="flex gap-6">
-                      <label className="flex items-center gap-2 text-sm">
-                        <input
-                          type="radio"
-                          value="single"
-                          {...register("post_type")}
-                        />
-                        Single Post
-                      </label>
-
-                      <label className="flex items-center gap-2 text-sm">
-                        <input
-                          type="radio"
-                          value="carousel"
-                          {...register("post_type")}
-                        />
-                        Carousel
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Carousel Slides */}
-                  <div>
-                    {postType === "carousel" && (
-                      <>
+                    {contentType === "image" ? (
+                      <div>
                         <label className="text-sm font-medium mb-1 block">
-                          No. of Carousel Slides {postType === "carousel" ? <span className="text-red-500">*</span> : ''}
+                          Text Format <span className="text-red-500">*</span>
                         </label>
                         <select
-                          {...register("slides", {
-                            required: postType === "carousel"
-                              ? "Slides is required for carousel posts"
-                              : false,
-                          })}
-                          className="w-full border rounded-lg px-3 py-2 text-sm"
+                          {...register("text_format", { required: "Text format is required" })}
+                          className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                         >
-                          <option value="">Select Slides</option>
-                          {[1, 2, 3, 4].map((num) => (
-                            <option key={num} value={num}>
-                              {num}
-                            </option>
-                          ))}
+                          <option value="">Select Text Format</option>
+                          <option value="paragraph">Paragraph</option>
+                          <option value="bullet_points">Bullet Points</option>
                         </select>
-                      </>
-                    )}
-                    {errors.slides && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.slides.message}
-                      </p>
+                        {errors.text_format && (
+                          <p className="text-xs text-red-500 mt-1">{errors.text_format.message}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="text-sm font-medium mb-1 block">
+                          Video Duration (seconds) <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          min={10}
+                          max={120}
+                          {...register("duration_seconds", {
+                            required: "Duration is required",
+                            min: { value: 10, message: "Minimum 10 seconds" },
+                            max: { value: 120, message: "Maximum 120 seconds" },
+                          })}
+                          className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        />
+                        {errors.duration_seconds && (
+                          <p className="text-xs text-red-500 mt-1">{errors.duration_seconds.message}</p>
+                        )}
+                      </div>
                     )}
                   </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-1 block flex items-center">
+                      {contentType === "image" ? "Custom Prompt" : "What should the video be about?"}
+                      <span className="text-gray-500 ms-1">(Optional)</span>
+                    </label>
+                    <textarea
+                      {...register("prompt")}
+                      rows={4}
+                      placeholder={
+                        contentType === "video"
+                          ? "Leave blank to let the AI build the video from the selected chapter, or add specific instructions..."
+                          : "Write your instructions..."
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                    {errors.prompt && <p className="text-xs text-red-500 mt-1">{errors.prompt.message}</p>}
+                  </div>
+
+                  {contentType === "image" && (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">
+                            Post Type <span className="text-red-500">*</span>
+                          </label>
+                          <div className="flex gap-6">
+                            <label className="flex items-center gap-2 text-sm">
+                              <input type="radio" value="single" {...register("post_type")} />
+                              Single Post
+                            </label>
+                            <label className="flex items-center gap-2 text-sm">
+                              <input type="radio" value="carousel" {...register("post_type")} />
+                              Carousel
+                            </label>
+                          </div>
+                        </div>
+
+                        {postType === "carousel" && (
+                          <div>
+                            <label className="text-sm font-medium mb-1 block">
+                              No. of Carousel Slides <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                              {...register("slides", {
+                                required: postType === "carousel" ? "Slides is required for carousel posts" : false,
+                              })}
+                              className="w-full border rounded-lg px-3 py-2 text-sm"
+                            >
+                              <option value="">Select Slides</option>
+                              {[1, 2, 3, 4].map((num) => (
+                                <option key={num} value={num}>
+                                  {num}
+                                </option>
+                              ))}
+                            </select>
+                            {errors.slides && (
+                              <p className="text-xs text-red-500 mt-1">{errors.slides.message}</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium mb-1 block">
+                            Image Style <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            {...register("image_style", { required: "Image style is required" })}
+                            className="w-full border rounded-lg px-3 py-2 text-sm"
+                          >
+                            <option value="">Select Style</option>
+                            <option value="Minimalist / Modern">Minimalist / Modern</option>
+                            <option value="Ancient History">Ancient History</option>
+                            <option value="Clinical / Physiological">Clinical / Physiological</option>
+                            <option value="Scientific / Conceptual">Scientific / Conceptual</option>
+                            <option value="Human / Real People">Human / Real People</option>
+                            <option value="Lifestyle / Wellness">Lifestyle / Wellness</option>
+                            <option value="Nature-Inspired">Nature-Inspired</option>
+                            <option value="Hyper-Realistic">Hyper-Realistic</option>
+                            <option value="Illustrated / Graphic">Illustrated / Graphic</option>
+                            <option value="Text-Forward / Typography-Led">Text-Forward / Typography-Led</option>
+                          </select>
+                          {errors.image_style && (
+                            <p className="text-xs text-red-500 mt-1">{errors.image_style.message}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium mb-1 block">
+                            Content Angle <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            {...register("content_angle", { required: "Content angle is required" })}
+                            className="w-full border rounded-lg px-3 py-2 text-sm"
+                          >
+                            <option value="">Select Angle</option>
+                            <option value="Beginner Friendly">Beginner Friendly</option>
+                            <option value="Myth-Busting">Myth-Busting</option>
+                            <option value="Contrarian Insight">Contrarian Insight</option>
+                            <option value="Educational / Explainer">Educational / Explainer</option>
+                            <option value="Clinical Perspective">Clinical Perspective</option>
+                            <option value="Story-Driven">Story-Driven</option>
+                            <option value="Problem → Reframe">Problem → Reframe</option>
+                          </select>
+                          {errors.content_angle && (
+                            <p className="text-xs text-red-500 mt-1">{errors.content_angle.message}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium mb-1 block">
+                            Human Presence <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            {...register("human_presence", { required: "Human presence is required" })}
+                            className="w-full border rounded-lg px-3 py-2 text-sm"
+                          >
+                            <option value="">Select Presence</option>
+                            <option value="No People">No People</option>
+                            <option value="Single Person">Single Person</option>
+                            <option value="Everyday People">Everyday People</option>
+                            <option value="Athletic / Active">Athletic / Active</option>
+                            <option value="Clinical / Professional">Clinical / Professional</option>
+                          </select>
+                          {errors.human_presence && (
+                            <p className="text-xs text-red-500 mt-1">{errors.human_presence.message}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium mb-1 block">
+                            Visual Mood <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            {...register("visual_mood", { required: "Visual mood is required" })}
+                            className="w-full border rounded-lg px-3 py-2 text-sm"
+                          >
+                            <option value="">Select Mood</option>
+                            <option value="Calm & Grounded">Calm & Grounded</option>
+                            <option value="Curious & Thoughtful">Curious & Thoughtful</option>
+                            <option value="Serious & Clinical">Serious & Clinical</option>
+                            <option value="Empowering">Empowering</option>
+                            <option value="Quietly Provocative">Quietly Provocative</option>
+                            <option value="Warm & Reassuring">Warm & Reassuring</option>
+                          </select>
+                          {errors.visual_mood && (
+                            <p className="text-xs text-red-500 mt-1">{errors.visual_mood.message}</p>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {contentType === "video" && (
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Orientation</label>
+                      <select
+                        {...register("orientation")}
+                        className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      >
+                        <option value="portrait">Portrait</option>
+                        <option value="landscape">Landscape</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {contentType === "video" && (
+                    <div className="relative">
+                      <label className="text-sm font-medium mb-1 block">
+                        Avatar <span className="text-gray-500">(Optional)</span>
+                      </label>
+                      <input type="hidden" {...register("avatar_id")} />
+                      <button
+                        type="button"
+                        onClick={() => setAvatarPickerOpen((v) => !v)}
+                        className="w-full border rounded-lg px-3 py-2 text-sm flex items-center gap-2 text-left focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      >
+                        {selectedAvatar ? (
+                          <>
+                            <img
+                              src={selectedAvatar.preview_image_url}
+                              alt={selectedAvatar.avatar_name}
+                              className="w-6 h-6 rounded-full object-cover"
+                            />
+                            <span className="truncate">{selectedAvatar.avatar_name}</span>
+                          </>
+                        ) : (
+                          <span className="text-gray-500">Let AI choose automatically</span>
+                        )}
+                      </button>
+
+                      {avatarPickerOpen && (
+                        <div className="absolute z-10 mt-1 w-full bg-white border rounded-lg shadow-lg">
+                          <div className="p-2 border-b">
+                            <input
+                              type="text"
+                              autoFocus
+                              value={avatarSearch}
+                              onChange={(e) => setAvatarSearch(e.target.value)}
+                              placeholder="Search avatars by name..."
+                              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            />
+                          </div>
+                          <div className="max-h-64 overflow-y-auto">
+                            <button
+                              type="button"
+                              onClick={clearAvatar}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 text-gray-600"
+                            >
+                              Let AI choose automatically
+                            </button>
+                            {avatarsLoading && <p className="px-3 py-2 text-sm text-gray-500">Loading avatars...</p>}
+                            {!avatarsLoading && filteredAvatars.length === 0 && (
+                              <p className="px-3 py-2 text-sm text-gray-500">No avatars found</p>
+                            )}
+                            {!avatarSearch.trim() && myFavoriteAvatars.length > 0 && (
+                              <p className="px-3 pt-2 pb-1 text-xs font-medium text-gray-400 uppercase">
+                                My Favorites
+                              </p>
+                            )}
+                            {filteredAvatars.map((avatar, index) => (
+                              <div key={avatar.avatar_id}>
+                                {!avatarSearch.trim() &&
+                                  dedupedGlobal.length > 0 &&
+                                  index === myFavoriteAvatars.length && (
+                                    <p className="px-3 pt-2 pb-1 text-xs font-medium text-gray-400 uppercase">
+                                      Popular
+                                    </p>
+                                  )}
+                                {!avatarSearch.trim() &&
+                                  dedupedRecent.length > 0 &&
+                                  index === myFavoriteAvatars.length + dedupedGlobal.length && (
+                                    <p className="px-3 pt-2 pb-1 text-xs font-medium text-gray-400 uppercase">
+                                      Recently Used
+                                    </p>
+                                  )}
+                                {!avatarSearch.trim() &&
+                                  otherAvatars.length > 0 &&
+                                  index === myFavoriteAvatars.length + dedupedGlobal.length + dedupedRecent.length && (
+                                    <p className="px-3 pt-2 pb-1 text-xs font-medium text-gray-400 uppercase">
+                                      All Avatars
+                                    </p>
+                                  )}
+                                <button
+                                  type="button"
+                                  onClick={() => chooseAvatar(avatar)}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50"
+                                >
+                                  <img
+                                    src={avatar.preview_image_url}
+                                    alt={avatar.avatar_name}
+                                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                                  />
+                                  <span className="truncate">{avatar.avatar_name}</span>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {/* {slideInputsCount > 0 &&
-                  [...Array(slideInputsCount)].map((_, index) => (
-                    <div key={index}>
-                      <label className="text-sm font-medium mb-1 block">
-                        {postType === "single"
-                          ? "Post Text"
-                          : `Slide ${index + 1}'s Text`}
-                      </label>
-                      <input
-                        type="text"
-                        {...register(`slide_texts.${index}`)}
-                        className="w-full border rounded-lg px-3 py-2 text-sm"
-                        placeholder={
-                          postType === "single"
-                            ? "Enter post text"
-                            : `Enter text for slide ${index + 1}`
-                        }
+                <div className="flex flex-wrap justify-between gap-3 px-6 py-4 border-t bg-gray-50 rounded-b-xl">
+                  <button
+                    type="button"
+                    onClick={() => setStep("type")}
+                    className="py-[10px] px-[16px] rounded-lg text-sm border border-gray-300 text-gray-700"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={drafting}
+                    className="py-[10px] px-[16px] rounded-lg text-sm bg-purple-600 text-white flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {drafting ? "Generating draft..." : "Generate Draft Text"}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* STEP 3: Draft review / approve */}
+            {step === "draft" && draft && (
+              <div>
+                <div className="px-6 py-4 space-y-3">
+                  {contentType === "image" ? (
+                    <>
+                      <p className="text-sm text-gray-500">This is the exact text that will appear ON the image - review it before we generate.</p>
+                      <div className="border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
+                        <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">Text on Image</p>
+                        <p className="text-sm whitespace-pre-wrap">{draft.image_text}</p>
+                      </div>
+
+                      <details className="text-sm">
+                        <summary className="cursor-pointer text-gray-500">Social post caption (not shown on the image)</summary>
+                        <div className="border rounded-lg p-4 bg-gray-50 space-y-2 mt-2">
+                          <p className="font-semibold">{draft.title}</p>
+                          <p className="text-sm whitespace-pre-wrap">{draft.caption}</p>
+                          {draft.hashtags && <p className="text-xs text-purple-600">{draft.hashtags}</p>}
+                        </div>
+                      </details>
+
+                      <div>
+                        <label className="text-sm font-medium mb-1 block">Image AI</label>
+                        <select
+                          value={imageEngine}
+                          onChange={(e) => setImageEngine(e.target.value)}
+                          className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        >
+                          <option value="openai">OpenAI (lower cost)</option>
+                          <option value="gemini">Gemini (higher cost)</option>
+                        </select>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-gray-500">Review the script below before we generate the video.</p>
+                      <div className="border rounded-lg p-4 bg-gray-50">
+                        <p className="text-sm whitespace-pre-wrap">{draft.script}</p>
+                      </div>
+
+                      <div className="border-t pt-3">
+                        <p className="text-sm font-medium mb-2">What happens when it's ready?</p>
+                        <div className="flex flex-col gap-2 text-sm mb-3">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              checked={publishAction === "review"}
+                              onChange={() => setPublishAction("review")}
+                              className="accent-[#7239EA]"
+                            />
+                            Review before publishing
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              checked={publishAction === "publish_now"}
+                              onChange={() => setPublishAction("publish_now")}
+                              className="accent-[#7239EA]"
+                            />
+                            Publish automatically when ready
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              checked={publishAction === "schedule"}
+                              onChange={() => setPublishAction("schedule")}
+                              className="accent-[#7239EA]"
+                            />
+                            Schedule for a specific time
+                          </label>
+                        </div>
+
+                        {publishAction === "schedule" && (
+                          <input
+                            type="datetime-local"
+                            value={scheduledAt}
+                            min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+                            onChange={(e) => setScheduledAt(e.target.value)}
+                            className="w-full border rounded-md px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          />
+                        )}
+
+                        {publishAction !== "review" && (
+                          <>
+                            <label className="text-sm font-medium mb-1 block">Caption</label>
+                            <textarea
+                              value={publishCaption}
+                              onChange={(e) => setPublishCaption(e.target.value)}
+                              rows={2}
+                              className="w-full border rounded-lg px-3 py-2 text-sm resize-none mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            />
+                            <PublishSettingsFields onChange={setPublishSettings} />
+                          </>
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                  {showFeedback && (
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">What should change?</label>
+                      <textarea
+                        value={feedback}
+                        onChange={(e) => setFeedback(e.target.value)}
+                        rows={3}
+                        placeholder="e.g. make it more casual, mention the Bohr effect earlier..."
+                        className="w-full border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
-                  ))} */}
-
-                {/* <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">
-                      Image Overlay Color
-                    </label>
-                    <input
-                      type="color"
-                      {...register("overlay_color", {
-                        required: hasText ? "Overlay color is required" : false,
-                      })}
-                      className="w-full h-[42px] border rounded-lg p-1"
-                    />
-                    {errors.overlay_color && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.overlay_color.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">
-                      Text Placement
-                    </label>
-                    <select
-                      {...register("text_placement", {
-                        required: hasText ? "Text placement is required" : false,
-                      })}
-                      className="w-full border rounded-lg px-3 py-2 text-sm"
-                    >
-                      <option value="">Select Placement</option>
-
-                      <option value="top-left">Top Left</option>
-                      <option value="top-center">Top Center</option>
-                      <option value="top-right">Top Right</option>
-
-                      <option value="center">Centered</option>
-
-                      <option value="bottom-left">Bottom Left</option>
-                      <option value="bottom-center">Bottom Center</option>
-                      <option value="bottom-right">Bottom Right</option>
-                    </select>
-                    {errors.text_placement && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.text_placement.message}
-                      </p>
-                    )}
-                  </div>
-                </div> */}
-
-                {/* <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Font Family</label>
-                    <select
-                      {...register("font_family", {
-                        required: hasText ? "Font family is required" : false,
-                      })}
-                      className="w-full border rounded-lg px-3 py-2 text-sm"
-                    >
-                      <option value="">Select Font</option>
-                      <option value="Inter">Inter</option>
-                      <option value="Poppins">Poppins</option>
-                      <option value="Roboto">Roboto</option>
-                    </select>
-                    {errors.font_family && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.font_family.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Font Size</label>
-                    <select
-                      {...register("font_size", {
-                        required: hasText ? "Font size is required" : false,
-                      })}
-                      className="w-full border rounded-lg px-3 py-2 text-sm"
-                    >
-                      <option value="">Select Size</option>
-                      <option value="H1">H1</option>
-                      <option value="H2">H2</option>
-                      <option value="H3">H3</option>
-                      <option value="H4">H4</option>
-                      <option value="H5">H5</option>
-                      <option value="H6">H6</option>
-                    </select>
-                    {errors.font_size && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.font_size.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Font Weight</label>
-                    <select
-                      {...register("font_weight", {
-                        required: hasText ? "Font weight is required" : false,
-                      })}
-                      className="w-full border rounded-lg px-3 py-2 text-sm"
-                    >
-                      <option value="">Select Weight</option>
-                      <option value="400">Regular (400)</option>
-                      <option value="500">Medium (500)</option>
-                      <option value="600">Semi Bold (600)</option>
-                      <option value="700">Bold (700)</option>
-                      <option value="900">Bolder (900)</option>
-                    </select>
-                    {errors.font_weight && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.font_weight.message}
-                      </p>
-                    )}
-                  </div>
-                </div> */}
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Image Style <span className="text-red-500">*</span></label>
-                    <select
-                      {...register("image_style", { required: "Image style is required" })}
-                      className="w-full border rounded-lg px-3 py-2 text-sm"
-                    >
-                      <option value="">Select Style</option>
-                      <option value="Minimalist / Modern">Minimalist / Modern</option>
-                      <option value="Ancient History">Ancient History</option>
-                      <option value="Clinical / Physiological">Clinical / Physiological</option>
-                      <option value="Scientific / Conceptual">Scientific / Conceptual</option>
-                      <option value="Human / Real People">Human / Real People</option>
-                      <option value="Lifestyle / Wellness">Lifestyle / Wellness</option>
-                      <option value="Nature-Inspired">Nature-Inspired</option>
-                      <option value="Hyper-Realistic">Hyper-Realistic</option>
-                      <option value="Illustrated / Graphic">Illustrated / Graphic</option>
-                      <option value="Text-Forward / Typography-Led">
-                        Text-Forward / Typography-Led
-                      </option>
-                    </select>
-
-                    {errors.image_style && (
-                      <p className="text-xs text-red-500 mt-1">{errors.image_style.message}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Content Angle <span className="text-red-500">*</span></label>
-                    <select
-                      {...register("content_angle", { required: "Content angle is required" })}
-                      className="w-full border rounded-lg px-3 py-2 text-sm"
-                    >
-                      <option value="">Select Angle</option>
-                      <option value="Beginner Friendly">Beginner Friendly</option>
-                      <option value="Myth-Busting">Myth-Busting</option>
-                      <option value="Contrarian Insight">Contrarian Insight</option>
-                      <option value="Educational / Explainer">Educational / Explainer</option>
-                      <option value="Clinical Perspective">Clinical Perspective</option>
-                      <option value="Story-Driven">Story-Driven</option>
-                      <option value="Problem → Reframe">Problem → Reframe</option>
-                    </select>
-                    {errors.content_angle && (
-                      <p className="text-xs text-red-500 mt-1">{errors.content_angle.message}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Human Presence <span className="text-red-500">*</span></label>
-                    <select
-                      {...register("human_presence", { required: "Human presence is required" })}
-                      className="w-full border rounded-lg px-3 py-2 text-sm"
-                    >
-                      <option value="">Select Presence</option>
-                      <option value="No People">No People</option>
-                      <option value="Single Person">Single Person</option>
-                      <option value="Everyday People">Everyday People</option>
-                      <option value="Athletic / Active">Athletic / Active</option>
-                      <option value="Clinical / Professional">Clinical / Professional</option>
-                    </select>
-                    {errors.human_presence && (
-                      <p className="text-xs text-red-500 mt-1">{errors.human_presence.message}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Visual Mood <span className="text-red-500">*</span></label>
-                    <select
-                      {...register("visual_mood", { required: "Visual mood is required" })}
-                      className="w-full border rounded-lg px-3 py-2 text-sm"
-                    >
-                      <option value="">Select Mood</option>
-                      <option value="Calm & Grounded">Calm & Grounded</option>
-                      <option value="Curious & Thoughtful">Curious & Thoughtful</option>
-                      <option value="Serious & Clinical">Serious & Clinical</option>
-                      <option value="Empowering">Empowering</option>
-                      <option value="Quietly Provocative">Quietly Provocative</option>
-                      <option value="Warm & Reassuring">Warm & Reassuring</option>
-                    </select>
-                    {errors.visual_mood && (
-                      <p className="text-xs text-red-500 mt-1">{errors.visual_mood.message}</p>
-                    )}
-                  </div>
-
+                  )}
                 </div>
 
+                <div className="flex flex-wrap justify-between gap-3 px-6 py-4 border-t bg-gray-50 rounded-b-xl">
+                  <button
+                    type="button"
+                    onClick={() => setStep("options")}
+                    className="py-[10px] px-[16px] rounded-lg text-sm border border-gray-300 text-gray-700"
+                  >
+                    Back
+                  </button>
+                  <div className="flex gap-3">
+                    {showFeedback ? (
+                      <button
+                        onClick={requestRevision}
+                        disabled={drafting}
+                        className="py-[10px] px-[16px] rounded-lg text-sm bg-gray-900 text-white disabled:opacity-50"
+                      >
+                        {drafting ? "Regenerating..." : "Regenerate Draft"}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setShowFeedback(true)}
+                        className="py-[10px] px-[16px] rounded-lg text-sm border border-gray-300 text-gray-700"
+                      >
+                        Request Changes
+                      </button>
+                    )}
+                    <button
+                      onClick={approveDraft}
+                      disabled={finalizing}
+                      className="py-[10px] px-[16px] rounded-lg text-sm bg-[#F8285A] text-white flex items-center gap-2 disabled:opacity-50"
+                    >
+                      <FaPlus size={16} />
+                      {finalizing ? "Generating..." : `Approve & Generate ${contentType === "image" ? "Image" : "Video"}`}
+                    </button>
+                  </div>
+                </div>
               </div>
+            )}
 
-              {/* Footer */}
-              <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50 rounded-b-xl">
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="py-[10px] px-[16px] rounded-lg text-sm bg-gray-900 text-white"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="py-[10px] px-[16px] rounded-lg text-sm bg-purple-600 text-white flex items-center gap-2 disabled:opacity-50"
-                >
-                  <span className="text-lg">
-                    <FaPlus size={22} className="bg-[#ffffff28] rounded-[4px] p-[5px]" />
-                  </span>
-                  {isSubmitting ? "Generating..." : "Generate"}
-                </button>
+            {/* STEP 4: Video generating/failed (a completed video hands off
+                straight to the same publish review screen used for images,
+                via handOffCompletedVideo(), so it's never shown here) */}
+            {step === "generating" && (
+              <div className="px-6 py-8">
+                {videoGeneration?.status !== "failed" && (
+                  <div className="text-center py-8">
+                    <div className="animate-spin h-8 w-8 border-2 border-gray-300 border-t-[#F8285A] rounded-full mx-auto mb-4" />
+                    <p className="text-sm text-gray-600">
+                      {videoGeneration?.status === "generating" || videoGeneration?.status === "thinking"
+                        ? "Generating your video..."
+                        : "Rendering final video..."}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">This can take a few minutes.</p>
+                  </div>
+                )}
+
+                {videoGeneration?.status === "failed" && (
+                  <div>
+                    <p className="text-sm text-red-600 mb-4">
+                      {videoGeneration.error_message || "Video generation failed. Your credits have been refunded."}
+                    </p>
+                    <button
+                      onClick={handleClose}
+                      className="border border-gray-300 text-gray-700 py-[8px] px-[14px] rounded-lg text-sm"
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
               </div>
-            </form>
+            )}
           </div>
         </div>
       )}

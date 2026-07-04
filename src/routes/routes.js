@@ -13,6 +13,8 @@ import NotFound from "../pages/NotFound"
 import Privacy from "../pages/common/Privacy"
 import Terms from "../pages/common/Terms"
 import AffiliateUserLandingPage from "../pages/AffiliateUserLandingPage"
+import Billing from "../pages/user/Billing"
+import Avatars from "../pages/user/Avatars"
 
 
 const allRoutes = [
@@ -49,6 +51,8 @@ const allRoutes = [
 
     // USER ROUTES
     { component: <UserDashboard />, path: "/u/dashboard", role: 1 },
+    { component: <Billing />, path: "/u/billing", role: 1 },
+    { component: <Avatars />, path: "/u/avatars", role: 1 },
     { component: <UsersLabs />, path: "/u/library", role: "public"},
     { component: <UsersLabs />, path: "/admin/library", role: "public"},
     // { component: <UsersLabs />, path: "/u/library", role: 2 },

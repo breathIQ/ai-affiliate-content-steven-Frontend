@@ -28,12 +28,12 @@ export default function InviteModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-[600px]  bg-white rounded-xl shadow-lg z-10">
+      <div className="relative w-full max-w-[600px] max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-lg z-10">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b">
           <h2 className="font-semibold text-gray-800 text-base">Invite Affiliate User</h2>
