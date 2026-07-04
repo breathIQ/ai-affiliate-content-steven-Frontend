@@ -263,7 +263,8 @@ export default function DraftPostPage({
         type: "url",
         url: img.image_url,
         media_type: img.media_type || "image",
-        status: img.status
+        status: img.status,
+        error: img.image_error
       }));
 
       setMediaItems(urlItems);
@@ -1108,7 +1109,12 @@ export default function DraftPostPage({
             >
               <img src="/icons/brokenImage.png" style={{width: '40px', height: '40px'}} />
               <p>
-                Image processing failed because the {generatedData?.model} AI server is currently down. Please regenerate the images before publishing. 
+                {/* Show the backend's real failure reason when it sent one -
+                    e.g. Gemini's free-tier key has NO image quota, which is
+                    a config problem, not a server outage. */}
+                {mediaItems.find((item) => item.status === false && item.error)?.error ||
+                  `Image processing failed because the ${generatedData?.model} AI server is currently down.`}{" "}
+                Please regenerate the images before publishing.
                 <span role="button" style={{whiteSpace: 'nowrap'}} className="bg-purple-600 border-purple-600 p-[7px] text-[12px] ms-2 rounded-sm cursor-pointer" onClick={() => setGeneratedData(null)}>Click Here</span>
               </p>
             </div>
