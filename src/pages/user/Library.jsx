@@ -43,9 +43,10 @@ export default function DraftPostPage({
   const [grokGeneration, setGrokGeneration] = useState(null); // { id, status }
   const [grokLoading, setGrokLoading] = useState(false);
 
-  // Publish-without-review, same as GenerateContentModal's HeyGen path -
-  // only offered in edit mode since Grok always converts an existing post's
-  // image, which is what PostAutoPublishService needs a post_id for.
+  // Publish-without-review, same as GenerateContentModal's HeyGen path.
+  // In edit mode the existing post is published once the render finishes;
+  // in create mode the backend creates the post at kickoff from the form's
+  // chapter + caption (both must be filled in before generating).
   const [grokPublishAction, setGrokPublishAction] = useState("review"); // "review" | "publish_now" | "schedule"
   const [grokScheduledAt, setGrokScheduledAt] = useState("");
   const [grokPublishSettings, setGrokPublishSettings] = useState({ platforms: [] });
@@ -651,7 +652,19 @@ export default function DraftPostPage({
     const sourceImage = mediaItems[0];
     if (!sourceImage) return;
 
-    if (isEditMode && grokPublishAction !== "review") {
+    if (grokPublishAction !== "review") {
+      if (!isEditMode) {
+        // Create mode: the backend builds the post from the form's chapter
+        // and caption, so both have to exist before generation starts.
+        if (!chapter?.id) {
+          toast.error("Select a chapter before auto-publishing this video");
+          return;
+        }
+        if (!caption.trim()) {
+          toast.error("Write a caption before auto-publishing this video");
+          return;
+        }
+      }
       if (!grokPublishSettings.platforms?.length) {
         toast.error("Please select at least one platform to publish to");
         return;
@@ -680,8 +693,9 @@ export default function DraftPostPage({
         duration_seconds: grokDuration,
         audio_mode: grokAudioMode,
         post_id: isEditMode ? id : undefined,
-        ...(isEditMode && grokPublishAction !== "review" && {
+        ...(grokPublishAction !== "review" && {
           publish_action: grokPublishAction,
+          ...(!isEditMode && { chapter_id: chapter?.id, caption }),
           platforms: grokPublishSettings.platforms,
           privacy_level: grokPublishSettings.privacy_level,
           allow_comment: grokPublishSettings.allow_comment,
@@ -700,13 +714,20 @@ export default function DraftPostPage({
 
       setGrokPickerOpen(false);
 
-      if (isEditMode && grokPublishAction !== "review") {
+      if (grokPublishAction !== "review") {
         setGrokLoading(false);
         toast.success(
           grokPublishAction === "schedule"
             ? `Video is generating and will be scheduled for ${new Date(grokScheduledAt).toLocaleString()} once ready.`
             : "Video is generating and will publish automatically once ready."
         );
+
+        // Create mode: the backend just created the post this render will
+        // land in - hand over to its detail page, since the compose form's
+        // in-memory image no longer drives anything.
+        if (!isEditMode && res.data?.post_id) {
+          navigate(`/u/post/view/${res.data.post_id}`, { replace: true });
+        }
         return;
       }
 
@@ -972,8 +993,7 @@ export default function DraftPostPage({
                   </p>
                 </div>
 
-                {isEditMode && (
-                  <div className="border-t pt-3">
+                <div className="border-t pt-3">
                     <p className="text-sm font-medium mb-2">What happens when it's ready?</p>
                     <div className="flex flex-col gap-2 text-sm mb-3">
                       <label className="flex items-center gap-2">
@@ -1016,10 +1036,16 @@ export default function DraftPostPage({
                     )}
 
                     {grokPublishAction !== "review" && (
-                      <PublishSettingsFields onChange={setGrokPublishSettings} />
+                      <>
+                        {!isEditMode && (
+                          <p className="text-xs text-gray-500 mb-2">
+                            Uses the chapter and caption from the post form - fill those in first.
+                          </p>
+                        )}
+                        <PublishSettingsFields onChange={setGrokPublishSettings} />
+                      </>
                     )}
                   </div>
-                )}
 
                 <div className="flex justify-end gap-2 pt-2">
                   <button

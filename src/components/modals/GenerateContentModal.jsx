@@ -222,6 +222,10 @@ export default function GenerateContentModal({ setGeneratedData }) {
   useEffect(() => {
     if (contentType === "video" && draft?.script) {
       setPublishCaption(draft.script);
+    } else if (contentType === "image" && draft?.caption) {
+      // Same title-newline-caption shape the backend composes for the
+      // review flow's generatedData.caption.
+      setPublishCaption([draft.title, draft.caption].filter(Boolean).join("\n"));
     }
   }, [contentType, draft]);
 
@@ -274,6 +278,30 @@ export default function GenerateContentModal({ setGeneratedData }) {
 
   const approveDraft = async () => {
     const formData = getValues();
+
+    // Shared publish-without-review validation - the image and video
+    // branches send the same platform/schedule fields.
+    if (publishAction !== "review") {
+      if (!publishSettings.platforms?.length) {
+        toast.error("Please select at least one platform to publish to");
+        return;
+      }
+      if (publishSettings.platforms.includes("tiktok") && !publishSettings.privacy_level) {
+        toast.error("Please select a TikTok privacy status");
+        return;
+      }
+      if (publishAction === "schedule") {
+        if (!scheduledAt) {
+          toast.error("Please choose a date and time to schedule this post");
+          return;
+        }
+        if (new Date(scheduledAt).getTime() <= Date.now()) {
+          toast.error("Scheduled time must be in the future");
+          return;
+        }
+      }
+    }
+
     setFinalizing(true);
 
     try {
@@ -292,6 +320,23 @@ export default function GenerateContentModal({ setGeneratedData }) {
           },
           approved_text: draft,
           image_model: imageEngine,
+          ...(publishAction !== "review" && {
+            publish_action: publishAction,
+            caption: publishCaption,
+            hashtags: (draft.hashtags || "")
+              .split(",")
+              .map((tag) => tag.trim())
+              .filter(Boolean)
+              .map((tag) => (tag.startsWith("#") ? tag : `#${tag}`))
+              .join(", "),
+            platforms: publishSettings.platforms,
+            privacy_level: publishSettings.privacy_level,
+            allow_comment: publishSettings.allow_comment,
+            content_disclose: publishSettings.content_disclose,
+            brand_organic: publishSettings.brand_organic,
+            branded_content: publishSettings.branded_content,
+            ...(publishAction === "schedule" && { scheduled_at: new Date(scheduledAt).toISOString() }),
+          }),
         };
 
         const res = await generateAIPost(payload);
@@ -301,30 +346,28 @@ export default function GenerateContentModal({ setGeneratedData }) {
           return;
         }
 
+        // Auto-publish succeeded server-side: the post already exists (and
+        // is publishing/scheduled), so skip the review flow entirely -
+        // handing res.data to Library would auto-save a duplicate draft.
+        if (publishAction !== "review" && res.data?.post_id) {
+          toast.success(
+            publishAction === "schedule"
+              ? `Images generated - post scheduled for ${new Date(scheduledAt).toLocaleString()}.`
+              : "Images generated - your post is publishing now."
+          );
+          handleClose();
+          return;
+        }
+
+        if (publishAction !== "review") {
+          // Server fell back to review (no usable images or the publish
+          // step failed) - the normal flow below auto-saves as a draft.
+          toast.error("The post couldn't be auto-published - review it below instead.");
+        }
+
         setGeneratedData(res.data);
         handleClose();
       } else {
-        if (publishAction !== "review") {
-          if (!publishSettings.platforms?.length) {
-            toast.error("Please select at least one platform to publish to");
-            return;
-          }
-          if (publishSettings.platforms.includes("tiktok") && !publishSettings.privacy_level) {
-            toast.error("Please select a TikTok privacy status");
-            return;
-          }
-          if (publishAction === "schedule") {
-            if (!scheduledAt) {
-              toast.error("Please choose a date and time to schedule this video");
-              return;
-            }
-            if (new Date(scheduledAt).getTime() <= Date.now()) {
-              toast.error("Scheduled time must be in the future");
-              return;
-            }
-          }
-        }
-
         const res = await generateVideo({
           script: draft.script,
           duration_seconds: Number(formData.duration_seconds),
@@ -874,64 +917,66 @@ export default function GenerateContentModal({ setGeneratedData }) {
                       <div className="border rounded-lg p-4 bg-gray-50">
                         <p className="text-sm whitespace-pre-wrap">{draft.script}</p>
                       </div>
-
-                      <div className="border-t pt-3">
-                        <p className="text-sm font-medium mb-2">What happens when it's ready?</p>
-                        <div className="flex flex-col gap-2 text-sm mb-3">
-                          <label className="flex items-center gap-2">
-                            <input
-                              type="radio"
-                              checked={publishAction === "review"}
-                              onChange={() => setPublishAction("review")}
-                              className="accent-[#7239EA]"
-                            />
-                            Review before publishing
-                          </label>
-                          <label className="flex items-center gap-2">
-                            <input
-                              type="radio"
-                              checked={publishAction === "publish_now"}
-                              onChange={() => setPublishAction("publish_now")}
-                              className="accent-[#7239EA]"
-                            />
-                            Publish automatically when ready
-                          </label>
-                          <label className="flex items-center gap-2">
-                            <input
-                              type="radio"
-                              checked={publishAction === "schedule"}
-                              onChange={() => setPublishAction("schedule")}
-                              className="accent-[#7239EA]"
-                            />
-                            Schedule for a specific time
-                          </label>
-                        </div>
-
-                        {publishAction === "schedule" && (
-                          <input
-                            type="datetime-local"
-                            value={scheduledAt}
-                            min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
-                            onChange={(e) => setScheduledAt(e.target.value)}
-                            className="w-full border rounded-md px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                          />
-                        )}
-
-                        {publishAction !== "review" && (
-                          <>
-                            <label className="text-sm font-medium mb-1 block">Caption</label>
-                            <textarea
-                              value={publishCaption}
-                              onChange={(e) => setPublishCaption(e.target.value)}
-                              rows={2}
-                              className="w-full border rounded-lg px-3 py-2 text-sm resize-none mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            />
-                            <PublishSettingsFields onChange={setPublishSettings} />
-                          </>
-                        )}
-                      </div>
                     </>
                   )}
+
+                  {/* Publish-without-review options - shown for both images
+                      and videos on the approve step. */}
+                  <div className="border-t pt-3">
+                    <p className="text-sm font-medium mb-2">What happens when it's ready?</p>
+                    <div className="flex flex-col gap-2 text-sm mb-3">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          checked={publishAction === "review"}
+                          onChange={() => setPublishAction("review")}
+                          className="accent-[#7239EA]"
+                        />
+                        Review before publishing
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          checked={publishAction === "publish_now"}
+                          onChange={() => setPublishAction("publish_now")}
+                          className="accent-[#7239EA]"
+                        />
+                        Publish automatically when ready
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          checked={publishAction === "schedule"}
+                          onChange={() => setPublishAction("schedule")}
+                          className="accent-[#7239EA]"
+                        />
+                        Schedule for a specific time
+                      </label>
+                    </div>
+
+                    {publishAction === "schedule" && (
+                      <input
+                        type="datetime-local"
+                        value={scheduledAt}
+                        min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+                        onChange={(e) => setScheduledAt(e.target.value)}
+                        className="w-full border rounded-md px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    )}
+
+                    {publishAction !== "review" && (
+                      <>
+                        <label className="text-sm font-medium mb-1 block">Caption</label>
+                        <textarea
+                          value={publishCaption}
+                          onChange={(e) => setPublishCaption(e.target.value)}
+                          rows={2}
+                          className="w-full border rounded-lg px-3 py-2 text-sm resize-none mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        />
+                        <PublishSettingsFields onChange={setPublishSettings} />
+                      </>
+                    )}
+                  </div>
 
                   {showFeedback && (
                     <div>
