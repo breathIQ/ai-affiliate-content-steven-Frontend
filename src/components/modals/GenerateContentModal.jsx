@@ -40,6 +40,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
   // clones), so we fetch once and filter client-side rather than rendering
   // a giant native <select>.
   const [avatars, setAvatars] = useState([]);
+  const [myHeygenAvatars, setMyHeygenAvatars] = useState([]); // the HeyGen account's own "My avatars" (photo avatar groups)
   const [myFavoriteAvatars, setMyFavoriteAvatars] = useState([]);
   const [globalFavoriteAvatars, setGlobalFavoriteAvatars] = useState([]);
   const [recentAvatars, setRecentAvatars] = useState([]);
@@ -98,6 +99,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
       try {
         const res = await getAvatars();
         setAvatars(res?.data?.all || []);
+        setMyHeygenAvatars(res?.data?.my_avatars || []);
         setMyFavoriteAvatars(res?.data?.personal_favorites || []);
         setGlobalFavoriteAvatars(res?.data?.global_favorites || []);
         setRecentAvatars(res?.data?.recently_used || []);
@@ -148,29 +150,38 @@ export default function GenerateContentModal({ setGeneratedData }) {
     setAvatarSearch("");
   };
 
-  // Priority order when not searching: my own favorites, then whatever's
-  // popular across everyone else, then whatever this user has actually
-  // used before, then everything else - each avatar appears in only the
-  // highest-priority section it qualifies for.
-  const myFavoriteIds = new Set(myFavoriteAvatars.map((a) => a.avatar_id));
-  const dedupedGlobal = globalFavoriteAvatars.filter((a) => !myFavoriteIds.has(a.avatar_id));
+  // Priority order when not searching: the account's own HeyGen avatars,
+  // then my favorites, then whatever's popular across everyone else, then
+  // whatever this user has actually used before, then everything else -
+  // each avatar appears in only the highest-priority section it
+  // qualifies for.
+  const myHeygenIds = new Set(myHeygenAvatars.map((a) => a.avatar_id));
+  const dedupedFavorites = myFavoriteAvatars.filter((a) => !myHeygenIds.has(a.avatar_id));
+  const myFavoriteIds = new Set(dedupedFavorites.map((a) => a.avatar_id));
+  const dedupedGlobal = globalFavoriteAvatars.filter(
+    (a) => !myHeygenIds.has(a.avatar_id) && !myFavoriteIds.has(a.avatar_id)
+  );
   const dedupedRecent = recentAvatars.filter(
-    (a) => !myFavoriteIds.has(a.avatar_id) && !dedupedGlobal.some((g) => g.avatar_id === a.avatar_id)
+    (a) =>
+      !myHeygenIds.has(a.avatar_id) &&
+      !myFavoriteIds.has(a.avatar_id) &&
+      !dedupedGlobal.some((g) => g.avatar_id === a.avatar_id)
   );
   const usedIds = new Set([
+    ...myHeygenIds,
     ...myFavoriteIds,
     ...dedupedGlobal.map((a) => a.avatar_id),
     ...dedupedRecent.map((a) => a.avatar_id),
   ]);
   const remainingSlots = Math.max(
     0,
-    30 - myFavoriteAvatars.length - dedupedGlobal.length - dedupedRecent.length
+    30 - myHeygenAvatars.length - dedupedFavorites.length - dedupedGlobal.length - dedupedRecent.length
   );
   const otherAvatars = avatars.filter((a) => !usedIds.has(a.avatar_id)).slice(0, remainingSlots);
 
   const filteredAvatars = avatarSearch.trim()
     ? avatars.filter((a) => a.avatar_name.toLowerCase().includes(avatarSearch.trim().toLowerCase())).slice(0, 30)
-    : [...myFavoriteAvatars, ...dedupedGlobal, ...dedupedRecent, ...otherAvatars];
+    : [...myHeygenAvatars, ...dedupedFavorites, ...dedupedGlobal, ...dedupedRecent, ...otherAvatars];
 
   const handleClose = () => {
     setIsOpen(false);
@@ -817,7 +828,12 @@ export default function GenerateContentModal({ setGeneratedData }) {
                             {!avatarsLoading && filteredAvatars.length === 0 && (
                               <p className="px-3 py-2 text-sm text-gray-500">No avatars found</p>
                             )}
-                            {!avatarSearch.trim() && myFavoriteAvatars.length > 0 && (
+                            {!avatarSearch.trim() && myHeygenAvatars.length > 0 && (
+                              <p className="px-3 pt-2 pb-1 text-xs font-medium text-gray-400 uppercase">
+                                My Avatars
+                              </p>
+                            )}
+                            {!avatarSearch.trim() && myHeygenAvatars.length === 0 && dedupedFavorites.length > 0 && (
                               <p className="px-3 pt-2 pb-1 text-xs font-medium text-gray-400 uppercase">
                                 My Favorites
                               </p>
@@ -825,22 +841,30 @@ export default function GenerateContentModal({ setGeneratedData }) {
                             {filteredAvatars.map((avatar, index) => (
                               <div key={avatar.avatar_id}>
                                 {!avatarSearch.trim() &&
+                                  myHeygenAvatars.length > 0 &&
+                                  dedupedFavorites.length > 0 &&
+                                  index === myHeygenAvatars.length && (
+                                    <p className="px-3 pt-2 pb-1 text-xs font-medium text-gray-400 uppercase">
+                                      My Favorites
+                                    </p>
+                                  )}
+                                {!avatarSearch.trim() &&
                                   dedupedGlobal.length > 0 &&
-                                  index === myFavoriteAvatars.length && (
+                                  index === myHeygenAvatars.length + dedupedFavorites.length && (
                                     <p className="px-3 pt-2 pb-1 text-xs font-medium text-gray-400 uppercase">
                                       Popular
                                     </p>
                                   )}
                                 {!avatarSearch.trim() &&
                                   dedupedRecent.length > 0 &&
-                                  index === myFavoriteAvatars.length + dedupedGlobal.length && (
+                                  index === myHeygenAvatars.length + dedupedFavorites.length + dedupedGlobal.length && (
                                     <p className="px-3 pt-2 pb-1 text-xs font-medium text-gray-400 uppercase">
                                       Recently Used
                                     </p>
                                   )}
                                 {!avatarSearch.trim() &&
                                   otherAvatars.length > 0 &&
-                                  index === myFavoriteAvatars.length + dedupedGlobal.length + dedupedRecent.length && (
+                                  index === myHeygenAvatars.length + dedupedFavorites.length + dedupedGlobal.length + dedupedRecent.length && (
                                     <p className="px-3 pt-2 pb-1 text-xs font-medium text-gray-400 uppercase">
                                       All Avatars
                                     </p>
