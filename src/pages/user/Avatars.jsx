@@ -91,7 +91,7 @@ export default function Avatars() {
       <button
         onClick={(e) => handleToggleFavorite(e, avatar)}
         title={isFavorited ? "Remove from my favorites" : "Add to my favorites"}
-        className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center shadow hover:scale-110 transition"
+        className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center shadow hover:scale-110 transition"
       >
         <span className={isFavorited ? "text-yellow-400" : "text-gray-300"}>★</span>
       </button>
