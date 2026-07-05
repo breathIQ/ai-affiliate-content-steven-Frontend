@@ -3,7 +3,7 @@ import Layout from "../../components/Layout/Layout";
 import PublishModal from "../../components/modals/PublishModal";
 import { useParams, useNavigate } from "react-router-dom";
 import { set, useForm } from "react-hook-form";
-import { createPost, publishPost, updatePostMedia } from "../../services/post.api";
+import { createPost, publishPost, updatePostMedia, generateAIPost } from "../../services/post.api";
 import toast from "react-hot-toast";
 import { getSinglePost } from "../../services/post.api";
 import { generateVideoFromImage, getGrokVideoStatus } from "../../services/grok.api";
@@ -42,6 +42,15 @@ export default function DraftPostPage({
   const [grokAudioMode, setGrokAudioMode] = useState("auto");
   const [grokGeneration, setGrokGeneration] = useState(null); // { id, status }
   const [grokLoading, setGrokLoading] = useState(false);
+
+  // "Don't like the result?" flows: grokSourceImage remembers the image a
+  // video was generated from (so it can be regenerated or restored), and
+  // genParams is the saved image-generation recipe from the draft's
+  // auto-save (so images can be regenerated with the same approved text).
+  const [grokSourceImage, setGrokSourceImage] = useState(null);
+  const [grokVideoReady, setGrokVideoReady] = useState(false);
+  const [genParams, setGenParams] = useState(null);
+  const [regenLoading, setRegenLoading] = useState(false);
 
   // Publish-without-review, same as GenerateContentModal's HeyGen path.
   // In edit mode the existing post is published once the render finishes;
@@ -163,6 +172,7 @@ export default function DraftPostPage({
         setAiModel(post.ai_model || "");
         setUser(post.user || "");
         setPostStatus(post.status || null);
+        setGenParams(post.ai_generation_params || null);
 
         // Chapter
         if (post.chapter) {
@@ -327,6 +337,10 @@ export default function DraftPostPage({
           .map((tag) => (tag.startsWith("#") ? tag : `#${tag}`))
           .join(", ");
         formData.append("hashtags", hashtagString);
+
+        if (generatedData.generation_params) {
+          formData.append("ai_generation_params", JSON.stringify(generatedData.generation_params));
+        }
 
         const response = await createPost(formData);
 
@@ -606,14 +620,19 @@ export default function DraftPostPage({
             return next;
           });
 
+          setGrokVideoReady(true);
+
           // This video just cost real credits - persist it to the saved
           // draft immediately rather than leaving it sitting only in this
-          // tab's memory until some later save action.
+          // tab's memory until some later save action. keep_files leaves
+          // the original image file on disk so "keep the image instead"
+          // can restore it.
           if (isEditMode) {
             try {
               const formData = new FormData();
               formData.append("media[0][file]", gen.video_url);
               formData.append("media[0][media_order]", 1);
+              formData.append("keep_files", "1");
               const saveRes = await updatePostMedia(id, formData);
 
               if (!saveRes?.success) {
@@ -650,8 +669,11 @@ export default function DraftPostPage({
   };
 
   const startGrokVideo = async () => {
-    const sourceImage = mediaItems[0];
-    if (!sourceImage) return;
+    // On a regenerate, mediaItems[0] is already the video - fall back to
+    // the remembered source image so Grok always animates the original.
+    const sourceUrl =
+      mediaItems[0]?.media_type !== "video" ? mediaItems[0]?.url : grokSourceImage;
+    if (!sourceUrl) return;
 
     if (grokPublishAction !== "review") {
       if (!isEditMode) {
@@ -688,9 +710,11 @@ export default function DraftPostPage({
 
     try {
       setGrokLoading(true);
+      setGrokVideoReady(false);
+      setGrokSourceImage(sourceUrl);
 
       const res = await generateVideoFromImage({
-        image_url: sourceImage.url,
+        image_url: sourceUrl,
         duration_seconds: grokDuration,
         audio_mode: grokAudioMode,
         post_id: isEditMode ? id : undefined,
@@ -739,6 +763,86 @@ export default function DraftPostPage({
       toast.error(
         error?.response?.data?.error || error?.message || "Could not start video generation."
       );
+    }
+  };
+
+  // "Don't like the video?" - throw it away and put the original image
+  // back (the image file was kept on disk via keep_files, so re-attaching
+  // by URL works). The video generation was already paid for; reverting
+  // doesn't refund it, it just changes what the post will publish.
+  const revertToImage = async () => {
+    if (!grokSourceImage) return;
+
+    setMediaItems([{ type: "url", url: grokSourceImage, media_type: "image" }]);
+    setGrokVideoReady(false);
+
+    if (isEditMode) {
+      try {
+        const formData = new FormData();
+        formData.append("media[0][file]", grokSourceImage);
+        formData.append("media[0][media_order]", 1);
+        formData.append("keep_files", "1");
+        const saveRes = await updatePostMedia(id, formData);
+
+        if (!saveRes?.success) {
+          toast.error("Could not restore the image on your draft - try again.");
+          return;
+        }
+      } catch (error) {
+        console.error("REVERT TO IMAGE ERROR ❌", error);
+        toast.error("Could not restore the image on your draft - try again.");
+        return;
+      }
+    }
+
+    toast.success("Back to the image - the video was discarded.");
+  };
+
+  // Regenerate this post's image(s) from the saved generation recipe -
+  // same approved text, same design settings, new picture. Charges image
+  // credits again, like any generation.
+  const regenerateImage = async () => {
+    if (!genParams || regenLoading) return;
+    if (!window.confirm("Generate a new image with the same text? This charges image credits again.")) return;
+
+    try {
+      setRegenLoading(true);
+      const res = await generateAIPost(genParams);
+
+      if (!res?.success) {
+        toast.error(res?.messages?.join(", ") || res?.message || "Could not regenerate the image.");
+        return;
+      }
+
+      const images = (res.data?.images || []).filter((img) => img.status !== false && img.image_url);
+
+      if (!images.length) {
+        toast.error(res.data?.images?.[0]?.image_error || "Image generation failed - failed slides are refunded.");
+        return;
+      }
+
+      const formData = new FormData();
+      images.forEach((img, i) => {
+        formData.append(`media[${i}][file]`, img.image_url);
+        formData.append(`media[${i}][media_order]`, i + 1);
+      });
+      const saveRes = await updatePostMedia(id, formData);
+
+      if (!saveRes?.success) {
+        toast.error("New image generated but couldn't be saved to the draft - try again.");
+        return;
+      }
+
+      setMediaItems(images.map((img) => ({ type: "url", url: img.image_url, media_type: "image" })));
+      setSelectedMedia(images.map((_, idx) => idx));
+      setGrokSourceImage(null);
+      setGrokVideoReady(false);
+      toast.success("New image generated - same text, fresh picture.");
+    } catch (error) {
+      console.error("REGENERATE IMAGE ERROR ❌", error);
+      toast.error(error?.response?.data?.message || "Could not regenerate the image.");
+    } finally {
+      setRegenLoading(false);
     }
   };
 
@@ -933,11 +1037,21 @@ export default function DraftPostPage({
 
             {isEditMode && postStatus === "draft" && (
               <div className="flex flex-wrap gap-2">
+                {genParams && (mediaItems[0]?.media_type || "image") === "image" && (
+                  <button
+                    onClick={regenerateImage}
+                    disabled={regenLoading || grokLoading}
+                    className={`border border-gray-400 text-gray-700 py-[10px] px-[16px] rounded-lg flex gap-2 ${regenLoading || grokLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                    title="Generate a new image using the same approved text"
+                  >
+                    {regenLoading ? "Regenerating image..." : "Regenerate Image"}
+                  </button>
+                )}
                 {canTurnIntoVideo && (
                   <button
                     onClick={() => setGrokPickerOpen(true)}
-                    disabled={grokLoading}
-                    className={`border border-gray-400 text-gray-700 py-[10px] px-[16px] rounded-lg flex gap-2 ${grokLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                    disabled={grokLoading || regenLoading}
+                    className={`border border-gray-400 text-gray-700 py-[10px] px-[16px] rounded-lg flex gap-2 ${grokLoading || regenLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     {grokLoading ? "Turning into video..." : "Turn into Video"}
                   </button>
@@ -951,6 +1065,28 @@ export default function DraftPostPage({
               </div>
             )}
           </div>
+
+          {/* Post-render choice: the video is saved, but the user can
+              redo it or fall back to the original image. */}
+          {grokVideoReady && grokSourceImage && (
+            <div className="flex flex-wrap items-center gap-3 border border-purple-200 bg-purple-50 rounded-lg px-4 py-3 text-sm">
+              <span className="text-gray-700">Not happy with the video?</span>
+              <button
+                onClick={() => setGrokPickerOpen(true)}
+                disabled={grokLoading}
+                className="border border-purple-400 text-purple-700 py-[6px] px-[12px] rounded-lg"
+              >
+                Regenerate video
+              </button>
+              <button
+                onClick={revertToImage}
+                disabled={grokLoading}
+                className="border border-gray-400 text-gray-700 py-[6px] px-[12px] rounded-lg"
+              >
+                Keep the image instead
+              </button>
+            </div>
+          )}
 
           {grokPickerOpen && (
             <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">

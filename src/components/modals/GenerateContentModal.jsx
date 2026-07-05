@@ -306,7 +306,10 @@ export default function GenerateContentModal({ setGeneratedData }) {
 
     try {
       if (contentType === "image") {
-        const payload = {
+        // Everything needed to re-run image generation with the same
+        // approved text later ("Regenerate image" on the post page) -
+        // saved onto the draft post by the Library auto-save.
+        const generationParams = {
           chapter: formData.chapter_id,
           model: formData.model,
           text_format: formData.text_format,
@@ -320,6 +323,10 @@ export default function GenerateContentModal({ setGeneratedData }) {
           },
           approved_text: draft,
           image_model: imageEngine,
+        };
+
+        const payload = {
+          ...generationParams,
           ...(publishAction !== "review" && {
             publish_action: publishAction,
             caption: publishCaption,
@@ -365,7 +372,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
           toast.error("The post couldn't be auto-published - review it below instead.");
         }
 
-        setGeneratedData(res.data);
+        setGeneratedData({ ...res.data, generation_params: generationParams });
         handleClose();
       } else {
         const res = await generateVideo({
