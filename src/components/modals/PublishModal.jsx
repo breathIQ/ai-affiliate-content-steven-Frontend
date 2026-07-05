@@ -9,6 +9,7 @@ import { useLoader } from "../../context/LoaderContext";
 export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
   const [platforms, setPlatforms] = useState({
     instagram: false,
+    instagram_story: false,
     tiktok: false,
   });
   const [mediaStatus, setMediaStatus] = useState({});
@@ -85,7 +86,7 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
 
   const submitForm = (data) => {
 
-    if (!platforms.instagram && !platforms.tiktok) {
+    if (!platforms.instagram && !platforms.instagram_story && !platforms.tiktok) {
       toast.error("Please select at least one platform to publish");
       return;
     }
@@ -358,6 +359,28 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
                 )}
               </label>
 
+              {/* Stories ride the same Instagram connection; captions and
+                  link stickers don't apply (Meta strips both on stories). */}
+              <label className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={platforms.instagram_story}
+                    disabled={!instagramStatus?.connected}
+                    className="accent-[#7239EA] w-[15.75px] h-[15.75px]"
+                    onChange={() =>
+                      setPlatforms((p) => ({
+                        ...p,
+                        instagram_story: !p.instagram_story,
+                      }))
+                    }
+                  />
+                  <span>
+                    Instagram Story
+                    <span className="block text-xs text-gray-500">24-hour story - image/video only, caption not shown</span>
+                  </span>
+                </div>
+              </label>
 
               <label className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

@@ -17,7 +17,7 @@ import { useLoader } from "../context/LoaderContext";
  * the parent modal just reads the latest value at submit time.
  */
 export default function PublishSettingsFields({ onChange }) {
-  const [platforms, setPlatforms] = useState({ instagram: false, tiktok: false });
+  const [platforms, setPlatforms] = useState({ instagram: false, instagram_story: false, tiktok: false });
   const [privacyLevel, setPrivacyLevel] = useState("");
   const [allowComment, setAllowComment] = useState(false);
   const [contentDisclosure, setContentDisclosure] = useState(false);
@@ -113,6 +113,24 @@ export default function PublishSettingsFields({ onChange }) {
                 Connect Instagram
               </button>
             )}
+          </label>
+
+          {/* Stories ride the same Instagram connection; captions and
+              link stickers don't apply (Meta strips both on stories). */}
+          <label className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={platforms.instagram_story}
+                disabled={!instagramStatus?.connected}
+                className="accent-[#7239EA] w-[15.75px] h-[15.75px]"
+                onChange={() => setPlatforms((p) => ({ ...p, instagram_story: !p.instagram_story }))}
+              />
+              <span>
+                Instagram Story
+                <span className="block text-xs text-gray-500">24-hour story - image/video only, caption not shown</span>
+              </span>
+            </div>
           </label>
 
           <label className="flex items-center justify-between">
