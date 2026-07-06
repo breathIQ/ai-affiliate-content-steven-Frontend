@@ -20,6 +20,26 @@ export default function Avatars() {
   const [page, setPage] = useState(1);
   const [previewAvatar, setPreviewAvatar] = useState(null);
 
+  // Catalog tabs - mirrors HeyGen's categories. Filters client-side on
+  // the group_type each avatar carries (stock avatars have none).
+  const [tab, setTab] = useState("all");
+  const TABS = [
+    { id: "all", label: "All" },
+    { id: "mine", label: "My Avatars" },
+    { id: "public", label: "Public" },
+    { id: "ugc", label: "UGC" },
+    { id: "community", label: "Community" },
+    { id: "studio", label: "Studio" },
+  ];
+  const matchesTab = (a) => {
+    if (tab === "mine") return !!a.is_my_avatar;
+    if (tab === "public") return a.group_type === "PUBLIC";
+    if (tab === "ugc") return a.group_type === "PUBLIC_PHOTO";
+    if (tab === "community") return a.group_type === "COMMUNITY_PHOTO";
+    if (tab === "studio") return !a.group_id;
+    return true;
+  };
+
   // Selfie -> personal avatar: this user's own uploads (max 3 live).
   const [myPhotoAvatars, setMyPhotoAvatars] = useState([]);
   const [createOpen, setCreateOpen] = useState(false);
@@ -146,7 +166,8 @@ export default function Avatars() {
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
-    const base = query ? avatars.filter((a) => a.avatar_name.toLowerCase().includes(query)) : avatars;
+    const inTab = tab === "all" ? avatars : avatars.filter(matchesTab);
+    const base = query ? inTab.filter((a) => a.avatar_name.toLowerCase().includes(query)) : inTab;
 
     // Priority order, regardless of search: my own favorites first, then
     // whatever's popular across everyone else, then the rest.
@@ -160,7 +181,8 @@ export default function Avatars() {
     const rest = base.filter((a) => !mineIds.has(a.avatar_id) && !popularIds.has(a.avatar_id));
 
     return { items: [...mine, ...popular, ...rest], mineCount: mine.length, popularCount: popular.length };
-  }, [avatars, search, myFavoriteIds, globalFavoriteIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [avatars, search, tab, myFavoriteIds, globalFavoriteIds]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.items.length / PAGE_SIZE));
   const pageItems = filtered.items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -168,7 +190,7 @@ export default function Avatars() {
 
   useEffect(() => {
     setPage(1);
-  }, [search]);
+  }, [search, tab]);
 
   const renderStar = (avatar) => {
     const isFavorited = myFavoriteIds.has(avatar.avatar_id);
@@ -245,6 +267,22 @@ export default function Avatars() {
             </div>
           </div>
         )}
+
+        <div className="flex flex-wrap gap-2">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`py-[6px] px-[14px] rounded-full text-sm border transition ${
+                tab === t.id
+                  ? "bg-purple-600 border-purple-600 text-white"
+                  : "border-gray-300 text-gray-600 hover:border-purple-400"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
 
         <input
           type="text"
