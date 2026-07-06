@@ -40,6 +40,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
   // clones), so we fetch once and filter client-side rather than rendering
   // a giant native <select>.
   const [avatars, setAvatars] = useState([]);
+  const [heygenPricing, setHeygenPricing] = useState(null); // { cost_cents_per_second, margin_multiplier, price_cents_per_credit, minimum_credits }
   const [myHeygenAvatars, setMyHeygenAvatars] = useState([]); // the HeyGen account's own "My avatars" (photo avatar groups)
   const [myFavoriteAvatars, setMyFavoriteAvatars] = useState([]);
   const [globalFavoriteAvatars, setGlobalFavoriteAvatars] = useState([]);
@@ -67,6 +68,20 @@ export default function GenerateContentModal({ setGeneratedData }) {
   });
 
   const postType = watch("post_type");
+  const durationSeconds = watch("duration_seconds");
+
+  // Live credit estimate for the chosen duration - mirrors the backend's
+  // HeygenPricingService::creditsForDuration() exactly, using the pricing
+  // constants the avatars endpoint returns (so it never drifts from what
+  // will actually be charged). null until pricing loads or if the
+  // duration is out of range.
+  const estimatedCredits = (() => {
+    const secs = Number(durationSeconds);
+    if (!heygenPricing || !secs || secs < 10 || secs > 120) return null;
+    const priceCents = secs * heygenPricing.cost_cents_per_second * heygenPricing.margin_multiplier;
+    const credits = priceCents / heygenPricing.price_cents_per_credit;
+    return Math.max(Math.ceil(credits), heygenPricing.minimum_credits);
+  })();
 
   useEffect(() => {
     if (location.state?.generate) {
@@ -99,6 +114,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
       try {
         const res = await getAvatars();
         setAvatars(res?.data?.all || []);
+        setHeygenPricing(res?.data?.pricing || null);
         setMyHeygenAvatars(res?.data?.my_avatars || []);
         setMyFavoriteAvatars(res?.data?.personal_favorites || []);
         setGlobalFavoriteAvatars(res?.data?.global_favorites || []);
@@ -610,6 +626,13 @@ export default function GenerateContentModal({ setGeneratedData }) {
                         />
                         {errors.duration_seconds && (
                           <p className="text-xs text-red-500 mt-1">{errors.duration_seconds.message}</p>
+                        )}
+                        {estimatedCredits !== null && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            Estimated cost:{" "}
+                            <span className="font-medium text-purple-700">{estimatedCredits} credits</span>{" "}
+                            for {Number(durationSeconds)}s. Final charge matches the actual rendered length.
+                          </p>
                         )}
                       </div>
                     )}
