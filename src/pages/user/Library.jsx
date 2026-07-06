@@ -619,6 +619,10 @@ export default function DraftPostPage({
             next[0] = { type: "url", url: gen.video_url, media_type: "video" };
             return next;
           });
+          // In edit mode the post page renders from viewMedia, so it has
+          // to be swapped too or the page keeps showing the old image
+          // even though the video saved (looked like nothing happened).
+          setViewMedia([{ media_type: "video", url: gen.video_url }]);
 
           setGrokVideoReady(true);
 
@@ -774,6 +778,7 @@ export default function DraftPostPage({
     if (!grokSourceImage) return;
 
     setMediaItems([{ type: "url", url: grokSourceImage, media_type: "image" }]);
+    setViewMedia([{ media_type: "image", url: grokSourceImage }]);
     setGrokVideoReady(false);
 
     if (isEditMode) {
@@ -834,6 +839,7 @@ export default function DraftPostPage({
       }
 
       setMediaItems(images.map((img) => ({ type: "url", url: img.image_url, media_type: "image" })));
+      setViewMedia(images.map((img) => ({ media_type: "image", url: img.image_url })));
       setSelectedMedia(images.map((_, idx) => idx));
       setGrokSourceImage(null);
       setGrokVideoReady(false);
@@ -1065,6 +1071,19 @@ export default function DraftPostPage({
               </div>
             )}
           </div>
+
+          {/* Grok renders take ~2-3 minutes with no intermediate steps -
+              show an explicit generating state so the wait doesn't look
+              like a hang (which led users to retry and double-charge). */}
+          {grokLoading && (
+            <div className="flex items-center gap-3 border border-purple-200 bg-purple-50 rounded-lg px-4 py-3 text-sm">
+              <span className="inline-block w-4 h-4 border-2 border-purple-300 border-t-purple-600 rounded-full animate-spin" />
+              <span className="text-gray-700">
+                Turning your image into a video - this usually takes 2-3 minutes. Please keep this page open
+                until it's ready.
+              </span>
+            </div>
+          )}
 
           {/* Post-render choice: the video is saved, but the user can
               redo it or fall back to the original image. */}
