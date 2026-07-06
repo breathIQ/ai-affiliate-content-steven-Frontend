@@ -439,14 +439,29 @@ export default function Avatars() {
             className="bg-white rounded-xl overflow-hidden max-w-sm w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <video
-              key={previewAvatar.avatar_id}
-              src={previewAvatar.preview_video_url}
-              poster={previewAvatar.preview_image_url}
-              controls
-              autoPlay
-              className="w-full aspect-[9/16] bg-black object-contain"
-            />
+            {previewAvatar.preview_video_url ? (
+              <video
+                key={previewAvatar.avatar_id}
+                src={previewAvatar.preview_video_url}
+                poster={previewAvatar.preview_image_url}
+                controls
+                autoPlay
+                className="w-full aspect-[9/16] bg-black object-contain"
+              />
+            ) : (
+              <div>
+                <img
+                  key={previewAvatar.avatar_id}
+                  src={previewAvatar.preview_image_url}
+                  alt={previewAvatar.avatar_name}
+                  className="w-full aspect-[9/16] bg-black object-contain"
+                />
+                <p className="text-xs text-gray-500 px-4 pt-3">
+                  No video sample for this avatar - photo avatars come to life when you generate a video with
+                  them.
+                </p>
+              </div>
+            )}
             <div className="p-4 flex items-center justify-between">
               <p className="font-medium text-gray-900">{previewAvatar.avatar_name}</p>
               <div className="flex items-center gap-4">
