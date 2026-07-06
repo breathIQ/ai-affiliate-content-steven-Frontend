@@ -35,3 +35,20 @@ export const toggleFavoriteAvatar = async (avatar) => {
   });
   return res.data;
 };
+
+// Selfie -> personal HeyGen photo avatar. formData: name, photo (file),
+// consent ("1"). Capped at 3 live avatars per user server-side.
+export const createPhotoAvatar = async (formData) => {
+  const res = await API.post(`/user/heygen/photo-avatars`, formData);
+  return res.data;
+};
+
+export const getPhotoAvatars = async () => {
+  const res = await API.get(`/user/heygen/photo-avatars`);
+  return res.data;
+};
+
+export const deletePhotoAvatar = async (id) => {
+  const res = await API.delete(`/user/heygen/photo-avatars/${id}`);
+  return res.data;
+};

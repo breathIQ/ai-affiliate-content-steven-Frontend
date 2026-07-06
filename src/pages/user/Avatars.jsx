@@ -1,6 +1,12 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import Layout from "../../components/Layout/Layout";
-import { getAvatars, toggleFavoriteAvatar } from "../../services/heygen.api";
+import {
+  getAvatars,
+  toggleFavoriteAvatar,
+  createPhotoAvatar,
+  getPhotoAvatars,
+  deletePhotoAvatar,
+} from "../../services/heygen.api";
 import toast from "react-hot-toast";
 
 const PAGE_SIZE = 24;
@@ -13,6 +19,85 @@ export default function Avatars() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [previewAvatar, setPreviewAvatar] = useState(null);
+
+  // Selfie -> personal avatar: this user's own uploads (max 3 live).
+  const [myPhotoAvatars, setMyPhotoAvatars] = useState([]);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createName, setCreateName] = useState("");
+  const [createFile, setCreateFile] = useState(null);
+  const [createPreview, setCreatePreview] = useState(null);
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const pollRef = useRef(null);
+
+  const refreshPhotoAvatars = async () => {
+    try {
+      const res = await getPhotoAvatars();
+      const list = res?.data || [];
+      setMyPhotoAvatars(list);
+
+      // Keep polling only while something is still processing.
+      if (list.some((a) => a.status === "pending")) {
+        clearTimeout(pollRef.current);
+        pollRef.current = setTimeout(refreshPhotoAvatars, 5000);
+      }
+      return list;
+    } catch (error) {
+      console.error("GET PHOTO AVATARS ERROR ❌", error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    refreshPhotoAvatars();
+    return () => clearTimeout(pollRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const submitCreateAvatar = async () => {
+    if (!createName.trim()) return toast.error("Give your avatar a name");
+    if (!createFile) return toast.error("Choose a photo");
+    if (!consentChecked) return toast.error("Please confirm you have the right to use this photo");
+
+    try {
+      setCreating(true);
+      const formData = new FormData();
+      formData.append("name", createName.trim());
+      formData.append("photo", createFile);
+      formData.append("consent", "1");
+      const res = await createPhotoAvatar(formData);
+
+      if (!res?.success) {
+        toast.error(res?.messages?.join(", ") || res?.message || "Could not create the avatar");
+        return;
+      }
+
+      toast.success("Avatar is being created - it usually takes under a minute.");
+      setCreateOpen(false);
+      setCreateName("");
+      setCreateFile(null);
+      setCreatePreview(null);
+      setConsentChecked(false);
+      refreshPhotoAvatars();
+    } catch (error) {
+      console.error("CREATE PHOTO AVATAR ERROR ❌", error);
+      toast.error(error?.response?.data?.message || error?.response?.data?.messages?.join?.(", ") || "Could not create the avatar");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const removePhotoAvatar = async (avatar) => {
+    if (!window.confirm(`Delete the avatar "${avatar.name}"? Videos already made with it are unaffected.`)) return;
+    try {
+      await deletePhotoAvatar(avatar.id);
+      toast.success("Avatar deleted");
+      refreshPhotoAvatars();
+    } catch (error) {
+      console.error("DELETE PHOTO AVATAR ERROR ❌", error);
+      toast.error("Could not delete the avatar");
+    }
+  };
 
   useEffect(() => {
     const fetchAvatars = async () => {
@@ -111,13 +196,55 @@ export default function Avatars() {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto py-8 space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Avatars</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Browse every HeyGen avatar available for your videos. Click one to preview a sample, or star your
-            personal favorites. The avatars everyone favorites the most rise to the top for the whole team.
-          </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">Avatars</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Browse every HeyGen avatar available for your videos. Click one to preview a sample, or star your
+              personal favorites. The avatars everyone favorites the most rise to the top for the whole team.
+            </p>
+          </div>
+          <button
+            onClick={() => setCreateOpen(true)}
+            className="bg-purple-600 text-white py-[10px] px-[16px] rounded-lg text-sm"
+          >
+            Create My Avatar
+          </button>
         </div>
+
+        {myPhotoAvatars.length > 0 && (
+          <div>
+            <p className="text-xs font-medium text-gray-400 uppercase mb-2">My Uploaded Avatars ({myPhotoAvatars.length}/3)</p>
+            <div className="flex flex-wrap gap-3">
+              {myPhotoAvatars.map((a) => (
+                <div key={a.id} className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm">
+                  {a.preview_image_url ? (
+                    <img src={a.preview_image_url} alt={a.name} className="w-10 h-10 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gray-100" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{a.name}</p>
+                    {a.status === "pending" && <p className="text-xs text-amber-600">Processing...</p>}
+                    {a.status === "ready" && <p className="text-xs text-green-600">Ready to use</p>}
+                    {a.status === "failed" && (
+                      <p className="text-xs text-red-600" title={a.error_message || ""}>
+                        Failed{a.error_message ? ` - ${a.error_message}` : ""}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => removePhotoAvatar(a)}
+                    className="text-xs text-gray-400 hover:text-red-500 ml-1"
+                    title="Delete this avatar"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <input
           type="text"
@@ -185,6 +312,85 @@ export default function Avatars() {
           </>
         )}
       </div>
+
+      {createOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+          onClick={() => !creating && setCreateOpen(false)}
+        >
+          <div
+            className="bg-white rounded-xl max-w-sm w-full max-h-[90vh] overflow-y-auto p-5 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="font-semibold text-lg">Create your own avatar</h2>
+            <p className="text-sm text-gray-500">
+              Upload a clear, front-facing photo of yourself and we'll turn it into an avatar you can use in
+              videos. Good light, one face, no sunglasses.
+            </p>
+
+            <div>
+              <label className="text-sm font-medium mb-1 block">Avatar name</label>
+              <input
+                type="text"
+                value={createName}
+                maxLength={60}
+                onChange={(e) => setCreateName(e.target.value)}
+                placeholder="e.g. My presenter"
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-1 block">Photo</label>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setCreateFile(file);
+                  setCreatePreview(file ? URL.createObjectURL(file) : null);
+                }}
+                className="w-full text-sm"
+              />
+              {createPreview && (
+                <img src={createPreview} alt="Preview" className="mt-2 w-24 h-24 rounded-lg object-cover border" />
+              )}
+            </div>
+
+            <label className="flex items-start gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                checked={consentChecked}
+                onChange={(e) => setConsentChecked(e.target.checked)}
+                className="accent-[#7239EA] mt-0.5 w-[15.75px] h-[15.75px]"
+              />
+              <span>
+                I confirm this photo is of me, or of someone who has authorized me to create an avatar with
+                their likeness.
+              </span>
+            </label>
+
+            <p className="text-xs text-gray-400">You can have up to 3 avatars. Photos are reviewed automatically and may be rejected.</p>
+
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                onClick={() => setCreateOpen(false)}
+                disabled={creating}
+                className="px-4 py-2 text-sm rounded-md border border-gray-300 text-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitCreateAvatar}
+                disabled={creating}
+                className="px-4 py-2 text-sm rounded-md text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
+              >
+                {creating ? "Creating..." : "Create Avatar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {previewAvatar && (
         <div
