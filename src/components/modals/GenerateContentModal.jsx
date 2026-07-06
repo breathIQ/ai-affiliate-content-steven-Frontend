@@ -611,22 +611,48 @@ export default function GenerateContentModal({ setGeneratedData }) {
                     ) : (
                       <div>
                         <label className="text-sm font-medium mb-1 block">
-                          Video Duration (seconds) <span className="text-red-500">*</span>
+                          Video Duration <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="number"
-                          min={10}
-                          max={120}
-                          {...register("duration_seconds", {
-                            required: "Duration is required",
-                            min: { value: 10, message: "Minimum 10 seconds" },
-                            max: { value: 120, message: "Maximum 120 seconds" },
-                          })}
-                          className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        />
-                        {errors.duration_seconds && (
-                          <p className="text-xs text-red-500 mt-1">{errors.duration_seconds.message}</p>
-                        )}
+                        {/* duration_seconds stays the single source of
+                            truth (estimate, validation, submit read it);
+                            these two fields just edit it as min:sec.
+                            Clamped to the same 10-120s range. */}
+                        <input type="hidden" {...register("duration_seconds")} />
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              min={0}
+                              max={2}
+                              value={Math.floor((Number(durationSeconds) || 0) / 60)}
+                              onChange={(e) => {
+                                const mins = Math.max(0, Math.min(2, Number(e.target.value) || 0));
+                                const secs = (Number(durationSeconds) || 0) % 60;
+                                const total = Math.max(10, Math.min(120, mins * 60 + secs));
+                                setValue("duration_seconds", total, { shouldValidate: true });
+                              }}
+                              className="w-16 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            />
+                            <span className="text-sm text-gray-600">min</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              min={0}
+                              max={59}
+                              value={(Number(durationSeconds) || 0) % 60}
+                              onChange={(e) => {
+                                const mins = Math.floor((Number(durationSeconds) || 0) / 60);
+                                const secs = Math.max(0, Math.min(59, Number(e.target.value) || 0));
+                                const total = Math.max(10, Math.min(120, mins * 60 + secs));
+                                setValue("duration_seconds", total, { shouldValidate: true });
+                              }}
+                              className="w-16 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            />
+                            <span className="text-sm text-gray-600">sec</span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">Between 10 seconds and 2 minutes.</p>
                         {estimatedCredits !== null && (
                           <p className="text-xs text-gray-500 mt-1">
                             Estimated cost:{" "}
