@@ -2,6 +2,7 @@ import Library from "../pages/user/Library"
 import Login from "../pages/auth/Login"
 import SignUpWithOTP from "../pages/auth/SignUpWithOTP"
 import Dashboard from "../pages/Dashboard"
+import Stats from "../pages/Stats"
 import FileUpload from "../pages/FileUpload"
 import Users from "../pages/Users"
 import UserDashboard from "../pages/user/UserDashboard"
@@ -46,6 +47,7 @@ const allRoutes = [
     { component: <Dashboard />, path: "/", role: 2 },
     { component: <Dashboard />, path: "/admin", role: 2 },
     { component: <Dashboard />, path: "/admin/dashboard", role: 2 },
+    { component: <Stats />, path: "/admin/stats", role: 2 },
     { component: <Users />, path: "/admin/users", role: 2 },
     { component: <FileUpload />, path: "/admin/files", role: 2 },
 
