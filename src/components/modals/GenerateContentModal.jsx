@@ -9,6 +9,80 @@ import PublishSettingsFields from "../PublishSettingsFields";
 
 const POLL_INTERVAL_MS = 6000;
 
+// One-click image style presets. Each maps to the four design fields the
+// backend expects, so nothing downstream changes - the dropdowns still
+// exist under "Customize (advanced)" for fine-tuning, pre-filled from
+// the chosen preset. Curated combinations that reliably look good, so
+// most users never touch the advanced controls.
+const IMAGE_PRESETS = [
+  {
+    id: "cinematic",
+    label: "Cinematic Infographic",
+    description: "Dramatic, premium, high detail",
+    design: {
+      image_style: "Cinematic Infographic",
+      content_angle: "Educational / Explainer",
+      human_presence: "No People",
+      visual_mood: "Empowering",
+    },
+  },
+  {
+    id: "minimal",
+    label: "Clean & Minimal",
+    description: "Crisp, modern, lots of space",
+    design: {
+      image_style: "Minimalist / Modern",
+      content_angle: "Educational / Explainer",
+      human_presence: "No People",
+      visual_mood: "Calm & Grounded",
+    },
+  },
+  {
+    id: "scientific",
+    label: "Scientific Diagram",
+    description: "Precise, clinical, labeled",
+    design: {
+      image_style: "Scientific / Conceptual",
+      content_angle: "Clinical Perspective",
+      human_presence: "No People",
+      visual_mood: "Serious & Clinical",
+    },
+  },
+  {
+    id: "human",
+    label: "Warm & Human",
+    description: "Real people, approachable",
+    design: {
+      image_style: "Lifestyle / Wellness",
+      content_angle: "Beginner Friendly",
+      human_presence: "Everyday People",
+      visual_mood: "Warm & Reassuring",
+    },
+  },
+  {
+    id: "bold",
+    label: "Bold & Vibrant",
+    description: "Strong colors, high energy",
+    design: {
+      image_style: "Illustrated / Graphic",
+      content_angle: "Myth-Busting",
+      human_presence: "No People",
+      visual_mood: "Quietly Provocative",
+    },
+  },
+  {
+    id: "photo",
+    label: "Hyper-Realistic Photo",
+    description: "Lifelike, photographic",
+    design: {
+      image_style: "Hyper-Realistic",
+      content_angle: "Story-Driven",
+      human_presence: "Single Person",
+      visual_mood: "Curious & Thoughtful",
+    },
+  },
+];
+
 export default function GenerateContentModal({ setGeneratedData }) {
   const [isOpen, setIsOpen] = useState(false);
   const [chapters, setChapters] = useState([]);
@@ -17,6 +91,8 @@ export default function GenerateContentModal({ setGeneratedData }) {
   // Wizard state
   const [step, setStep] = useState("type"); // type -> options -> draft -> generating -> done
   const [contentType, setContentType] = useState(null); // 'image' | 'video'
+  const [stylePreset, setStylePreset] = useState(IMAGE_PRESETS[0].id); // selected image style preset
+  const [advancedStyle, setAdvancedStyle] = useState(false); // reveal the fine-grained dropdowns
   const [draft, setDraft] = useState(null); // {title, caption, hashtags, summary} | {script}
   const [imageEngine, setImageEngine] = useState("openai"); // which AI actually renders the image - chosen after text is approved
   const [showFeedback, setShowFeedback] = useState(false);
@@ -149,6 +225,8 @@ export default function GenerateContentModal({ setGeneratedData }) {
     setSelectedAvatar(null);
     setAvatarSearch("");
     setAvatarPickerOpen(false);
+    setStylePreset(IMAGE_PRESETS[0].id);
+    setAdvancedStyle(false);
     reset();
   };
 
@@ -204,9 +282,22 @@ export default function GenerateContentModal({ setGeneratedData }) {
     resetWizard();
   };
 
+  const applyPreset = (preset) => {
+    setStylePreset(preset.id);
+    setValue("image_style", preset.design.image_style, { shouldValidate: true });
+    setValue("content_angle", preset.design.content_angle, { shouldValidate: true });
+    setValue("human_presence", preset.design.human_presence, { shouldValidate: true });
+    setValue("visual_mood", preset.design.visual_mood, { shouldValidate: true });
+  };
+
   const chooseType = (type) => {
     setContentType(type);
     setStep("options");
+    // Seed the image design fields from the default preset so a user can
+    // generate great images without opening the advanced controls.
+    if (type === "image") {
+      applyPreset(IMAGE_PRESETS.find((p) => p.id === stylePreset) || IMAGE_PRESETS[0]);
+    }
   };
 
   const requestDraft = async (formData) => {
@@ -726,16 +817,53 @@ export default function GenerateContentModal({ setGeneratedData }) {
                         )}
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Style presets: the primary, simple control. Each
+                          fills the four design fields below. */}
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">
+                          Style <span className="text-red-500">*</span>
+                        </label>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {IMAGE_PRESETS.map((preset) => (
+                            <button
+                              type="button"
+                              key={preset.id}
+                              onClick={() => applyPreset(preset)}
+                              className={`text-left border rounded-lg px-3 py-2 transition ${
+                                stylePreset === preset.id
+                                  ? "border-purple-600 bg-purple-50 ring-1 ring-purple-600"
+                                  : "border-gray-300 hover:border-purple-400"
+                              }`}
+                            >
+                              <span className="block text-sm font-medium text-gray-900">{preset.label}</span>
+                              <span className="block text-xs text-gray-500">{preset.description}</span>
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setAdvancedStyle((v) => !v)}
+                          className="text-xs text-purple-600 mt-2 hover:underline"
+                        >
+                          {advancedStyle ? "Hide advanced options" : "Customize (advanced)"}
+                        </button>
+                      </div>
+
+                      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${advancedStyle ? "" : "hidden"}`}>
                         <div>
                           <label className="text-sm font-medium mb-1 block">
                             Image Style <span className="text-red-500">*</span>
                           </label>
                           <select
                             {...register("image_style", { required: "Image style is required" })}
+                            onChange={(e) => {
+                              register("image_style").onChange(e);
+                              setStylePreset("custom");
+                            }}
                             className="w-full border rounded-lg px-3 py-2 text-sm"
                           >
                             <option value="">Select Style</option>
+                            <option value="Cinematic Infographic">Cinematic Infographic</option>
                             <option value="Minimalist / Modern">Minimalist / Modern</option>
                             <option value="Ancient History">Ancient History</option>
                             <option value="Clinical / Physiological">Clinical / Physiological</option>
@@ -757,6 +885,10 @@ export default function GenerateContentModal({ setGeneratedData }) {
                           </label>
                           <select
                             {...register("content_angle", { required: "Content angle is required" })}
+                            onChange={(e) => {
+                              register("content_angle").onChange(e);
+                              setStylePreset("custom");
+                            }}
                             className="w-full border rounded-lg px-3 py-2 text-sm"
                           >
                             <option value="">Select Angle</option>
@@ -778,6 +910,10 @@ export default function GenerateContentModal({ setGeneratedData }) {
                           </label>
                           <select
                             {...register("human_presence", { required: "Human presence is required" })}
+                            onChange={(e) => {
+                              register("human_presence").onChange(e);
+                              setStylePreset("custom");
+                            }}
                             className="w-full border rounded-lg px-3 py-2 text-sm"
                           >
                             <option value="">Select Presence</option>
@@ -797,6 +933,10 @@ export default function GenerateContentModal({ setGeneratedData }) {
                           </label>
                           <select
                             {...register("visual_mood", { required: "Visual mood is required" })}
+                            onChange={(e) => {
+                              register("visual_mood").onChange(e);
+                              setStylePreset("custom");
+                            }}
                             className="w-full border rounded-lg px-3 py-2 text-sm"
                           >
                             <option value="">Select Mood</option>
