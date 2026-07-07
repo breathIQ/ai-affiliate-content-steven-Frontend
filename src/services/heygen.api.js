@@ -52,3 +52,22 @@ export const deletePhotoAvatar = async (id) => {
   const res = await API.delete(`/user/heygen/photo-avatars/${id}`);
   return res.data;
 };
+
+// Own voice -> personal voice clone. formData: name, audio (file/blob),
+// consent ("1"). Capped at 2 live voices per user server-side. One-time
+// credit charge. Returns a voice with heygen_voice_id (present => usable in
+// rich b-roll mode) and a reference url (used for talking-head mode).
+export const createVoiceClone = async (formData) => {
+  const res = await API.post(`/user/heygen/voice-clones`, formData);
+  return res.data;
+};
+
+export const getVoiceClones = async () => {
+  const res = await API.get(`/user/heygen/voice-clones`);
+  return res.data;
+};
+
+export const deleteVoiceClone = async (id) => {
+  const res = await API.delete(`/user/heygen/voice-clones/${id}`);
+  return res.data;
+};

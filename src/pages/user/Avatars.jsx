@@ -6,8 +6,14 @@ import {
   createPhotoAvatar,
   getPhotoAvatars,
   deletePhotoAvatar,
+  createVoiceClone,
+  getVoiceClones,
+  deleteVoiceClone,
 } from "../../services/heygen.api";
 import toast from "react-hot-toast";
+
+const VOICE_PASSAGE =
+  "Carbon dioxide isn't just a waste gas. It's the signal your body uses to release oxygen where it's needed most. When you breathe a little slower, you actually deliver more oxygen, not less.";
 
 const PAGE_SIZE = 24;
 
@@ -49,6 +55,20 @@ export default function Avatars() {
   const [consentChecked, setConsentChecked] = useState(false);
   const [creating, setCreating] = useState(false);
   const pollRef = useRef(null);
+
+  // Own voice -> personal voice clone (max 2 live). Audio comes from a file
+  // upload or an in-browser recording of the passage below.
+  const [myVoices, setMyVoices] = useState([]);
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  const [voiceName, setVoiceName] = useState("");
+  const [voiceFile, setVoiceFile] = useState(null); // File or Blob
+  const [voicePreview, setVoicePreview] = useState(null);
+  const [voiceConsent, setVoiceConsent] = useState(false);
+  const [voiceCreating, setVoiceCreating] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [recordSeconds, setRecordSeconds] = useState(0);
+  const mediaRecorderRef = useRef(null);
+  const recordTimerRef = useRef(null);
 
   const refreshPhotoAvatars = async () => {
     try {
@@ -116,6 +136,101 @@ export default function Avatars() {
     } catch (error) {
       console.error("DELETE PHOTO AVATAR ERROR ❌", error);
       toast.error("Could not delete the avatar");
+    }
+  };
+
+  const refreshVoices = async () => {
+    try {
+      const res = await getVoiceClones();
+      setMyVoices(res?.data || []);
+    } catch (error) {
+      console.error("GET VOICES ERROR ❌", error);
+    }
+  };
+
+  useEffect(() => {
+    refreshVoices();
+  }, []);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      const chunks = [];
+      mr.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+      mr.onstop = () => {
+        const blob = new Blob(chunks, { type: mr.mimeType || "audio/webm" });
+        setVoiceFile(blob);
+        setVoicePreview(URL.createObjectURL(blob));
+        stream.getTracks().forEach((t) => t.stop());
+      };
+      mediaRecorderRef.current = mr;
+      mr.start();
+      setRecording(true);
+      setRecordSeconds(0);
+      recordTimerRef.current = setInterval(() => setRecordSeconds((s) => s + 1), 1000);
+    } catch (error) {
+      console.error("RECORD ERROR ❌", error);
+      toast.error("Couldn't access the microphone. You can upload an audio file instead.");
+    }
+  };
+
+  const stopRecording = () => {
+    try {
+      mediaRecorderRef.current?.stop();
+    } catch (_) {}
+    clearInterval(recordTimerRef.current);
+    setRecording(false);
+  };
+
+  const resetVoiceForm = () => {
+    if (recording) stopRecording();
+    setVoiceOpen(false);
+    setVoiceName("");
+    setVoiceFile(null);
+    setVoicePreview(null);
+    setVoiceConsent(false);
+    setRecordSeconds(0);
+  };
+
+  const submitCreateVoice = async () => {
+    if (!voiceName.trim()) return toast.error("Give your voice a name");
+    if (!voiceFile) return toast.error("Record or upload a voice sample");
+    if (!voiceConsent) return toast.error("Please confirm this is your own voice or you're authorized to use it");
+
+    try {
+      setVoiceCreating(true);
+      const formData = new FormData();
+      formData.append("name", voiceName.trim());
+      formData.append("audio", voiceFile, voiceFile.name || "voice-recording.webm");
+      formData.append("consent", "1");
+      const res = await createVoiceClone(formData);
+
+      if (!res?.success) {
+        toast.error(res?.messages?.join(", ") || res?.message || "Could not create the voice");
+        return;
+      }
+
+      toast.success("Voice created - you can now pick it when generating a video.");
+      resetVoiceForm();
+      refreshVoices();
+    } catch (error) {
+      console.error("CREATE VOICE ERROR ❌", error);
+      toast.error(error?.response?.data?.message || error?.response?.data?.messages?.join?.(", ") || "Could not create the voice");
+    } finally {
+      setVoiceCreating(false);
+    }
+  };
+
+  const removeVoice = async (voice) => {
+    if (!window.confirm(`Delete the voice "${voice.name}"? Videos already made with it are unaffected.`)) return;
+    try {
+      await deleteVoiceClone(voice.id);
+      toast.success("Voice deleted");
+      refreshVoices();
+    } catch (error) {
+      console.error("DELETE VOICE ERROR ❌", error);
+      toast.error("Could not delete the voice");
     }
   };
 
@@ -226,13 +341,50 @@ export default function Avatars() {
               personal favorites. The avatars everyone favorites the most rise to the top for the whole team.
             </p>
           </div>
-          <button
-            onClick={() => setCreateOpen(true)}
-            className="bg-purple-600 text-white py-[10px] px-[16px] rounded-lg text-sm"
-          >
-            Create My Avatar
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setVoiceOpen(true)}
+              className="border border-purple-600 text-purple-700 py-[10px] px-[16px] rounded-lg text-sm hover:bg-purple-50"
+            >
+              Create My Voice
+            </button>
+            <button
+              onClick={() => setCreateOpen(true)}
+              className="bg-purple-600 text-white py-[10px] px-[16px] rounded-lg text-sm"
+            >
+              Create My Avatar
+            </button>
+          </div>
         </div>
+
+        {myVoices.length > 0 && (
+          <div>
+            <p className="text-xs font-medium text-gray-400 uppercase mb-2">My Voices ({myVoices.length}/2)</p>
+            <div className="flex flex-wrap gap-3">
+              {myVoices.map((v) => (
+                <div key={v.id} className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm">
+                  <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">🎙️</div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{v.name}</p>
+                    {v.reference_audio_url ? (
+                      <audio src={v.reference_audio_url} controls className="h-6 mt-0.5 max-w-[160px]" />
+                    ) : null}
+                    <p className="text-[11px] text-gray-400 mt-0.5">
+                      {v.heygen_voice_id ? "Rich + talking-head modes" : "Talking-head mode only"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => removeVoice(v)}
+                    className="text-xs text-gray-400 hover:text-red-500 ml-1"
+                    title="Delete this voice"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {myPhotoAvatars.length > 0 && (
           <div>
@@ -424,6 +576,111 @@ export default function Avatars() {
                 className="px-4 py-2 text-sm rounded-md text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
               >
                 {creating ? "Creating..." : "Create Avatar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {voiceOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+          onClick={() => !voiceCreating && resetVoiceForm()}
+        >
+          <div
+            className="bg-white rounded-xl max-w-sm w-full max-h-[90vh] overflow-y-auto p-5 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="font-semibold text-lg">Create your own voice</h2>
+            <p className="text-sm text-gray-500">
+              Record yourself reading the passage below (about 20 seconds), or upload a clean audio clip of your
+              voice. We'll use it to narrate your videos in your own voice.
+            </p>
+
+            <div>
+              <label className="text-sm font-medium mb-1 block">Voice name</label>
+              <input
+                type="text"
+                value={voiceName}
+                maxLength={60}
+                onChange={(e) => setVoiceName(e.target.value)}
+                placeholder="e.g. My voice"
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+              <p className="text-xs font-medium text-gray-400 uppercase mb-1">Read this aloud</p>
+              <p className="text-sm text-gray-700 italic">"{VOICE_PASSAGE}"</p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {!recording ? (
+                <button
+                  onClick={startRecording}
+                  className="px-3 py-2 text-sm rounded-md bg-red-500 text-white hover:bg-red-600"
+                >
+                  ● Record
+                </button>
+              ) : (
+                <button
+                  onClick={stopRecording}
+                  className="px-3 py-2 text-sm rounded-md bg-gray-800 text-white animate-pulse"
+                >
+                  ■ Stop ({recordSeconds}s)
+                </button>
+              )}
+              <span className="text-xs text-gray-400">or</span>
+              <label className="px-3 py-2 text-sm rounded-md border border-gray-300 text-gray-700 cursor-pointer hover:bg-gray-50">
+                Upload file
+                <input
+                  type="file"
+                  accept="audio/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setVoiceFile(file);
+                    setVoicePreview(file ? URL.createObjectURL(file) : null);
+                  }}
+                />
+              </label>
+            </div>
+
+            {voicePreview && (
+              <div>
+                <p className="text-xs text-gray-400 mb-1">Preview your sample:</p>
+                <audio src={voicePreview} controls className="w-full h-9" />
+              </div>
+            )}
+
+            <label className="flex items-start gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                checked={voiceConsent}
+                onChange={(e) => setVoiceConsent(e.target.checked)}
+                className="accent-[#7239EA] mt-0.5 w-[15.75px] h-[15.75px]"
+              />
+              <span>I confirm this is my own voice, or a voice I'm authorized to clone.</span>
+            </label>
+
+            <p className="text-xs text-gray-400">
+              You can have up to 2 voices. Creating a voice uses credits.
+            </p>
+
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                onClick={resetVoiceForm}
+                disabled={voiceCreating}
+                className="px-4 py-2 text-sm rounded-md border border-gray-300 text-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitCreateVoice}
+                disabled={voiceCreating}
+                className="px-4 py-2 text-sm rounded-md text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
+              >
+                {voiceCreating ? "Creating..." : "Create Voice"}
               </button>
             </div>
           </div>

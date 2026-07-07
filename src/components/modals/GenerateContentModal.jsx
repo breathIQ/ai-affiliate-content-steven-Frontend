@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
 import { getChapter, draftPostText, generateAIPost } from "../../services/post.api";
-import { draftScript, generateVideo, getVideoGenerationStatus, getAvatars } from "../../services/heygen.api";
+import { draftScript, generateVideo, getVideoGenerationStatus, getAvatars, getVoiceClones } from "../../services/heygen.api";
 import { useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import PublishSettingsFields from "../PublishSettingsFields";
@@ -126,6 +126,15 @@ export default function GenerateContentModal({ setGeneratedData }) {
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState(null);
 
+  // Voice: the user's own cloned voices. Selecting one lets them choose,
+  // per video, between "agent" (rich, b-roll, uses the HeyGen voice clone)
+  // and "audio" (talking-head, open-source Chatterbox voice on their own
+  // photo avatar). Empty selection = default HeyGen/agent voice.
+  const [myVoices, setMyVoices] = useState([]);
+  const [selectedVoiceId, setSelectedVoiceId] = useState("");
+  const [voiceMode, setVoiceMode] = useState("agent");
+  const selectedVoice = myVoices.find((v) => String(v.id) === String(selectedVoiceId)) || null;
+
   const {
     register,
     handleSubmit,
@@ -205,6 +214,22 @@ export default function GenerateContentModal({ setGeneratedData }) {
     fetchAvatars();
   }, [isOpen, contentType, avatars.length, avatarsLoading]);
 
+  useEffect(() => {
+    if (!isOpen || contentType !== "video") return;
+    getVoiceClones()
+      .then((res) => setMyVoices(res?.data || []))
+      .catch((error) => console.error("GET VOICES ERROR ❌", error));
+  }, [isOpen, contentType]);
+
+  // When a voice is chosen, default to rich mode if it has a HeyGen clone,
+  // otherwise force talking-head (the only mode a Chatterbox-only voice
+  // supports).
+  const chooseVoice = (id) => {
+    setSelectedVoiceId(id);
+    const v = myVoices.find((vc) => String(vc.id) === String(id));
+    setVoiceMode(v && v.heygen_voice_id ? "agent" : "audio");
+  };
+
   useEffect(() => () => stopPolling(), []);
 
   const stopPolling = () => {
@@ -225,6 +250,8 @@ export default function GenerateContentModal({ setGeneratedData }) {
     setSelectedAvatar(null);
     setAvatarSearch("");
     setAvatarPickerOpen(false);
+    setSelectedVoiceId("");
+    setVoiceMode("agent");
     setStylePreset(IMAGE_PRESETS[0].id);
     setAdvancedStyle(false);
     reset();
@@ -498,6 +525,8 @@ export default function GenerateContentModal({ setGeneratedData }) {
           duration_seconds: Number(formData.duration_seconds),
           orientation: formData.orientation,
           avatar_id: formData.avatar_id || undefined,
+          voice_clone_id: selectedVoiceId || undefined,
+          voice_mode: selectedVoiceId ? voiceMode : undefined,
           ...(publishAction !== "review" && {
             publish_action: publishAction,
             chapter_id: formData.chapter_id,
@@ -1073,6 +1102,64 @@ export default function GenerateContentModal({ setGeneratedData }) {
                               </div>
                             ))}
                           </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {contentType === "video" && myVoices.length > 0 && (
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">
+                        Voice <span className="text-gray-500">(Optional)</span>
+                      </label>
+                      <select
+                        value={selectedVoiceId}
+                        onChange={(e) => chooseVoice(e.target.value)}
+                        className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      >
+                        <option value="">Default voice (AI picks / stock)</option>
+                        {myVoices.map((v) => (
+                          <option key={v.id} value={v.id}>
+                            {v.name} (my voice)
+                          </option>
+                        ))}
+                      </select>
+
+                      {selectedVoice && (
+                        <div className="mt-2 space-y-2">
+                          <div className="flex gap-2">
+                            {selectedVoice.heygen_voice_id && (
+                              <button
+                                type="button"
+                                onClick={() => setVoiceMode("agent")}
+                                className={`flex-1 px-3 py-2 rounded-lg text-xs text-left border ${
+                                  voiceMode === "agent" ? "border-purple-500 bg-purple-50" : "border-gray-300"
+                                }`}
+                              >
+                                <span className="block font-medium text-gray-900">Rich video</span>
+                                <span className="block text-gray-500">B-roll + scenes, my voice</span>
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => setVoiceMode("audio")}
+                              className={`flex-1 px-3 py-2 rounded-lg text-xs text-left border ${
+                                voiceMode === "audio" ? "border-purple-500 bg-purple-50" : "border-gray-300"
+                              }`}
+                            >
+                              <span className="block font-medium text-gray-900">Just me talking</span>
+                              <span className="block text-gray-500">My exact voice, my avatar</span>
+                            </button>
+                          </div>
+                          {voiceMode === "audio" && (
+                            <p className="text-xs text-amber-600">
+                              Talking-head uses your own uploaded avatar — pick one of your avatars above. Adds a
+                              small voice-synthesis charge.
+                            </p>
+                          )}
+                          {!selectedVoice.heygen_voice_id && (
+                            <p className="text-xs text-gray-400">This voice supports talking-head mode only.</p>
+                          )}
                         </div>
                       )}
                     </div>
