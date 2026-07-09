@@ -257,12 +257,28 @@ console.log("profile:", profile)
             />
 
             <label className="text-sm">Amazon Link to Your Personal Review of the Book</label>
+            <p className="text-xs text-gray-400 mb-1">
+              Open your review on Amazon and copy its link — product pages and
+              other sites won't work.
+            </p>
             <input
               {...register("amazon_link", {
                 validate: (value) => {
                   if (!value) return true; // not required
-                  return value.startsWith("https://www.amazon.com/")
-                    || "Link must start with https://www.amazon.com/";
+                  if (!value.startsWith("https://www.amazon.com/"))
+                    return "Link must start with https://www.amazon.com/";
+                  // Review permalink (classic or portal format), or the book's own page
+                  const BOOK_ASINS = ["B0GW2FJ2X1", "9941881677"];
+                  const isReview =
+                    /\/customer-reviews\/(?:[^/]+\/)*R[A-Z0-9]{7,}/i.test(value) ||
+                    /amazon\.com\/review\/R[A-Z0-9]{7,}/i.test(value);
+                  const dpMatch = value.match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})/i);
+                  const isBookPage = dpMatch && BOOK_ASINS.includes(dpMatch[1].toUpperCase());
+                  return (
+                    isReview ||
+                    isBookPage ||
+                    "This must be the link to your Amazon review of the book"
+                  );
                 },
               })}
               className={`w-full border px-3 py-2 rounded-md ${errors.amazon_link ? 'border-red-500 mb-0' : 'mb-4'}`}
