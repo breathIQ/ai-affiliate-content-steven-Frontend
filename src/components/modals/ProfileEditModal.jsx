@@ -268,7 +268,8 @@ console.log("profile:", profile)
                   if (!value.startsWith("https://www.amazon.com/"))
                     return "Link must start with https://www.amazon.com/";
                   // Review permalink (classic or portal format), or the book's own page
-                  const BOOK_ASINS = ["B0GW2FJ2X1", "9941881677"];
+                  // paperback, Kindle, ISBN
+                  const BOOK_ASINS = ["B0GW2FJ2X1", "B0GX2WRBBB", "9941881677"];
                   const isReview =
                     /\/customer-reviews\/(?:[^/]+\/)*R[A-Z0-9]{7,}/i.test(value) ||
                     /amazon\.com\/review\/R[A-Z0-9]{7,}/i.test(value);
