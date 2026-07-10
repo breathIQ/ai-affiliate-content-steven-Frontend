@@ -23,6 +23,7 @@ const validateEmail = (email) => {
     email: "",
     password: "",
     password_confirmation: "",
+    carbogenetics_affiliate_id: "",
   });
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const navigate = useNavigate();
@@ -235,6 +236,25 @@ const validatePassword = (value) => {
       {showConfirmPassword ? <FaEye /> : <FaEyeSlash />}
     </button>
   </div>
+</div>
+
+<div>
+  <label className="text-sm font-medium">
+    Carbogenetics Affiliate ID{" "}
+    <span className="text-gray-400 font-normal">(optional)</span>
+  </label>
+  <input
+    type="text"
+    name="carbogenetics_affiliate_id"
+    value={form.carbogenetics_affiliate_id}
+    onChange={handleChange}
+    placeholder="Already an affiliate? Enter your ID"
+    className="w-full border rounded-lg px-3 py-2 mt-1"
+  />
+  <p className="text-xs text-gray-500 mt-1">
+    Leave blank and we'll find your affiliate account by email — or
+    create a new one for you automatically.
+  </p>
 </div>
 
 <div className="flex items-start gap-2 ">
