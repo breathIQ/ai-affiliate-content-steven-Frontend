@@ -16,6 +16,10 @@ import Terms from "../pages/common/Terms"
 import AffiliateUserLandingPage from "../pages/AffiliateUserLandingPage"
 import Billing from "../pages/user/Billing"
 import Avatars from "../pages/user/Avatars"
+import CampaignReviewQueue from "../pages/admin/CampaignReviewQueue"
+import CampaignContent from "../pages/admin/CampaignContent"
+import CampaignPostPreview from "../pages/user/CampaignPostPreview"
+import Automations from "../pages/user/Automations"
 
 
 const allRoutes = [
@@ -50,17 +54,23 @@ const allRoutes = [
     { component: <Stats />, path: "/admin/stats", role: 2 },
     { component: <Users />, path: "/admin/users", role: 2 },
     { component: <FileUpload />, path: "/admin/files", role: 2 },
+    { component: <CampaignReviewQueue />, path: "/admin/campaign-review", role: 2 },
+    { component: <CampaignContent />, path: "/admin/campaign-content", role: 2 },
 
     // USER ROUTES
     { component: <UserDashboard />, path: "/u/dashboard", role: 1 },
     { component: <Billing />, path: "/u/billing", role: 1 },
     { component: <Avatars />, path: "/u/avatars", role: 1 },
+    { component: <Automations />, path: "/u/automations", role: 1 },
+    { component: <Automations />, path: "/admin/automations", role: 2 },
     { component: <UsersLabs />, path: "/u/library", role: "public"},
     { component: <UsersLabs />, path: "/admin/library", role: "public"},
     // { component: <UsersLabs />, path: "/u/library", role: 2 },
     { component: <UsersLabs />, path: "/library", role: 2 },
     { component: <Library />, path: "/u/post/view/:id", role: 1 },
     { component: <Library />, path: "/admin/u/post/view/:id", role: 2 },
+    { component: <CampaignPostPreview />, path: "/u/campaign-post/:id", role: 1 },
+    { component: <CampaignPostPreview />, path: "/admin/campaign-post/:id", role: 2 },
     // { component: <Library />, path: "/u/post/view/:id", role: 2 },
 
     { component: <AffiliateUserLandingPage />, path: "/:affiliateId", role: "public" },

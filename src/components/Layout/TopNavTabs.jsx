@@ -15,11 +15,14 @@ export default function TopNavTabs() {
     { name: "Stats", path: "/admin/stats" },
     { name: "Users", path: "/admin/users" },
     { name: "Files", path: "/admin/files" },
+    { name: "Campaigns", path: "/admin/campaign-content" },
+    { name: "Reviews", path: "/admin/campaign-review" },
   ];
 
   const userTabs = [
     { name: "Dashboard", path: "/u/dashboard" },
     { name: "Library", path: "/u/library" },
+    { name: "Automations", path: "/u/automations" },
     { name: "Avatars", path: "/u/avatars" },
     { name: "Billing", path: "/u/billing" },
     // { name: "Schedule", path: "/u/schedule" },
