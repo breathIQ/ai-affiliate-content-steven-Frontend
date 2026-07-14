@@ -21,6 +21,8 @@ import CampaignContent from "../pages/admin/CampaignContent"
 import CampaignPostPreview from "../pages/user/CampaignPostPreview"
 import Automations from "../pages/user/Automations"
 import ApiBalances from "../pages/admin/ApiBalances"
+import Transactions from "../pages/admin/Transactions"
+import UserDetail from "../pages/admin/UserDetail"
 
 
 const allRoutes = [
@@ -55,6 +57,8 @@ const allRoutes = [
     { component: <Stats />, path: "/admin/stats", role: 2 },
     { component: <ApiBalances />, path: "/admin/api-balances", role: 2 },
     { component: <Users />, path: "/admin/users", role: 2 },
+    { component: <UserDetail />, path: "/admin/users/:id", role: 2 },
+    { component: <Transactions />, path: "/admin/transactions", role: 2 },
     { component: <FileUpload />, path: "/admin/files", role: 2 },
     { component: <CampaignReviewQueue />, path: "/admin/campaign-review", role: 2 },
     { component: <CampaignContent />, path: "/admin/campaign-content", role: 2 },
