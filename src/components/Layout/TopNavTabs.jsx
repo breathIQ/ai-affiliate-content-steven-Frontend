@@ -13,6 +13,7 @@ export default function TopNavTabs() {
   const defaultTabs = [
     { name: "Dashboard", path: "/admin/dashboard" },
     { name: "Stats", path: "/admin/stats" },
+    { name: "API Credits", path: "/admin/api-balances" },
     { name: "Users", path: "/admin/users" },
     { name: "Files", path: "/admin/files" },
     { name: "Campaigns", path: "/admin/campaign-content" },

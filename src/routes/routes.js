@@ -20,6 +20,7 @@ import CampaignReviewQueue from "../pages/admin/CampaignReviewQueue"
 import CampaignContent from "../pages/admin/CampaignContent"
 import CampaignPostPreview from "../pages/user/CampaignPostPreview"
 import Automations from "../pages/user/Automations"
+import ApiBalances from "../pages/admin/ApiBalances"
 
 
 const allRoutes = [
@@ -52,6 +53,7 @@ const allRoutes = [
     { component: <Dashboard />, path: "/admin", role: 2 },
     { component: <Dashboard />, path: "/admin/dashboard", role: 2 },
     { component: <Stats />, path: "/admin/stats", role: 2 },
+    { component: <ApiBalances />, path: "/admin/api-balances", role: 2 },
     { component: <Users />, path: "/admin/users", role: 2 },
     { component: <FileUpload />, path: "/admin/files", role: 2 },
     { component: <CampaignReviewQueue />, path: "/admin/campaign-review", role: 2 },
