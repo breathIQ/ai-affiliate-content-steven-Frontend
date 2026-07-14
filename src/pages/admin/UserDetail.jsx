@@ -275,14 +275,24 @@ function UserDetail() {
                                 {pl.clicks > 0 ? ` (${pl.clicks} clicks)` : ""}
                               </span>
                             );
-                            return pl.status === "published" &&
-                              acc?.profile_url ? (
+                            // Direct permalink when the publish captured
+                            // one; otherwise the user's platform profile.
+                            const href =
+                              pl.external_url ||
+                              (pl.status === "published"
+                                ? acc?.profile_url
+                                : null);
+                            return href ? (
                               <a
                                 key={i}
-                                href={acc.profile_url}
+                                href={href}
                                 target="_blank"
                                 rel="noreferrer"
-                                title={`Open ${acc.username} on ${pl.platform}`}
+                                title={
+                                  pl.external_url
+                                    ? "Open the published post"
+                                    : `Open ${acc?.username || ""} on ${pl.platform}`
+                                }
                               >
                                 {chip}
                               </a>
