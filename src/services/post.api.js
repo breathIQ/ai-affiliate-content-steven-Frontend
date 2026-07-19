@@ -72,3 +72,8 @@ export const updatePostMedia = async (id, data) => {
   });
   return res.data;
 };
+
+export const getChapterAngles = async (chapterId) => {
+  const res = await API.get(`/user/chapters/${chapterId}/angles`);
+  return res.data;
+};

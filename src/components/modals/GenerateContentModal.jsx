@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
-import { getChapter, draftPostText, generateAIPost } from "../../services/post.api";
+import { getChapter, draftPostText, generateAIPost, getChapterAngles } from "../../services/post.api";
 import { draftScript, generateVideo, getVideoGenerationStatus, getAvatars, getVoiceClones } from "../../services/heygen.api";
 import { useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -86,6 +86,9 @@ const IMAGE_PRESETS = [
 export default function GenerateContentModal({ setGeneratedData }) {
   const [isOpen, setIsOpen] = useState(false);
   const [chapters, setChapters] = useState([]);
+  const [angles, setAngles] = useState([]);
+  const [anglesLoading, setAnglesLoading] = useState(false);
+  const [selectedAngleId, setSelectedAngleId] = useState("");
   const location = useLocation();
 
   // Wizard state
@@ -152,7 +155,33 @@ export default function GenerateContentModal({ setGeneratedData }) {
     },
   });
 
+  const chapterId = watch("chapter_id");
   const postType = watch("post_type");
+
+  // Angles are chapter-specific: reload (and clear any prior pick) on change.
+  useEffect(() => {
+    setSelectedAngleId("");
+    if (!chapterId) {
+      setAngles([]);
+      return;
+    }
+    let cancelled = false;
+    setAnglesLoading(true);
+    getChapterAngles(chapterId)
+      .then((r) => {
+        if (!cancelled) setAngles(r?.data?.angles || []);
+      })
+      .catch(() => {
+        if (!cancelled) setAngles([]);
+      })
+      .finally(() => {
+        if (!cancelled) setAnglesLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [chapterId]);
+
   const durationSeconds = watch("duration_seconds");
 
   // Live credit estimate for the chosen duration - mirrors the backend's
@@ -333,6 +362,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
       if (contentType === "image") {
         const res = await draftPostText({
           chapter: formData.chapter_id,
+          ...(selectedAngleId ? { angle_id: selectedAngleId } : {}),
           model: formData.model,
           text_format: formData.text_format,
           prompt: formData.prompt,
@@ -350,6 +380,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
       } else {
         const res = await draftScript({
           chapter: formData.chapter_id,
+          ...(selectedAngleId ? { angle_id: selectedAngleId } : {}),
           model: formData.model,
           duration_seconds: Number(formData.duration_seconds),
           prompt: formData.prompt,
@@ -390,6 +421,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
       if (contentType === "image") {
         const res = await draftPostText({
           chapter: formData.chapter_id,
+          ...(selectedAngleId ? { angle_id: selectedAngleId } : {}),
           model: formData.model,
           text_format: formData.text_format,
           prompt: formData.prompt,
@@ -406,6 +438,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
       } else {
         const res = await draftScript({
           chapter: formData.chapter_id,
+          ...(selectedAngleId ? { angle_id: selectedAngleId } : {}),
           model: formData.model,
           duration_seconds: Number(formData.duration_seconds),
           prompt: formData.prompt,
@@ -462,6 +495,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
         // saved onto the draft post by the Library auto-save.
         const generationParams = {
           chapter: formData.chapter_id,
+          ...(selectedAngleId ? { angle_id: selectedAngleId } : {}),
           model: formData.model,
           text_format: formData.text_format,
           post_type: formData.post_type,
@@ -700,6 +734,76 @@ export default function GenerateContentModal({ setGeneratedData }) {
                       <p className="text-xs text-red-500 mt-1">{errors.chapter_id.message}</p>
                     )}
                   </div>
+
+                  {/* Content angle: which argument from the chapter to make.
+                      Each chapter supports a dozen distinct posts; without this
+                      the model keeps landing on the same obvious takeaway. */}
+                  {chapterId && (
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">
+                        Content Angle{" "}
+                        <span className="font-normal text-gray-500">
+                          (optional, but gives a sharper post)
+                        </span>
+                      </label>
+
+                      {anglesLoading ? (
+                        <p className="text-sm text-gray-500 py-2">Loading angles...</p>
+                      ) : angles.length === 0 ? (
+                        <p className="text-sm text-gray-500 py-2">
+                          No angles yet for this chapter. The post will cover the chapter generally.
+                        </p>
+                      ) : (
+                        <div className="max-h-72 overflow-y-auto rounded-lg border divide-y">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedAngleId("")}
+                            className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
+                              selectedAngleId === "" ? "bg-purple-50" : ""
+                            }`}
+                          >
+                            <span className="font-medium">Let the AI choose</span>
+                            <span className="block text-xs text-gray-500">
+                              Covers the chapter's main point
+                            </span>
+                          </button>
+
+                          {angles.map((a) => (
+                            <button
+                              key={a.id}
+                              type="button"
+                              onClick={() => setSelectedAngleId(a.id)}
+                              className={`w-full text-left px-3 py-2 hover:bg-gray-50 ${
+                                String(selectedAngleId) === String(a.id) ? "bg-purple-50" : ""
+                              }`}
+                            >
+                              <span className="flex items-start gap-2">
+                                <span className="min-w-0 flex-1">
+                                  <span className="block text-sm font-medium text-gray-900">
+                                    {a.title}
+                                  </span>
+                                  <span className="block text-xs text-gray-600 mt-0.5">
+                                    {a.summary}
+                                  </span>
+                                </span>
+                                {a.used_by_me > 0 && (
+                                  <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-500">
+                                    used
+                                  </span>
+                                )}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {angles.length > 0 && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          {angles.length} angles from this chapter
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
