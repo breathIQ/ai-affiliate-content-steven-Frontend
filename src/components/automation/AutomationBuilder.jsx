@@ -1,17 +1,38 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import AvatarPickerModal from "../modals/AvatarPickerModal";
 
 // Builds the payload for a new automation campaign: name, start date,
 // platforms applied to every step, per-campaign defaults (avatar/voice), and
-// an ordered list of day-N steps. Each step picks a content type and the
-// source (a book chapter, or a product campaign for promos).
+// an ordered list of day-N steps.
+//
+// Each step is "what is this about" (source) then "what should it look like"
+// (format). The API models the two as one `content_type`, so `source` lives
+// only in this component and picks which content types are on offer.
 
-const CONTENT_TYPES = [
-  { value: "carousel_images", label: "Carousel images (about a chapter)" },
-  { value: "heygen_video", label: "HeyGen video (script written by AI)" },
-  { value: "image_to_video", label: "Image → short video (about a chapter)" },
-  { value: "product_promo", label: "Product promo post" },
+const SOURCES = [
+  { value: "chapter", label: "Book Chapter" },
+  { value: "article", label: "Article" },
+  { value: "product", label: "Promote Product" },
 ];
+
+const FORMATS = {
+  chapter: [
+    { value: "carousel_images", label: "Carousel images" },
+    { value: "heygen_video", label: "AI presenter video" },
+    { value: "image_to_video", label: "Image → short video" },
+  ],
+  article: [
+    { value: "article_images", label: "Carousel images" },
+    { value: "article_video", label: "AI presenter video" },
+  ],
+  product: [{ value: "product_promo", label: "Promo post" }],
+};
+
+// Which content types come from a campaign row rather than a book chapter.
+const ARTICLE_TYPES = ["article_images", "article_video"];
+const CAMPAIGN_TYPES = [...ARTICLE_TYPES, "product_promo"];
+const VIDEO_TYPES = ["heygen_video", "article_video"];
 
 const PLATFORMS = [
   { value: "instagram", label: "Instagram" },
@@ -27,6 +48,7 @@ const MODELS = [
 
 const blankStep = (day) => ({
   day_number: day,
+  source: "chapter",
   run_at_time: "09:00",
   content_type: "carousel_images",
   chapter_id: "",
@@ -34,12 +56,19 @@ const blankStep = (day) => ({
   params: { slides: 3, duration_seconds: 60, model: "claude", image_model: "openai", prompt: "" },
 });
 
-const AutomationBuilder = ({ chapters, campaigns, avatars, onCancel, onCreated, createFn }) => {
-  const today = new Date().toISOString().slice(0, 10);
+const AutomationBuilder = ({ chapters, campaigns, articles = [], avatars, onCancel, onCreated, createFn }) => {
+  // Local calendar date, not UTC: toISOString() rolls over to tomorrow in the
+  // evening for anyone behind UTC, which blocked starting a campaign today.
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
+    now.getDate()
+  ).padStart(2, "0")}`;
   const [name, setName] = useState("");
   const [startDate, setStartDate] = useState(today);
   const [platforms, setPlatforms] = useState(["instagram"]);
   const [defaults, setDefaults] = useState({ avatar_id: "", voice_id: "" });
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
+  const selectedAvatar = avatars.find((a) => a.avatar_id === defaults.avatar_id) || null;
   const [steps, setSteps] = useState([blankStep(1)]);
   const [saving, setSaving] = useState(false);
 
@@ -48,6 +77,16 @@ const AutomationBuilder = ({ chapters, campaigns, avatars, onCancel, onCreated, 
 
   const updateStep = (i, patch) =>
     setSteps((list) => list.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
+
+  // Changing the source changes what formats exist and which source id applies,
+  // so reset both rather than leaving a stale chapter on an article step.
+  const changeSource = (i, source) =>
+    updateStep(i, {
+      source,
+      content_type: FORMATS[source][0].value,
+      chapter_id: "",
+      campaign_slug: "",
+    });
 
   const updateParam = (i, key, value) =>
     setSteps((list) =>
@@ -66,13 +105,15 @@ const AutomationBuilder = ({ chapters, campaigns, avatars, onCancel, onCreated, 
     if (!platforms.length) return "Pick at least one platform.";
     if (!steps.length) return "Add at least one step.";
     for (const s of steps) {
-      if (s.content_type === "product_promo") {
+      if (s.source === "product") {
         if (!s.campaign_slug) return `Day ${s.day_number}: pick a product campaign.`;
+      } else if (s.source === "article") {
+        if (!s.campaign_slug) return `Day ${s.day_number}: pick an article.`;
       } else if (!s.chapter_id) {
         return `Day ${s.day_number}: pick a chapter.`;
       }
-      if (s.content_type === "heygen_video" && !(s.params.avatar_id || defaults.avatar_id)) {
-        return `Day ${s.day_number}: pick an avatar for the HeyGen video (or set a default).`;
+      if (VIDEO_TYPES.includes(s.content_type) && !(s.params.avatar_id || defaults.avatar_id)) {
+        return `Day ${s.day_number}: pick an avatar for the video (or set a default above).`;
       }
     }
     return null;
@@ -88,14 +129,17 @@ const AutomationBuilder = ({ chapters, campaigns, avatars, onCancel, onCreated, 
         start_date: startDate,
         platforms,
         defaults,
-        steps: steps.map((s) => ({
-          day_number: Number(s.day_number),
-          run_at_time: s.run_at_time,
-          content_type: s.content_type,
-          chapter_id: s.content_type === "product_promo" ? null : Number(s.chapter_id) || null,
-          campaign_slug: s.content_type === "product_promo" ? s.campaign_slug : null,
-          params: cleanParams(s),
-        })),
+        steps: steps.map((s) => {
+          const fromCampaign = CAMPAIGN_TYPES.includes(s.content_type);
+          return {
+            day_number: Number(s.day_number),
+            run_at_time: s.run_at_time,
+            content_type: s.content_type,
+            chapter_id: fromCampaign ? null : Number(s.chapter_id) || null,
+            campaign_slug: fromCampaign ? s.campaign_slug : null,
+            params: cleanParams(s),
+          };
+        }),
       };
       const res = await createFn(payload);
       onCreated(res?.data || payload);
@@ -124,6 +168,13 @@ const AutomationBuilder = ({ chapters, campaigns, avatars, onCancel, onCreated, 
       p.slides = Number(s.params.slides) || 1;
       p.image_model = s.params.image_model || "openai";
       p.theme = s.params.theme || undefined;
+    } else if (s.content_type === "article_images") {
+      p.slides = Number(s.params.slides) || 3;
+      p.image_model = s.params.image_model || "openai";
+    } else if (s.content_type === "article_video") {
+      p.duration_seconds = Number(s.params.duration_seconds) || 60;
+      p.avatar_id = s.params.avatar_id || undefined;
+      p.voice_id = s.params.voice_id || undefined;
     }
     if (s.params.prompt) p.prompt = s.params.prompt;
     return p;
@@ -183,21 +234,42 @@ const AutomationBuilder = ({ chapters, campaigns, avatars, onCancel, onCreated, 
 
       {avatars.length > 0 && (
         <div className="mb-4">
-          <label className="text-sm block">
-            <span className="block text-gray-600 mb-1">Default avatar for HeyGen videos (optional)</span>
-            <select
-              value={defaults.avatar_id}
-              onChange={(e) => setDefaults((d) => ({ ...d, avatar_id: e.target.value }))}
-              className="w-full sm:w-1/2 border rounded-lg px-3 py-2"
-            >
-              <option value="">None</option>
-              {avatars.map((a) => (
-                <option key={a.avatar_id} value={a.avatar_id}>
-                  {a.avatar_name || a.name || a.avatar_id}
-                </option>
-              ))}
-            </select>
-          </label>
+          <span className="block text-sm text-gray-600 mb-1">
+            Default avatar for HeyGen videos (optional)
+          </span>
+          <button
+            type="button"
+            onClick={() => setAvatarPickerOpen(true)}
+            className="flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left hover:bg-gray-50 sm:w-1/2"
+          >
+            {selectedAvatar?.preview_image_url ? (
+              <img
+                src={selectedAvatar.preview_image_url}
+                alt=""
+                className="h-10 w-10 flex-shrink-0 rounded object-cover"
+              />
+            ) : (
+              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded bg-gray-100 text-xs text-gray-400">
+                None
+              </span>
+            )}
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm text-gray-800">
+                {selectedAvatar
+                  ? selectedAvatar.avatar_name || selectedAvatar.name || selectedAvatar.avatar_id
+                  : "No avatar selected"}
+              </span>
+              <span className="block text-xs text-gray-500">Click to browse avatars</span>
+            </span>
+          </button>
+
+          <AvatarPickerModal
+            isOpen={avatarPickerOpen}
+            onClose={() => setAvatarPickerOpen(false)}
+            avatars={avatars}
+            selectedId={defaults.avatar_id}
+            onSelect={(a) => setDefaults((d) => ({ ...d, avatar_id: a ? a.avatar_id : "" }))}
+          />
         </div>
       )}
 
@@ -225,11 +297,24 @@ const AutomationBuilder = ({ chapters, campaigns, avatars, onCancel, onCreated, 
                 />
               </label>
               <select
+                value={s.source}
+                onChange={(e) => changeSource(i, e.target.value)}
+                className="text-sm border rounded px-2 py-1"
+                title="What this post is about"
+              >
+                {SOURCES.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+              <select
                 value={s.content_type}
                 onChange={(e) => updateStep(i, { content_type: e.target.value })}
                 className="text-sm border rounded px-2 py-1 flex-1"
+                title="What the post looks like"
               >
-                {CONTENT_TYPES.map((t) => (
+                {(FORMATS[s.source] ?? FORMATS.chapter).map((t) => (
                   <option key={t.value} value={t.value}>
                     {t.label}
                   </option>
@@ -247,8 +332,8 @@ const AutomationBuilder = ({ chapters, campaigns, avatars, onCancel, onCreated, 
             </div>
 
             <div className="grid sm:grid-cols-2 gap-2">
-              {/* Source: chapter for book content, campaign for promos */}
-              {s.content_type === "product_promo" ? (
+              {/* Which chapter / article / product this step is about. */}
+              {s.source === "product" ? (
                 <select
                   value={s.campaign_slug}
                   onChange={(e) => updateStep(i, { campaign_slug: e.target.value })}
@@ -258,6 +343,19 @@ const AutomationBuilder = ({ chapters, campaigns, avatars, onCancel, onCreated, 
                   {campaigns.map((c) => (
                     <option key={c.slug || c.id} value={c.slug}>
                       {c.name}
+                    </option>
+                  ))}
+                </select>
+              ) : s.source === "article" ? (
+                <select
+                  value={s.campaign_slug}
+                  onChange={(e) => updateStep(i, { campaign_slug: e.target.value })}
+                  className="text-sm border rounded px-2 py-1.5"
+                >
+                  <option value="">Select article</option>
+                  {articles.map((a) => (
+                    <option key={a.slug} value={a.slug}>
+                      #{a.article_number} {a.title}
                     </option>
                   ))}
                 </select>
@@ -285,8 +383,9 @@ const AutomationBuilder = ({ chapters, campaigns, avatars, onCancel, onCreated, 
                 ))}
               </select>
 
-              {/* Per-type extras */}
-              {s.content_type === "carousel_images" && (
+              {/* Per-type extras. Article slides/videos take the same options
+                  as their book equivalents. */}
+              {(s.content_type === "carousel_images" || s.content_type === "article_images") && (
                 <select
                   value={s.params.slides}
                   onChange={(e) => updateParam(i, "slides", e.target.value)}
@@ -300,7 +399,18 @@ const AutomationBuilder = ({ chapters, campaigns, avatars, onCancel, onCreated, 
                 </select>
               )}
 
-              {s.content_type === "heygen_video" && (
+              {s.content_type === "article_images" && (
+                <select
+                  value={s.params.image_model}
+                  onChange={(e) => updateParam(i, "image_model", e.target.value)}
+                  className="text-sm border rounded px-2 py-1.5"
+                >
+                  <option value="openai">Images by OpenAI</option>
+                  <option value="gemini">Images by Gemini</option>
+                </select>
+              )}
+
+              {VIDEO_TYPES.includes(s.content_type) && (
                 <>
                   <select
                     value={s.params.duration_seconds}

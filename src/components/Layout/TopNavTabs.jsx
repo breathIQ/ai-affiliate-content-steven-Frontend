@@ -23,10 +23,12 @@ export default function TopNavTabs() {
 
   const userTabs = [
     { name: "Dashboard", path: "/u/dashboard" },
+    { name: "Generate", path: "/u/generate" },
     { name: "Library", path: "/u/library" },
     { name: "Automations", path: "/u/automations" },
     { name: "Avatars", path: "/u/avatars" },
     { name: "Billing", path: "/u/billing" },
+    { name: "Affiliate", path: "/u/affiliate" },
     // { name: "Schedule", path: "/u/schedule" },
   ];
 

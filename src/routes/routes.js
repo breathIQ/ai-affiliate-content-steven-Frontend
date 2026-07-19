@@ -19,7 +19,9 @@ import Avatars from "../pages/user/Avatars"
 import CampaignReviewQueue from "../pages/admin/CampaignReviewQueue"
 import CampaignContent from "../pages/admin/CampaignContent"
 import CampaignPostPreview from "../pages/user/CampaignPostPreview"
+import AffiliateHub from "../pages/user/AffiliateHub"
 import Automations from "../pages/user/Automations"
+import Generate from "../pages/user/Generate"
 import ApiBalances from "../pages/admin/ApiBalances"
 import Transactions from "../pages/admin/Transactions"
 import UserDetail from "../pages/admin/UserDetail"
@@ -67,8 +69,10 @@ const allRoutes = [
     { component: <UserDashboard />, path: "/u/dashboard", role: 1 },
     { component: <Billing />, path: "/u/billing", role: 1 },
     { component: <Avatars />, path: "/u/avatars", role: 1 },
+    { component: <AffiliateHub />, path: "/u/affiliate", role: 1 },
     { component: <Automations />, path: "/u/automations", role: 1 },
     { component: <Automations />, path: "/admin/automations", role: 2 },
+    { component: <Generate />, path: "/u/generate", role: 1 },
     { component: <UsersLabs />, path: "/u/library", role: "public"},
     { component: <UsersLabs />, path: "/admin/library", role: "public"},
     // { component: <UsersLabs />, path: "/u/library", role: 2 },

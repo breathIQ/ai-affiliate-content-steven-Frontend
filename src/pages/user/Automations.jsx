@@ -10,6 +10,7 @@ import {
 } from "../../services/campaign.api";
 import { getChapter } from "../../services/post.api";
 import { getCampaigns } from "../../services/campaign.api";
+import { getArticles } from "../../services/article.api";
 import { getAvatars } from "../../services/heygen.api";
 import AutomationBuilder from "../../components/automation/AutomationBuilder";
 
@@ -28,6 +29,15 @@ const CONTENT_LABELS = {
   heygen_video: "HeyGen video",
   image_to_video: "Image → video",
   product_promo: "Product promo",
+  article_images: "Article images",
+  article_video: "Article video",
+};
+
+// "article-19" is unreadable in a list; show the article's real title when we
+// have it loaded, and fall back to the slug for product campaigns.
+const articleTitle = (articles, slug) => {
+  const a = articles.find((x) => x.slug === slug);
+  return a ? `#${a.article_number} ${a.title}` : null;
 };
 
 const STEP_STATUS_STYLES = {
@@ -46,6 +56,7 @@ const Automations = () => {
   const [creating, setCreating] = useState(false);
   const [chapters, setChapters] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
+  const [articles, setArticles] = useState([]);
   const [avatars, setAvatars] = useState([]);
 
   const load = async () => {
@@ -63,17 +74,24 @@ const Automations = () => {
     load();
     // Reference data for the builder dropdowns.
     getChapter().then((r) => setChapters(r?.data || [])).catch(() => {});
-    getCampaigns().then((r) => setCampaigns(r?.data || [])).catch(() => {});
+    getCampaigns().then((r) => setCampaigns(r?.data?.campaigns || [])).catch(() => {});
+    getArticles().then((r) => setArticles(r?.data?.articles || [])).catch(() => {});
     getAvatars()
       .then((r) => {
         const d = r?.data || {};
         // avatars endpoint returns grouped sections; flatten to a simple list.
+        const favorites = [].concat(d.personal_favorites || [], d.global_favorites || []);
+        const favoriteIds = new Set(favorites.map((a) => a && a.avatar_id).filter(Boolean));
         const flat = []
-          .concat(d.my_avatars || [], d.favorites || [], d.popular || [], d.all || [])
+          .concat(d.my_avatars || [], favorites, d.recently_used || [], d.all || [])
           .filter((a) => a && a.avatar_id);
-        // De-dupe by avatar_id.
+        // De-dupe by avatar_id, keeping the favorite flag for the picker's tabs.
         const seen = new Set();
-        setAvatars(flat.filter((a) => (seen.has(a.avatar_id) ? false : seen.add(a.avatar_id))));
+        setAvatars(
+          flat
+            .filter((a) => (seen.has(a.avatar_id) ? false : seen.add(a.avatar_id)))
+            .map((a) => ({ ...a, is_favorite: favoriteIds.has(a.avatar_id) }))
+        );
       })
       .catch(() => {});
   }, []);
@@ -133,6 +151,7 @@ const Automations = () => {
 
         {creating && (
           <AutomationBuilder
+            articles={articles}
             chapters={chapters}
             campaigns={campaigns}
             avatars={avatars}
@@ -190,8 +209,10 @@ const Automations = () => {
                       </span>
                       <span className="text-gray-700">{CONTENT_LABELS[s.content_type] || s.content_type}</span>
                       <span className="text-xs text-gray-400">
-                        {s.content_type === "product_promo"
-                          ? s.campaign_slug
+                        {/* Article and product steps both carry a campaign_slug;
+                            only book steps have a chapter. */}
+                        {s.campaign_slug
+                          ? articleTitle(articles, s.campaign_slug) || s.campaign_slug
                           : `Chapter ${s.chapter_id || "?"}`}
                       </span>
                     </div>

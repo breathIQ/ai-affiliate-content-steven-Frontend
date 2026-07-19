@@ -4,6 +4,8 @@ import RecentPostsTable from "../components/RecentPostsTable";
 import { useLocation } from "react-router-dom";
 import { getPost } from "../services/post.api";
 import GenerateContentModal from "../components/modals/GenerateContentModal";
+import CampaignContentModal from "../components/modals/CampaignContentModal";
+import ArticleContentModal from "../components/modals/ArticleContentModal";
 import Library from "./user/Library";
 import { useLoader } from "../context/LoaderContext";
 import toast from "react-hot-toast";
@@ -63,7 +65,16 @@ export default function UsersLabs() {
               View and manage all your posts in one place.
             </p>
           </div>
-          {state?.id ? "" : <GenerateContentModal setGeneratedData={setGeneratedData} />}
+          {state?.id ? "" : (
+            <div className="flex items-center gap-2">
+              {/* Campaign and article posts are saved server-side, so no
+                  in-page preview hand-off is needed (unlike the book flow's
+                  setGeneratedData). */}
+              <ArticleContentModal />
+              <CampaignContentModal />
+              <GenerateContentModal setGeneratedData={setGeneratedData} />
+            </div>
+          )}
         </div>
         <div className="">
           <RecentPostsTable

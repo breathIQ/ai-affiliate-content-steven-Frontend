@@ -164,19 +164,44 @@ export default function RecentPostsTable({
                 </td> */}
 
                   <td className="p-3">
-                    {/* {console.log(item, "<<<<<ASd")} */}
-                    {item.media_type == "video" ? (
-                      <img
-                        src={"/icons/videoicon.svg"}
-                        alt=""
-                        className="w-10 h-10  object-cover"
-                      />
+                    {/* The thumbnail opens the full-size media in a new tab.
+                        `item.media` is the real file URL for videos too, so the
+                        same link works for both. A post can legitimately have no
+                        media yet (a video still rendering), so guard it rather
+                        than linking nowhere and rendering a broken image. */}
+                    {item.media ? (
+                      <a
+                        href={item.media}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={
+                          item.media_type == "video"
+                            ? "Open video in a new tab"
+                            : "Open image in a new tab"
+                        }
+                        className="inline-block rounded-md hover:ring-2 hover:ring-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      >
+                        <img
+                          src={
+                            item.media_type == "video"
+                              ? "/icons/videoicon.svg"
+                              : item.media
+                          }
+                          alt={
+                            item.media_type == "video"
+                              ? "Open video"
+                              : "Open image"
+                          }
+                          className="w-10 h-10 rounded-md object-cover cursor-pointer"
+                        />
+                      </a>
                     ) : (
-                      <img
-                        src={item.media || ""}
-                        alt=""
-                        className="w-10 h-10 rounded-md object-cover"
-                      />
+                      <span
+                        title="No media on this post yet"
+                        className="w-10 h-10 rounded-md bg-gray-100 border border-gray-200 flex items-center justify-center text-[9px] text-gray-400"
+                      >
+                        none
+                      </span>
                     )}
                   </td>
 
@@ -187,8 +212,26 @@ export default function RecentPostsTable({
                   </td>
 
                   <td className="p-3 text-gray-600">
-                    {item?.chapter_code ? item?.chapter_code + ":" : ""}
-                    {item.chapter_name}
+                    {item?.campaign_name ? (
+                      <button
+                        onClick={() =>
+                          navigate(
+                            user?.role_id == 1
+                              ? `/admin/campaign-post/${item?.id}`
+                              : `/u/campaign-post/${item?.id}`
+                          )
+                        }
+                        className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 hover:bg-purple-200"
+                        title="View & arrange slides"
+                      >
+                        {item.campaign_name}
+                      </button>
+                    ) : (
+                      <>
+                        {item?.chapter_code ? item?.chapter_code + ":" : ""}
+                        {item.chapter_name}
+                      </>
+                    )}
                   </td>
 
                   <td className="p-3 text-gray-600">
@@ -246,6 +289,15 @@ export default function RecentPostsTable({
                           hour12: true,
                         })}
                       </button>
+                    ) : item.status?.toLowerCase() === "draft" &&
+                      item.requires_human_review &&
+                      item.review_status === "pending" ? (
+                      <span className="text-amber-600 font-medium">In review</span>
+                    ) : item.status?.toLowerCase() === "draft" &&
+                      item.review_status === "rejected" ? (
+                      <span className="text-red-600 font-medium" title={item.review_note || ""}>
+                        Rejected
+                      </span>
                     ) : item.status?.toLowerCase() === "draft" ? (
                       <button
                         className="text-purple-600 font-medium hover:underline"

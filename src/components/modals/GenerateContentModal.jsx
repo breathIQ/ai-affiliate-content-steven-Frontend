@@ -336,6 +336,10 @@ export default function GenerateContentModal({ setGeneratedData }) {
           model: formData.model,
           text_format: formData.text_format,
           prompt: formData.prompt,
+          // A carousel needs one text per slide, so the draft has to know how
+          // many slides it is writing for.
+          post_type: formData.post_type,
+          slides: formData.post_type === "single" ? 1 : Number(formData.slides),
         });
         if (!res?.success) {
           toast.error(res?.message || "Could not generate draft");
@@ -389,6 +393,8 @@ export default function GenerateContentModal({ setGeneratedData }) {
           model: formData.model,
           text_format: formData.text_format,
           prompt: formData.prompt,
+          post_type: formData.post_type,
+          slides: formData.post_type === "single" ? 1 : Number(formData.slides),
           feedback,
           previous_text: draft,
         });
@@ -1191,11 +1197,31 @@ export default function GenerateContentModal({ setGeneratedData }) {
                 <div className="px-6 py-4 space-y-3">
                   {contentType === "image" ? (
                     <>
-                      <p className="text-sm text-gray-500">This is the exact text that will appear ON the image - review it before we generate.</p>
-                      <div className="border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
-                        <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">Text on Image</p>
-                        <p className="text-sm whitespace-pre-wrap">{draft.image_text}</p>
-                      </div>
+                      <p className="text-sm text-gray-500">
+                        {draft.image_text_slides?.length > 1
+                          ? "This is the exact text that will appear on each slide, in order - review it before we generate."
+                          : "This is the exact text that will appear ON the image - review it before we generate."}
+                      </p>
+
+                      {/* A carousel carries a different beat of the argument on
+                          every slide, so each one is reviewed separately. */}
+                      {draft.image_text_slides?.length > 1 ? (
+                        <div className="space-y-2">
+                          {draft.image_text_slides.map((s, i) => (
+                            <div key={i} className="border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
+                              <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">
+                                Slide {i + 1} of {draft.image_text_slides.length}
+                              </p>
+                              <p className="text-sm whitespace-pre-wrap">{s}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
+                          <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">Text on Image</p>
+                          <p className="text-sm whitespace-pre-wrap">{draft.image_text}</p>
+                        </div>
+                      )}
 
                       <details className="text-sm">
                         <summary className="cursor-pointer text-gray-500">Social post caption (not shown on the image)</summary>

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import GenerateContentModal from "../../components/modals/GenerateContentModal";
+import CampaignContentModal from "../../components/modals/CampaignContentModal";
+import ArticleContentModal from "../../components/modals/ArticleContentModal";
 import Layout from "../../components/Layout/Layout";
 
 const views = ["Month", "Week", "Day", "List"];
@@ -204,7 +206,11 @@ export default function UserSchedule() {
               Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             </p>
           </div>
-          <GenerateContentModal />
+          <div className="flex items-center gap-2">
+            <ArticleContentModal />
+            <CampaignContentModal />
+            <GenerateContentModal />
+          </div>
         </div>
         <div className="bg-white p-6 rounded-xl border shadow-sm ">
           {/* HEADER */}

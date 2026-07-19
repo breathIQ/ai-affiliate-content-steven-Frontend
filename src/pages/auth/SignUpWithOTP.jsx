@@ -8,7 +8,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Footer from "../../components/Layout/Footer";
 
 export default function SignUpWithOTP() {
-  const [step, setStep] = useState(1); // 1 = signup, 2 = otp
+  const [step, setStep] = useState(1); // 1 = signup, 2 = otp, 3 = check your email
   const [isLoading, setISloading] = useState(false); // 1 = signup, 2 = otp
   const [showPassword, setShowPassword] = useState(false);
 const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -63,10 +63,9 @@ if (!passwordRegex.test(form.password)) {
         form
       );
       setISloading(false);
-      // console.log("res" ,res,);
-      toast.success(res?.data.message || "OTP sent to your email");
-      navigate("/login");
-      // setStep(2); // move to OTP screen
+      // Show the "check your email / get started" confirmation in place rather
+      // than a toast that disappears mid-redirect.
+      setStep(3);
     } catch (error) {
       setISloading(false);
       toast.error(error?.response?.data?.message || "Signup failed");
@@ -325,6 +324,32 @@ const validatePassword = (value) => {
                 <span className="text-purple-600 cursor-pointer">Resend</span>
               </p>
             </>
+          )}
+
+          {step === 3 && (
+            <div className="text-center">
+              <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-green-100 flex items-center justify-center text-2xl">
+                ✉️
+              </div>
+              <h1 className="text-2xl font-semibold mb-2">Check your email</h1>
+              <p className="text-sm text-gray-600 mb-6">
+                Your account is ready. We&rsquo;ve sent a welcome email to{" "}
+                <span className="font-medium text-gray-800">{form.email}</span> with everything you need to
+                log in to your dashboard and get started.
+              </p>
+
+              <button
+                onClick={() => navigate("/login")}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-lg py-2"
+              >
+                Log in to your dashboard
+              </button>
+
+              <p className="text-xs text-gray-400 mt-4">
+                Don&rsquo;t see it? Check your spam folder. You can log in any time with the email and
+                password you just created.
+              </p>
+            </div>
           )}
         </div>
       </div>

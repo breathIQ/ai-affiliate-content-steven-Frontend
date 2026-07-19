@@ -80,6 +80,25 @@ export const deleteAutomation = async (id) => {
   return res.data;
 };
 
+// ---- Affiliate hub (handle, links, ref code, coupon) ----
+
+export const getAffiliateProfile = async () => {
+  const res = await API.get("/user/affiliate");
+  return res.data;
+};
+
+export const claimAffiliateCoupon = async (code) => {
+  const res = await API.post("/user/affiliate/coupon", { code });
+  return res.data;
+};
+
+// Rename the affiliate's handle. The old one is kept server-side and keeps
+// resolving, so links in already-published posts continue to earn.
+export const updateAffiliateHandle = async (affiliate_id) => {
+  const res = await API.post("/user/affiliate/handle", { affiliate_id });
+  return res.data;
+};
+
 // ---- Admin: campaigns, approved copy, official images, review queue ----
 
 export const adminGetCampaigns = async () => {
