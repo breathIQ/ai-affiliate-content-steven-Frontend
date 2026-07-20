@@ -44,8 +44,33 @@ export default function AffiliateSalesFidelityPreview() {
           <p className="fidelity-banner">Stop losing hours. Start sharing what <em>actually matters.</em></p>
         </section>
 
+        <section className="fidelity-source" aria-labelledby="source-title">
+          <div className="fidelity-source-art" style={{ backgroundImage: "url('/images/affiliate-sales/2-clean.png')" }} role="img" aria-label="The Carbonated Body book, laboratory glassware, research volumes, and scientific content icons" />
+          <div className="fidelity-source-header">
+            <p className="fidelity-source-label">2. What’s Behind the Content</p>
+            <h2 id="source-title">This isn’t a content farm.<br />It’s <em>an original way</em> of seeing the body,<br />with a publishing engine attached.</h2>
+          </div>
+          <p className="fidelity-source-intro">Every piece of content <strong>CO2Body</strong> generates is drawn from a real body of work:</p>
+          <div className="fidelity-source-points">
+            <article>
+              <h3>20 years of dedicated research<br />into CO₂ and human physiology.</h3>
+              <p>How carbon dioxide affects oxygen delivery, breathing, energy, sleep, circulation, and long-term health.</p>
+            </article>
+            <article>
+              <h3>A complete book, <em>The Carbonated Body</em>,<br />written over several years.</h3>
+              <p>Not ghostwritten, not compiled from blog posts. Chapter by chapter, it’s the source material the system pulls from when it writes your posts.</p>
+            </article>
+            <article>
+              <h3>New, fully-researched articles<br />every week.</h3>
+              <p>Each one thought through, sourced, and written to teach something real. The library keeps growing, so your content never runs dry.</p>
+            </article>
+          </div>
+          <p className="fidelity-source-insight">When the system writes a caption, a carousel, or an avatar video script, it’s working directly from this material, <strong>whole chapters at a time.</strong> That’s why the output reads like it came from someone who actually knows the subject. <em>Because it did.</em></p>
+          <p className="fidelity-source-banner">The difference is simple: AI tools generate content about a topic.<br /><em>CO2Body generates content from a life’s work and an original perspective on the topic.</em></p>
+        </section>
+
         <section className="fidelity-note" aria-label="Prototype scope">
-          <p>These two sections demonstrate the conversion method: approved artwork, masked embedded copy, and selectable HTML text in the same composition.</p>
+          <p>These sections demonstrate the conversion method: approved artwork, preserved visual assets, and selectable HTML text in the same composition.</p>
           <Link to="/affiliate-sales-preview">View the unchanged image-led page →</Link>
         </section>
       </main>
