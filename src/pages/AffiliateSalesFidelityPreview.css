@@ -138,6 +138,8 @@
 .fidelity-benefits h2 { margin:0; color:#e8e8e6; font-size:clamp(40px,4.35vw,70px); line-height:.98; }
 .fidelity-benefits h2 em,.fidelity-benefits-banner em { color:#dda026; font-style:normal; }
 .fidelity-benefits-strip { position:absolute; z-index:2; right:4%; bottom:18.3%; left:4%; display:grid; grid-template-columns:repeat(3,1fr); align-items:center; margin:0; color:#e6e8eb; font-size:clamp(17px,1.65vw,27px); font-weight:800; text-align:center; }
+.fidelity-benefits-strip span { box-sizing:border-box; padding-left:clamp(78px,7.2vw,112px); }
+.fidelity-benefits-strip span:nth-child(3) { padding-left:clamp(118px,9.2vw,140px); font-size:.88em; }
 .fidelity-benefits-banner { position:absolute; z-index:2; right:5%; bottom:5.2%; left:15%; margin:0; color:#e7e8eb; font-size:clamp(22px,2.35vw,38px); font-weight:800; text-align:center; }
 .fidelity-comparison { position:relative; width:min(100%,1536px); aspect-ratio:3/2; margin:auto; overflow:hidden; background:#020914; }
 .fidelity-comparison-art { position:absolute; inset:0; background-position:center; background-size:cover; background-repeat:no-repeat; }
@@ -282,7 +284,7 @@
   .fidelity-benefits h2 { font-size:39px; }
   .fidelity-benefits h2 br { display:none; }
   .fidelity-benefits-strip { grid-template-columns:1fr; gap:10px; margin:20px; font-size:24px; }
-  .fidelity-benefits-strip span { padding:16px; border-left:3px solid var(--gold); background:#061325; }
+  .fidelity-benefits-strip span,.fidelity-benefits-strip span:nth-child(3) { padding:16px; border-left:3px solid var(--gold); background:#061325; font-size:inherit; }
   .fidelity-benefits-banner { margin:10px 14px 30px; padding:20px; border:1px solid var(--gold); border-radius:9px; background:#061325; font-size:24px; }
   .fidelity-comparison { display:flex; flex-direction:column; aspect-ratio:auto; }
   .fidelity-comparison-art { position:relative; width:100%; aspect-ratio:3/2; background-size:cover; background-position:center; }
