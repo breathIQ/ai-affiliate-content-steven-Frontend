@@ -134,6 +134,79 @@ export default function AffiliateSalesFidelityPreview() {
           <p className="fidelity-referrals-banner">Every conversion it produces <em>lands in your account.</em></p>
         </section>
 
+        <section className="fidelity-audience" aria-labelledby="audience-title">
+          <div className="fidelity-audience-art" style={{ backgroundImage: "url('/images/affiliate-sales/7-clean.png')" }} role="img" aria-label="Four kinds of people who can share CO2Body content, with no specialist skills required" />
+          <div className="fidelity-audience-header">
+            <p>7. Who This Is For</p>
+            <h2 id="audience-title">This works if you believe in the mission.<br /><em>That’s the only real requirement.</em></h2>
+          </div>
+          <p className="fidelity-audience-summary">The research is done. The content engine is built. The marketing team works for you.</p>
+          <p className="fidelity-audience-banner">You bring belief in the mission. <em>The system does the rest.</em></p>
+        </section>
+
+        <section className="fidelity-benefits" aria-labelledby="benefits-title">
+          <div className="fidelity-benefits-art" style={{ backgroundImage: "url('/images/affiliate-sales/8-clean.png')" }} role="img" aria-label="Five creator benefits including content depth, credibility, voice control, authentic advocacy, and scalability" />
+          <div className="fidelity-benefits-header">
+            <p>8. Why Creators Love This System</p>
+            <h2 id="benefits-title">Content that stays fresh.<br /><em>Credibility that compounds.</em></h2>
+          </div>
+          <div className="fidelity-benefits-strip"><span>Educational, not salesy</span><span>Posting stays effortless</span><span>Commissions compound over time</span></div>
+          <p className="fidelity-benefits-banner">You don’t need a huge audience. <em>You need an audience that trusts you.</em></p>
+        </section>
+
+        <section className="fidelity-comparison" aria-labelledby="comparison-title">
+          <div className="fidelity-comparison-art" style={{ backgroundImage: "url('/images/affiliate-sales/9-clean.png')" }} aria-hidden="true" />
+          <div className="fidelity-comparison-header">
+            <p>9. What Makes This Different</p>
+            <h2 id="comparison-title">What Makes This Different.</h2>
+          </div>
+          <div className="fidelity-comparison-grid">
+            <div className="fidelity-comparison-column fidelity-comparison-typical">
+              <h3>Typical Affiliate Program</h3>
+              {['Here’s a link. Good luck.', 'Create everything yourself', 'Generic AI content', 'Post manually every day', 'One click. One chance.', 'Nothing for your audience'].map((item) => <p key={item}>{item}</p>)}
+            </div>
+            <div className="fidelity-comparison-column fidelity-comparison-co2body">
+              <h3>CO₂Body</h3>
+              {['Content engine + marketing team', 'Images, carousels + videos from real research', 'An original, terrain-first perspective', 'Hands-free automation campaigns', 'Email + retargeting convert for weeks', 'An exclusive discount only you can give'].map((item) => <p key={item}>{item}</p>)}
+            </div>
+          </div>
+          <p className="fidelity-comparison-banner">Not just a link. <em>A complete system built to help you win.</em></p>
+        </section>
+
+        <section className="fidelity-faq" aria-labelledby="faq-title">
+          <div className="fidelity-faq-art" style={{ backgroundImage: "url('/images/affiliate-sales/10-clean.png')" }} aria-hidden="true" />
+          <div className="fidelity-faq-header">
+            <p>10. Frequently Asked Questions</p>
+            <h2 id="faq-title">Questions? <em>Here’s the straight answer.</em></h2>
+          </div>
+          <div className="fidelity-faq-grid">
+            {[
+              ['Is this just AI-generated content?', 'AI handles the format. The substance comes from 20 years of research, a complete book, and new researched articles.'],
+              ['I’ve never made content before. Can I do this?', 'If you can click a button and pick a topic, yes.'],
+              ['What if I don’t like what it generates?', 'Regenerate, keep the image, reorder the carousel, or edit before publishing.'],
+              ['Do I have to be on camera?', 'Never. Use a realistic avatar—or create your own from one selfie.'],
+              ['How do I get paid?', 'Your affiliate link tracks referrals through visits, email, retargeting, and purchase.'],
+              ['What does it cost?', 'Simple prepaid credits. Pay only for what you generate.'],
+            ].map(([question, answer]) => (
+              <article key={question}><h3>{question}</h3><p>{answer}</p></article>
+            ))}
+          </div>
+          <p className="fidelity-faq-banner">Real research. <em>Simple to use.</em> Always under your control.</p>
+        </section>
+
+        <section className="fidelity-cta" aria-labelledby="cta-title">
+          <div className="fidelity-cta-art" style={{ backgroundImage: "url('/images/affiliate-sales/11-clean.png')" }} role="img" aria-label="The real Carbonated Body book beside a complete automated affiliate marketing system" />
+          <div className="fidelity-cta-header">
+            <h2 id="cta-title">The research took 20 years.<br /><em>Sharing it takes 5 minutes.</em></h2>
+            <p>A genuinely original perspective. Beautiful content.<br />A marketing team working your leads. Income from every person you bring in.</p>
+          </div>
+          <div className="fidelity-cta-action">
+            <Link to="/signup">Get your affiliate link + start creating <span aria-hidden="true">→</span></Link>
+            <p>Give your followers an exclusive affiliate-only discount.</p>
+          </div>
+          <p className="fidelity-cta-banner">Share better science. Build trust. Get paid to do it.</p>
+        </section>
+
         <section className="fidelity-note" aria-label="Prototype scope">
           <p>These sections demonstrate the conversion method: approved artwork, preserved visual assets, and selectable HTML text in the same composition.</p>
           <Link to="/affiliate-sales-preview">View the unchanged image-led page →</Link>
