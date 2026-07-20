@@ -25,7 +25,9 @@
 .fidelity-problem { min-height:760px; aspect-ratio:1536/1024; }
 .fidelity-problem-art { position:absolute; inset:0; background-position:center; background-size:cover; background-repeat:no-repeat; }
 .fidelity-problem-copy { position:relative; z-index:2; width:51%; margin-left:auto; padding:clamp(30px,3.7vw,60px) clamp(36px,5vw,82px) 150px 34px; }
-.fidelity-section-label { display:block; width:max-content; margin:0 auto 24px; padding:0; border:0; border-radius:0; font-family:"Barlow Condensed",sans-serif; font-size:clamp(20px,2.1vw,34px); font-weight:800; text-transform:uppercase; }
+.fidelity-section-label { display:flex; align-items:center; justify-content:center; gap:18px; width:100%; margin:0 auto 24px; padding:0; border:0; border-radius:0; font-family:"Barlow Condensed",sans-serif; font-size:clamp(20px,2.1vw,34px); font-weight:800; text-transform:uppercase; }
+.fidelity-section-label::before,.fidelity-section-label::after { content:""; flex:1 1 90px; height:1px; background:linear-gradient(90deg,transparent,var(--gold)); }
+.fidelity-section-label::after { background:linear-gradient(90deg,var(--gold),transparent); }
 .fidelity-problem h2 { margin:0 0 30px; font-size:clamp(34px,3.3vw,56px); line-height:1.06; text-align:center; }
 .fidelity-point { display:grid; grid-template-columns:92px 1fr; gap:32px; align-items:start; margin:22px 0; }
 .fidelity-icon { display:block; width:72px; height:72px; }
