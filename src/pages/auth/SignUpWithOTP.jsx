@@ -63,9 +63,19 @@ if (!passwordRegex.test(form.password)) {
         form
       );
       setISloading(false);
-      // Show the "check your email / get started" confirmation in place rather
-      // than a toast that disappears mid-redirect.
-      setStep(3);
+      const newUser = res?.data?.data;
+      if (newUser?.access_token) {
+        // Register returns a session token: log them straight in and walk
+        // them through onboarding (their affiliate link + social accounts).
+        localStorage.setItem("user", JSON.stringify(newUser));
+        localStorage.setItem("access_token", newUser.access_token);
+        localStorage.setItem("onboarding_pending", "1");
+        navigate("/u/onboarding");
+      } else {
+        // No token in the response — fall back to the "check your email /
+        // get started" confirmation.
+        setStep(3);
+      }
     } catch (error) {
       setISloading(false);
       toast.error(error?.response?.data?.message || "Signup failed");

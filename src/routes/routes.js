@@ -20,6 +20,7 @@ import CampaignReviewQueue from "../pages/admin/CampaignReviewQueue"
 import CampaignContent from "../pages/admin/CampaignContent"
 import CampaignPostPreview from "../pages/user/CampaignPostPreview"
 import AffiliateHub from "../pages/user/AffiliateHub"
+import Onboarding from "../pages/user/Onboarding"
 import Automations from "../pages/user/Automations"
 import Generate from "../pages/user/Generate"
 import ApiBalances from "../pages/admin/ApiBalances"
@@ -74,6 +75,7 @@ const allRoutes = [
     { component: <Billing />, path: "/u/billing", role: 1 },
     { component: <Avatars />, path: "/u/avatars", role: 1 },
     { component: <AffiliateHub />, path: "/u/affiliate", role: 1 },
+    { component: <Onboarding />, path: "/u/onboarding", role: 1 },
     { component: <Automations />, path: "/u/automations", role: 1 },
     { component: <Automations />, path: "/admin/automations", role: 2 },
     { component: <Generate />, path: "/u/generate", role: 1 },

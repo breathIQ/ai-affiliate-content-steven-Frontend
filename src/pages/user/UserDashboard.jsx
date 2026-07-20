@@ -30,6 +30,18 @@ function UserDashboard() {
   useEffect(() => {
     const linkResponse = searchParams.get("linkResponse");
 
+    // Mid-onboarding? The social OAuth callbacks always land here, so carry
+    // the result back to the onboarding wizard instead of unpacking it.
+    if (localStorage.getItem("onboarding_pending") === "1") {
+      navigate(
+        linkResponse
+          ? `/u/onboarding?linkResponse=${encodeURIComponent(linkResponse)}`
+          : "/u/onboarding",
+        { replace: true }
+      );
+      return;
+    }
+
     if (linkResponse) {
       try {
         const parsedResponse = JSON.parse(decodeURIComponent(linkResponse));

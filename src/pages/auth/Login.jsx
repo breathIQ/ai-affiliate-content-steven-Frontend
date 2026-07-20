@@ -112,6 +112,8 @@ window.location  = "/"
       toast.success(res?.data.message);
       localStorage.setItem("user", JSON.stringify(res?.data.data));
       localStorage.setItem("access_token", res?.data.data?.access_token);
+      // Onboarding is a fresh-signup flow only; a normal login ends it.
+      localStorage.removeItem("onboarding_pending");
       window.location.href =
         res?.data.data?.role_id == 2 ? "/u/dashboard" : "/admin/dashboard";
     } catch (error) {
