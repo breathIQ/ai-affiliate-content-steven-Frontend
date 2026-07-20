@@ -5,7 +5,10 @@ export default function AffiliateSalesFidelityPreview() {
   return (
     <div className="fidelity-page">
       <header className="fidelity-header">
-        <Link className="fidelity-logo" to="/affiliate-sales-fidelity-preview">CO₂BODY</Link>
+        <Link className="fidelity-logo" to="/affiliate-sales-fidelity-preview" aria-label="CO2Body home">
+          <img src="/images/affiliate-sales/co2body-logo.webp" alt="" />
+          <span>CO₂BODY</span>
+        </Link>
         <span className="fidelity-status">HTML fidelity prototype</span>
         <Link className="fidelity-header-cta" to="/signup">Start creating</Link>
       </header>
