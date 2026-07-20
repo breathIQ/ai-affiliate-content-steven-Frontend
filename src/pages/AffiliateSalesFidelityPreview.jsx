@@ -101,7 +101,7 @@ export default function AffiliateSalesFidelityPreview() {
         </section>
 
         <section className="fidelity-workflow" aria-labelledby="workflow-title">
-          <div className="fidelity-workflow-art" style={{ backgroundImage: "url('/images/affiliate-sales/4-clean.png')" }} role="img" aria-label="CO2Body workflow from book and research through generated formats to published social posts" />
+          <div className="fidelity-workflow-art" style={{ backgroundImage: "url('/images/affiliate-sales/4-clean.png')", "--mobile-art": "url('/images/affiliate-sales/4-mobile.webp')" }} role="img" aria-label="CO2Body workflow from book and research through generated formats to published social posts" />
           <div className="fidelity-workflow-header">
             <p>4. How It Works</p>
             <h2 id="workflow-title">From “I should post something”<br /><em>to published, in minutes.</em></h2>
@@ -115,7 +115,7 @@ export default function AffiliateSalesFidelityPreview() {
         </section>
 
         <section className="fidelity-automation" aria-labelledby="automation-title">
-          <div className="fidelity-automation-art" style={{ backgroundImage: "url('/images/affiliate-sales/5-clean.png')" }} role="img" aria-label="A four-day automated content campaign connected through the CO2Body campaign engine" />
+          <div className="fidelity-automation-art" style={{ backgroundImage: "url('/images/affiliate-sales/5-clean.png')", "--mobile-art": "url('/images/affiliate-sales/5-mobile.webp')" }} role="img" aria-label="A four-day automated content campaign connected through the CO2Body campaign engine" />
           <div className="fidelity-automation-header">
             <p>5. Automation Campaigns</p>
             <h2 id="automation-title">The <em>“set it and forget it”</em> mode.</h2>
@@ -125,7 +125,7 @@ export default function AffiliateSalesFidelityPreview() {
         </section>
 
         <section className="fidelity-referrals" aria-labelledby="referrals-title">
-          <div className="fidelity-referrals-art" style={{ backgroundImage: "url('/images/affiliate-sales/6-clean.png')" }} role="img" aria-label="A referral marketing system flowing through email, coupon, retargeting, tracking, and commission" />
+          <div className="fidelity-referrals-art" style={{ backgroundImage: "url('/images/affiliate-sales/6-clean.png')", "--mobile-art": "url('/images/affiliate-sales/6-mobile.webp')" }} role="img" aria-label="A referral marketing system flowing through email, coupon, retargeting, tracking, and commission" />
           <div className="fidelity-referrals-header">
             <p>6. We Market to Your Referrals for You</p>
             <h2 id="referrals-title">Most affiliate programs hand you a link<br />and wish you luck. <em>We do the selling with you.</em></h2>
@@ -135,7 +135,7 @@ export default function AffiliateSalesFidelityPreview() {
         </section>
 
         <section className="fidelity-audience" aria-labelledby="audience-title">
-          <div className="fidelity-audience-art" style={{ backgroundImage: "url('/images/affiliate-sales/7-clean.png')" }} role="img" aria-label="Four kinds of people who can share CO2Body content, with no specialist skills required" />
+          <div className="fidelity-audience-art" style={{ backgroundImage: "url('/images/affiliate-sales/7-clean.png')", "--mobile-art": "url('/images/affiliate-sales/7-mobile.webp')" }} role="img" aria-label="Four kinds of people who can share CO2Body content, with no specialist skills required" />
           <div className="fidelity-audience-header">
             <p>7. Who This Is For</p>
             <h2 id="audience-title">This works if you believe in the mission.<br /><em>That’s the only real requirement.</em></h2>
@@ -145,7 +145,7 @@ export default function AffiliateSalesFidelityPreview() {
         </section>
 
         <section className="fidelity-benefits" aria-labelledby="benefits-title">
-          <div className="fidelity-benefits-art" style={{ backgroundImage: "url('/images/affiliate-sales/8-clean.png')" }} role="img" aria-label="Five creator benefits including content depth, credibility, voice control, authentic advocacy, and scalability" />
+          <div className="fidelity-benefits-art" style={{ backgroundImage: "url('/images/affiliate-sales/8-clean.png')", "--mobile-art": "url('/images/affiliate-sales/8-mobile.webp')" }} role="img" aria-label="Five creator benefits including content depth, credibility, voice control, authentic advocacy, and scalability" />
           <div className="fidelity-benefits-header">
             <p>8. Why Creators Love This System</p>
             <h2 id="benefits-title">Content that stays fresh.<br /><em>Credibility that compounds.</em></h2>
@@ -195,7 +195,7 @@ export default function AffiliateSalesFidelityPreview() {
         </section>
 
         <section className="fidelity-cta" aria-labelledby="cta-title">
-          <div className="fidelity-cta-art" style={{ backgroundImage: "url('/images/affiliate-sales/11-clean.png')" }} role="img" aria-label="The real Carbonated Body book beside a complete automated affiliate marketing system" />
+          <div className="fidelity-cta-art" style={{ backgroundImage: "url('/images/affiliate-sales/11-clean.png')", "--mobile-art": "url('/images/affiliate-sales/11-mobile.webp')" }} role="img" aria-label="The real Carbonated Body book beside a complete automated affiliate marketing system" />
           <div className="fidelity-cta-header">
             <h2 id="cta-title">The research took 20 years.<br /><em>Sharing it takes 5 minutes.</em></h2>
             <p>A genuinely original perspective. Beautiful content.<br />A marketing team working your leads. Income from every person you bring in.</p>
@@ -212,8 +212,8 @@ export default function AffiliateSalesFidelityPreview() {
           <Link to="/affiliate-sales-preview">View the unchanged image-led page →</Link>
         </section>
       </main>
-      <Link className="fidelity-floating-cta" to="/signup">
-        Get your affiliate link <span aria-hidden="true">→</span>
+      <Link className="fidelity-floating-cta" to="/signup" aria-label="Get your affiliate link">
+        <span className="fidelity-floating-label">Get your affiliate link</span><span className="fidelity-floating-arrow" aria-hidden="true">→</span>
       </Link>
     </div>
   );
