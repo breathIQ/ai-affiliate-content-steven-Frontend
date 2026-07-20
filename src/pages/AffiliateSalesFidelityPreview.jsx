@@ -10,7 +10,10 @@ export default function AffiliateSalesFidelityPreview() {
           <span>CO₂BODY</span>
         </Link>
         <span className="fidelity-status">HTML fidelity prototype</span>
-        <Link className="fidelity-header-cta" to="/signup">Start creating</Link>
+        <nav className="fidelity-header-actions" aria-label="Account actions">
+          <Link className="fidelity-sign-in" to="/login">Sign in</Link>
+          <Link className="fidelity-header-cta" to="/signup">Start creating</Link>
+        </nav>
       </header>
 
       <main>
