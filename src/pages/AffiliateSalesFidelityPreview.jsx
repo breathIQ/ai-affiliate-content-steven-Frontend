@@ -12,7 +12,7 @@ export default function AffiliateSalesFidelityPreview() {
 
       <main>
         <section className="fidelity-hero" aria-labelledby="fidelity-title">
-          <div className="fidelity-hero-art" style={{ backgroundImage: "url('/images/affiliate-sales/0.png')" }} role="img" aria-label="The Carbonated Body book with CO2Body content previews" />
+          <div className="fidelity-hero-art" style={{ backgroundImage: "url('/images/affiliate-sales/0.png')", "--mobile-art": "url('/images/affiliate-sales/0-mobile.webp')" }} role="img" aria-label="The Carbonated Body book with CO2Body content previews" />
           <div className="fidelity-hero-copy">
             <p className="fidelity-kicker">CO2Body Affiliate Platform</p>
             <h1 id="fidelity-title">Share Science That<br />Actually Changes Lives.<br /><em>Get Paid to Do It.</em></h1>
