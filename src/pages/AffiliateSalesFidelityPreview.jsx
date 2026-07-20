@@ -5,11 +5,10 @@ export default function AffiliateSalesFidelityPreview() {
   return (
     <div className="fidelity-page">
       <header className="fidelity-header">
-        <Link className="fidelity-logo" to="/affiliate-sales-fidelity-preview" aria-label="CO2Body home">
+        <Link className="fidelity-logo" to="/" aria-label="CO2Body home">
           <img src="/images/affiliate-sales/co2body-logo.webp" alt="" />
           <span>CO₂BODY</span>
         </Link>
-        <span className="fidelity-status">HTML fidelity prototype</span>
         <nav className="fidelity-header-actions" aria-label="Account actions">
           <Link className="fidelity-sign-in" to="/login">Sign in</Link>
           <Link className="fidelity-header-cta" to="/signup">Start creating</Link>
@@ -213,10 +212,6 @@ export default function AffiliateSalesFidelityPreview() {
           <p className="fidelity-cta-banner">Share better science. Build trust. Get paid to do it.</p>
         </section>
 
-        <section className="fidelity-note" aria-label="Prototype scope">
-          <p>These sections demonstrate the conversion method: approved artwork, preserved visual assets, and selectable HTML text in the same composition.</p>
-          <Link to="/affiliate-sales-preview">View the unchanged image-led page →</Link>
-        </section>
       </main>
       <Link className="fidelity-floating-cta" to="/signup" aria-label="Get your affiliate link">
         <span className="fidelity-floating-label">Get your affiliate link</span><span className="fidelity-floating-arrow" aria-hidden="true">→</span>

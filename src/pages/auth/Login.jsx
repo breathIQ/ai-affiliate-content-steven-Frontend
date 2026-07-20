@@ -90,8 +90,8 @@ export default function Login() {
 
   useEffect(()=>{
     if(user?.access_token){
-window.location  = "/"
-    }    
+      window.location = Number(user?.role_id) === 2 ? "/u/dashboard" : "/admin/dashboard";
+    }
   },[user?.access_token])
 
   // Handle Login
