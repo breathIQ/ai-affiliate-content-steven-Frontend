@@ -23,8 +23,8 @@ export default function AffiliateSalesFidelityPreview() {
           </div>
         </section>
 
-        <section className="fidelity-problem" style={{ "--problem-art": "url('/images/affiliate-sales/1.png')" }} aria-labelledby="problem-title">
-          <div className="fidelity-problem-art" style={{ backgroundImage: "url('/images/affiliate-sales/1.png')" }} role="img" aria-label="A creator overwhelmed by repetitive health content" />
+        <section className="fidelity-problem" style={{ "--problem-art": "url('/images/affiliate-sales/1-clean.png')" }} aria-labelledby="problem-title">
+          <div className="fidelity-problem-art" style={{ backgroundImage: "url('/images/affiliate-sales/1-clean.png')" }} role="img" aria-label="A creator overwhelmed by repetitive health content" />
           <div className="fidelity-problem-copy">
             <p className="fidelity-section-label">1. The Problem</p>
             <h2 id="problem-title">You want to share content that matters. But creating it is a <em>full-time job.</em></h2>
