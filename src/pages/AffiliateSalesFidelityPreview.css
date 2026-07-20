@@ -220,6 +220,7 @@
   .fidelity-banner { position:relative; right:auto; bottom:auto; left:auto; margin:0 14px 28px; padding:18px; border:1px solid var(--gold); border-radius:9px; background:#061325; font-size:28px; }
   .fidelity-source { display:flex; flex-direction:column; aspect-ratio:auto; }
   .fidelity-source-art { position:relative; width:100%; aspect-ratio:4/3; background-size:auto 100%; background-position:left center; }
+  .fidelity-source-art::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent 48%,rgba(2,9,20,.82) 68%,#020914 88%); pointer-events:none; }
   .fidelity-source-header,.fidelity-source-intro,.fidelity-source-points,.fidelity-source-insight,.fidelity-source-banner { position:relative; inset:auto; }
   .fidelity-source-header { order:-1; padding:42px 20px 24px; background:#020914; }
   .fidelity-source-header::after { right:12%; bottom:5px; left:12%; }
