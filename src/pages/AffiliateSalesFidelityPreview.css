@@ -235,7 +235,7 @@
   .fidelity-source-insight { margin:10px 20px; padding:22px; border:1px solid rgba(239,169,29,.5); border-radius:10px; font-size:15px; }
   .fidelity-source-banner { margin:18px 14px 30px; padding:20px; border:1px solid var(--gold); border-radius:9px; background:#061325; font-size:24px; text-align:center; }
   .fidelity-lens { display:flex; flex-direction:column; aspect-ratio:auto; }
-  .fidelity-lens-art { position:relative; width:100%; aspect-ratio:4/3; background-size:auto 100%; background-position:center; }
+  .fidelity-lens-art { position:relative; width:100%; aspect-ratio:16/9; background-size:cover; background-position:center top; }
   .fidelity-lens-header,.fidelity-lens-side,.fidelity-lens-points article,.fidelity-lens-banner { position:relative; inset:auto; width:auto!important; }
   .fidelity-lens-header { order:-1; padding:42px 20px 24px; background:#020914; }
   .fidelity-lens-label { font-size:20px; }
