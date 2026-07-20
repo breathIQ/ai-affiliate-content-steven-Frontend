@@ -69,6 +69,37 @@ export default function AffiliateSalesFidelityPreview() {
           <p className="fidelity-source-banner">The difference is simple: AI tools generate content about a topic.<br /><em>CO2Body generates content from a life’s work and an original perspective on the topic.</em></p>
         </section>
 
+        <section className="fidelity-lens" aria-labelledby="lens-title">
+          <div className="fidelity-lens-art" style={{ backgroundImage: "url('/images/affiliate-sales/3-clean.png')" }} role="img" aria-label="A terrain-first view of the human body showing CO2, oxygen delivery, circulation, and cellular energy" />
+          <div className="fidelity-lens-header">
+            <p className="fidelity-lens-label">3. A Different Lens on Health</p>
+            <h2 id="lens-title">Most health content asks what’s wrong.<br /><em>We ask what made it possible.</em></h2>
+          </div>
+          <article className="fidelity-lens-side fidelity-lens-usual">
+            <h3>The Usual Lens</h3>
+            <p>Looking for what’s broken. Treating symptoms. Managing numbers. Another part to fix.</p>
+          </article>
+          <article className="fidelity-lens-side fidelity-lens-co2">
+            <h3>The CO₂ Lens</h3>
+            <p>Understanding the living systems that make health possible. Supporting terrain, structure, and flow so the body can thrive.</p>
+          </article>
+          <div className="fidelity-lens-points">
+            <article>
+              <h3>Terrain, structure,<br />and flow.</h3>
+              <p>Health isn’t one thing. It’s the environment, the architecture, and the circulation that bring life to every cell.</p>
+            </article>
+            <article>
+              <h3>Supply is<br />not delivery.</h3>
+              <p>Oxygen in the air means nothing if it can’t get to where it’s needed and be used by the cells.</p>
+            </article>
+            <article>
+              <h3>CO₂ is the forgotten<br />coordinator.</h3>
+              <p>It expands vessels, directs blood flow, unloads oxygen, and powers cellular energy. Without it, nothing else works well.</p>
+            </article>
+          </div>
+          <p className="fidelity-lens-banner">A lens that makes everything else about health <em>make more sense.</em></p>
+        </section>
+
         <section className="fidelity-note" aria-label="Prototype scope">
           <p>These sections demonstrate the conversion method: approved artwork, preserved visual assets, and selectable HTML text in the same composition.</p>
           <Link to="/affiliate-sales-preview">View the unchanged image-led page →</Link>
