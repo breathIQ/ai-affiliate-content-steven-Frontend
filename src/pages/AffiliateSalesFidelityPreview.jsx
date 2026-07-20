@@ -212,6 +212,9 @@ export default function AffiliateSalesFidelityPreview() {
           <Link to="/affiliate-sales-preview">View the unchanged image-led page →</Link>
         </section>
       </main>
+      <Link className="fidelity-floating-cta" to="/signup">
+        Get your affiliate link <span aria-hidden="true">→</span>
+      </Link>
     </div>
   );
 }
