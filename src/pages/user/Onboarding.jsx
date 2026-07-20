@@ -23,6 +23,7 @@ export default function Onboarding() {
   const [step, setStep] = useState(1);
   const [profile, setProfile] = useState(null);
   const [hub, setHub] = useState(null);
+  const [couponPolls, setCouponPolls] = useState(0);
   const [copied, setCopied] = useState(false);
   const [editing, setEditing] = useState(false);
   const [handleInput, setHandleInput] = useState("");
@@ -51,6 +52,20 @@ export default function Onboarding() {
     localStorage.setItem(ONBOARDING_FLAG, "1");
     loadData();
   }, []);
+
+  // The ref code + coupon are provisioned in the background right after
+  // signup, usually a few seconds behind this page's first fetch. Poll the
+  // hub until the coupon shows up (each fetch also triggers the server's
+  // lazy auto-claim once the ref code exists).
+  useEffect(() => {
+    if (hub?.coupon || couponPolls >= 8) return;
+    const t = setTimeout(async () => {
+      setCouponPolls((c) => c + 1);
+      const hubRes = await getAffiliateProfile().catch(() => null);
+      if (hubRes?.data) setHub(hubRes.data);
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [hub, couponPolls]);
 
   // Returning from an Instagram/TikTok OAuth link (via the dashboard
   // bounce): surface the result and stay on the connect step.
@@ -113,9 +128,9 @@ export default function Onboarding() {
     }
   };
 
-  const finish = () => {
+  const finish = (destination = "/u/dashboard") => {
     localStorage.removeItem(ONBOARDING_FLAG);
-    navigate("/u/dashboard");
+    navigate(destination);
   };
 
   const StepDot = ({ n }) => (
@@ -134,6 +149,7 @@ export default function Onboarding() {
         <div className="flex items-center justify-center gap-2 mb-6">
           <StepDot n={1} />
           <StepDot n={2} />
+          <StepDot n={3} />
         </div>
 
         {step === 1 && (
@@ -210,6 +226,18 @@ export default function Onboarding() {
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {!hub?.coupon && (
+              <div className="mb-6 border rounded-lg px-4 py-3 bg-gray-50">
+                <p className="text-sm font-medium mb-1">Your $500 coupon</p>
+                <p className="text-xs text-gray-500">
+                  We're setting up your personal coupon code — it gives your
+                  audience $500 off any device and credits the sale to you.
+                  It'll appear here in a moment (and always lives on your
+                  Affiliate tab).
+                </p>
               </div>
             )}
 
@@ -309,23 +337,56 @@ export default function Onboarding() {
 
             <button
               type="button"
-              onClick={finish}
+              onClick={() => setStep(3)}
               className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-lg py-2"
             >
               {social?.instagram?.connected || social?.tiktok?.connected
-                ? "Finish"
-                : "I'll connect later — go to my dashboard"}
+                ? "Continue"
+                : "I'll connect later — continue"}
             </button>
           </>
         )}
 
-        <button
-          type="button"
-          onClick={finish}
-          className="w-full text-xs text-gray-400 hover:text-gray-600 mt-4"
-        >
-          Skip setup for now
-        </button>
+        {step === 3 && (
+          <>
+            <h1 className="text-2xl font-semibold text-center mb-1">
+              You're all set!
+            </h1>
+            <p className="text-sm text-gray-500 text-center mb-6">
+              The best way to start earning: create your first post from a
+              chapter of <em>The Carbonated Body</em>. Pick a chapter and
+              CO2Body turns it into ready-to-publish content — carousel
+              slides, an AI presenter video, or an animated image — with your
+              affiliate link built in.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => finish("/u/generate")}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-lg py-2 mb-3"
+            >
+              Create my first book chapter post
+            </button>
+
+            <button
+              type="button"
+              onClick={() => finish()}
+              className="w-full border rounded-lg py-2 text-sm text-gray-600 hover:bg-gray-50"
+            >
+              Go to my dashboard
+            </button>
+          </>
+        )}
+
+        {step !== 3 && (
+          <button
+            type="button"
+            onClick={() => finish()}
+            className="w-full text-xs text-gray-400 hover:text-gray-600 mt-4"
+          >
+            Skip setup for now
+          </button>
+        )}
       </div>
     </div>
   );
