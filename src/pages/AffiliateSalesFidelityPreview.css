@@ -208,7 +208,7 @@
   .fidelity-lede { font-size:16px; }
   .fidelity-proof { font-size:14px; }
   .fidelity-problem { display:flex; flex-direction:column; min-height:0; }
-  .fidelity-problem-art { position:relative; width:100%; aspect-ratio:16/10; background-size:auto 100%; background-position:14% center; }
+  .fidelity-problem-art { position:relative; width:100%; aspect-ratio:3/4; background-image:var(--mobile-art)!important; background-size:contain; background-position:center; }
   .fidelity-problem-copy { width:100%; margin:0; padding:42px 20px 28px; background:#020914; }
   .fidelity-problem h2 { font-size:38px; }
   .fidelity-point { grid-template-columns:52px 1fr; gap:14px; }
