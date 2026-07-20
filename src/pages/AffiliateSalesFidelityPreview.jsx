@@ -32,7 +32,7 @@ export default function AffiliateSalesFidelityPreview() {
               <span className="fidelity-icon fidelity-icon-brain" aria-hidden="true" />
               <p>You’ve seen what passes for health content online: recycled clickbait, generic AI filler, the same ten “hacks” rephrased forever. Most of it doesn’t just look shallow. It’s <strong>saying nothing new</strong>, because it’s all working from the same tired assumptions about how the body works.</p>
             </div>
-            <div className="fidelity-point">
+            <div className="fidelity-point fidelity-point-clock">
               <span className="fidelity-icon fidelity-icon-clock" aria-hidden="true" />
               <p>Meanwhile, creating something genuinely good takes <strong>hours per post</strong>: researching it, getting it accurate, designing it well, and formatting it for every platform. Most people give up.</p>
             </div>
