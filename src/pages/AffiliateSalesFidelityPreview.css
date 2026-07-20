@@ -25,6 +25,7 @@
 .fidelity-problem { min-height:760px; aspect-ratio:1536/1024; }
 .fidelity-problem-art { position:absolute; inset:0; background-position:center; background-size:cover; background-repeat:no-repeat; }
 .fidelity-problem::after { content:""; position:absolute; inset:0 0 0 47.5%; background:linear-gradient(90deg,rgba(2,10,19,.93),#020914 12%,#020914 100%); }
+.fidelity-problem::before { content:""; position:absolute; z-index:2; right:0; bottom:0; left:0; height:15%; background:linear-gradient(180deg,rgba(2,9,20,.96),#020914 24%); }
 .fidelity-problem-copy { position:relative; z-index:2; width:51%; margin-left:auto; padding:clamp(30px,3.7vw,60px) clamp(36px,5vw,82px) 150px 34px; }
 .fidelity-section-label { display:block; width:max-content; margin:0 auto 24px; padding:0; border:0; border-radius:0; font-family:"Barlow Condensed",sans-serif; font-size:clamp(20px,2.1vw,34px); font-weight:800; text-transform:uppercase; }
 .fidelity-problem h2 { margin:0 0 30px; font-size:clamp(34px,3.3vw,56px); line-height:1.06; text-align:center; }
@@ -36,7 +37,7 @@
 .fidelity-point p,.fidelity-problem-close { margin:0; color:#eef0f4; font-size:clamp(15px,1.25vw,21px); line-height:1.42; }
 .fidelity-point strong,.fidelity-problem-close strong { color:#f0af2b; }
 .fidelity-point-final p strong { font-family:"Barlow Condensed",sans-serif; font-size:1.55em; text-transform:uppercase; }
-.fidelity-banner { position:absolute; z-index:3; right:7%; bottom:3.6%; left:10%; margin:0; padding:24px 30px; color:#ebedf0; border:1px solid var(--gold); border-radius:9px; background:#061325; box-shadow:0 0 30px rgba(239,169,29,.14); font-size:clamp(22px,2.5vw,42px); font-weight:800; text-align:center; }
+.fidelity-banner { position:absolute; z-index:3; right:5%; bottom:2.8%; left:5%; margin:0; padding:24px 30px; color:#ebedf0; border:1px solid var(--gold); border-radius:9px; background:#061325; box-shadow:0 0 30px rgba(239,169,29,.14); font-size:clamp(22px,2.5vw,42px); font-weight:800; text-align:center; }
 .fidelity-note { width:min(900px,calc(100% - 40px)); margin:0 auto; padding:64px 0 100px; color:#aeb9ca; text-align:center; line-height:1.7; }
 .fidelity-note a { color:#ffc64d; font-weight:700; }
 .fidelity-page a:focus-visible { outline:3px solid #ffd25c; outline-offset:4px; }
@@ -55,6 +56,7 @@
   .fidelity-proof { font-size:14px; }
   .fidelity-problem { display:flex; flex-direction:column; min-height:0; }
   .fidelity-problem::after { display:none; }
+  .fidelity-problem::before { display:none; }
   .fidelity-problem-art { position:relative; width:100%; aspect-ratio:4/3; background-size:auto 100%; background-position:14% center; }
   .fidelity-problem-copy { width:100%; margin:0; padding:42px 20px 28px; background:#020914; }
   .fidelity-problem h2 { font-size:38px; }
