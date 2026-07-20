@@ -26,6 +26,7 @@ import ApiBalances from "../pages/admin/ApiBalances"
 import Transactions from "../pages/admin/Transactions"
 import UserDetail from "../pages/admin/UserDetail"
 import AffiliateSalesPreview from "../pages/AffiliateSalesPreview"
+import AffiliateSalesFidelityPreview from "../pages/AffiliateSalesFidelityPreview"
 
 
 const allRoutes = [
@@ -34,6 +35,7 @@ const allRoutes = [
     { component: <Login />, path: "/admin/login", role: "public" },
     { component: <SignUpWithOTP />, path: "/signup", role: "public" },
     { component: <AffiliateSalesPreview />, path: "/affiliate-sales-preview", role: "public" },
+    { component: <AffiliateSalesFidelityPreview />, path: "/affiliate-sales-fidelity-preview", role: "public" },
     {
         component:<ResetPassword/> ,
         path:"/reset-password",
