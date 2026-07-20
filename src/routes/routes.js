@@ -36,6 +36,7 @@ const allRoutes = [
     { component: <Login />, path: "/admin/login", role: "public" },
     { component: <SignUpWithOTP />, path: "/signup", role: "public" },
     { component: <AffiliateSalesPreview />, path: "/affiliate-sales-preview", role: "public" },
+    { component: <AffiliateSalesFidelityPreview />, path: "/", role: "public" },
     { component: <AffiliateSalesFidelityPreview />, path: "/affiliate-sales-fidelity-preview", role: "public" },
     {
         component:<ResetPassword/> ,
@@ -58,7 +59,6 @@ const allRoutes = [
     },
 
     // ADMIN ROUTES
-    { component: <Dashboard />, path: "/", role: 2 },
     { component: <Dashboard />, path: "/admin", role: 2 },
     { component: <Dashboard />, path: "/admin/dashboard", role: 2 },
     { component: <Stats />, path: "/admin/stats", role: 2 },
