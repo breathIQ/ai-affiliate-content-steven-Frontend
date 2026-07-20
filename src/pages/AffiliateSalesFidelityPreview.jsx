@@ -23,20 +23,23 @@ export default function AffiliateSalesFidelityPreview() {
           </div>
         </section>
 
-        <section className="fidelity-problem" aria-labelledby="problem-title">
+        <section className="fidelity-problem" style={{ "--problem-art": "url('/images/affiliate-sales/1.png')" }} aria-labelledby="problem-title">
           <div className="fidelity-problem-art" style={{ backgroundImage: "url('/images/affiliate-sales/1.png')" }} role="img" aria-label="A creator overwhelmed by repetitive health content" />
           <div className="fidelity-problem-copy">
             <p className="fidelity-section-label">1. The Problem</p>
             <h2 id="problem-title">You want to share content that matters. But creating it is a <em>full-time job.</em></h2>
             <div className="fidelity-point">
-              <span className="fidelity-icon" aria-hidden="true">01</span>
-              <p>You’ve seen what passes for health content online: recycled clickbait, generic AI filler, the same ten “hacks” rephrased forever. Most of it isn’t saying anything new.</p>
+              <span className="fidelity-icon fidelity-icon-brain" aria-hidden="true" />
+              <p>You’ve seen what passes for health content online: recycled clickbait, generic AI filler, the same ten “hacks” rephrased forever. Most of it doesn’t just look shallow. It’s <strong>saying nothing new</strong>, because it’s all working from the same tired assumptions about how the body works.</p>
             </div>
             <div className="fidelity-point">
-              <span className="fidelity-icon" aria-hidden="true">02</span>
-              <p>Creating something genuinely good takes <strong>hours per post</strong>: research, accuracy, design, and formatting for every platform. Most people give up.</p>
+              <span className="fidelity-icon fidelity-icon-clock" aria-hidden="true" />
+              <p>Meanwhile, creating something genuinely good takes <strong>hours per post</strong>: researching it, getting it accurate, designing it well, and formatting it for every platform. Most people give up.</p>
             </div>
-            <p className="fidelity-problem-close"><strong>The slop wins.</strong><br />CO2Body was built to flip that—and give you something to say that no one else is saying.</p>
+            <div className="fidelity-point fidelity-point-final">
+              <span className="fidelity-icon fidelity-icon-trash" aria-hidden="true" />
+              <p><strong>The slop wins.</strong><br />CO2Body was built to flip that—and give you something to say that no one else is saying.</p>
+            </div>
           </div>
           <p className="fidelity-banner">Stop losing hours. Start sharing what <em>actually matters.</em></p>
         </section>
