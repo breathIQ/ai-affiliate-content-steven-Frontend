@@ -40,6 +40,7 @@
 .fidelity-source { position:relative; width:min(100%,1536px); aspect-ratio:3/2; margin:auto; overflow:hidden; background:#020914; }
 .fidelity-source-art { position:absolute; inset:0; background-position:center; background-size:cover; background-repeat:no-repeat; }
 .fidelity-source-header { position:absolute; z-index:2; top:1.7%; right:17%; left:20%; text-align:center; }
+.fidelity-source-header::after { content:""; position:absolute; right:4%; bottom:-18px; left:4%; height:3px; background:radial-gradient(ellipse at center,rgba(255,255,232,1) 0 1%,rgba(255,210,87,.95) 5%,rgba(220,143,22,.72) 19%,rgba(186,111,11,.42) 48%,transparent 76%); box-shadow:0 0 9px rgba(255,193,55,.38); }
 .fidelity-source-label { display:flex; align-items:center; gap:18px; margin:0 0 8px; color:var(--gold); font-family:"Barlow Condensed",sans-serif; font-size:clamp(17px,1.8vw,29px); font-weight:800; letter-spacing:.03em; text-transform:uppercase; }
 .fidelity-source-label::before,.fidelity-source-label::after { content:""; flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold)); }
 .fidelity-source-label::after { background:linear-gradient(90deg,var(--gold),transparent); }
@@ -89,6 +90,7 @@
   .fidelity-source-art { position:relative; width:100%; aspect-ratio:1/1; background-size:auto 100%; background-position:22% center; }
   .fidelity-source-header,.fidelity-source-intro,.fidelity-source-points,.fidelity-source-insight,.fidelity-source-banner { position:relative; inset:auto; }
   .fidelity-source-header { order:-1; padding:42px 20px 24px; background:#020914; }
+  .fidelity-source-header::after { right:12%; bottom:5px; left:12%; }
   .fidelity-source-label { font-size:20px; }
   .fidelity-source h2 { font-size:36px; }
   .fidelity-source h2 br { display:none; }
