@@ -213,6 +213,36 @@ export default function Onboarding() {
               </div>
             )}
 
+            {hub?.coupon && (
+              <div className="mb-6 border rounded-lg px-4 py-3 bg-purple-50">
+                <p className="text-sm font-medium mb-1">
+                  Your {hub.coupon_discount || "$500 off"} coupon
+                </p>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-lg font-semibold tracking-wide">
+                    {hub.coupon}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(hub.coupon);
+                      toast.success("Coupon copied");
+                    }}
+                    className="text-purple-600 hover:text-purple-700 shrink-0"
+                    title="Copy coupon"
+                  >
+                    <FiCopy />
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Share it with your audience — it gives them{" "}
+                  {hub.coupon_discount || "$500 off"} any device (
+                  {hub.coupon_minimum || "$1,495 minimum order"}) on
+                  carbogenetics.com, and the sale is credited to you.
+                </p>
+              </div>
+            )}
+
             <button
               type="button"
               onClick={() => setStep(2)}
