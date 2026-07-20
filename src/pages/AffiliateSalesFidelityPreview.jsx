@@ -100,6 +100,40 @@ export default function AffiliateSalesFidelityPreview() {
           <p className="fidelity-lens-banner">A lens that makes everything else about health <em>make more sense.</em></p>
         </section>
 
+        <section className="fidelity-workflow" aria-labelledby="workflow-title">
+          <div className="fidelity-workflow-art" style={{ backgroundImage: "url('/images/affiliate-sales/4-clean.png')" }} role="img" aria-label="CO2Body workflow from book and research through generated formats to published social posts" />
+          <div className="fidelity-workflow-header">
+            <p>4. How It Works</p>
+            <h2 id="workflow-title">From “I should post something”<br /><em>to published, in minutes.</em></h2>
+          </div>
+          <div className="fidelity-workflow-steps" aria-label="Three publishing steps">
+            <h3><em>Step 1</em> — Pick your source.</h3>
+            <h3><em>Step 2</em> — Choose your format.</h3>
+            <h3><em>Step 3</em> — Publish. Or don’t even do that.</h3>
+          </div>
+          <p className="fidelity-workflow-banner">Pick a topic. Choose a format. <em>Let the system do the rest.</em></p>
+        </section>
+
+        <section className="fidelity-automation" aria-labelledby="automation-title">
+          <div className="fidelity-automation-art" style={{ backgroundImage: "url('/images/affiliate-sales/5-clean.png')" }} role="img" aria-label="A four-day automated content campaign connected through the CO2Body campaign engine" />
+          <div className="fidelity-automation-header">
+            <p>5. Automation Campaigns</p>
+            <h2 id="automation-title">The <em>“set it and forget it”</em> mode.</h2>
+          </div>
+          <p className="fidelity-automation-summary">Build the campaign once. The system runs it every day without you.</p>
+          <p className="fidelity-automation-banner">Your accounts stay active. <em>Your audience keeps learning. Your links keep working.</em></p>
+        </section>
+
+        <section className="fidelity-referrals" aria-labelledby="referrals-title">
+          <div className="fidelity-referrals-art" style={{ backgroundImage: "url('/images/affiliate-sales/6-clean.png')" }} role="img" aria-label="A referral marketing system flowing through email, coupon, retargeting, tracking, and commission" />
+          <div className="fidelity-referrals-header">
+            <p>6. We Market to Your Referrals for You</p>
+            <h2 id="referrals-title">Most affiliate programs hand you a link<br />and wish you luck. <em>We do the selling with you.</em></h2>
+          </div>
+          <p className="fidelity-referrals-summary">You introduce people to the work.<br /><em>An entire marketing system<br />takes it from there.</em></p>
+          <p className="fidelity-referrals-banner">Every conversion it produces <em>lands in your account.</em></p>
+        </section>
+
         <section className="fidelity-note" aria-label="Prototype scope">
           <p>These sections demonstrate the conversion method: approved artwork, preserved visual assets, and selectable HTML text in the same composition.</p>
           <Link to="/affiliate-sales-preview">View the unchanged image-led page →</Link>
