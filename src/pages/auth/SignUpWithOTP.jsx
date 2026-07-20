@@ -70,7 +70,9 @@ if (!passwordRegex.test(form.password)) {
         localStorage.setItem("user", JSON.stringify(newUser));
         localStorage.setItem("access_token", newUser.access_token);
         localStorage.setItem("onboarding_pending", "1");
-        navigate("/u/onboarding");
+        // Full reload (not navigate): app-level state like the Header's
+        // profile context only loads on mount, same as Login's redirect.
+        window.location.href = "/u/onboarding";
       } else {
         // No token in the response — fall back to the "check your email /
         // get started" confirmation.
