@@ -7,6 +7,10 @@ import {
 } from "../../services/profile.service";
 import { instagramAccountLink } from "../../services/socialMediaAuth.api";
 import { tiktokAccountLink } from "../../services/socialMediaAuth.api";
+import {
+  getAffiliateProfile,
+  claimAffiliateCoupon,
+} from "../../services/campaign.api";
 import { useLoader } from "../../context/LoaderContext";
 
 const DEFAULT_IMAGE = "/images/defaultImage.png";
@@ -20,6 +24,10 @@ export function ProfileEditModal({ isOpen, onClose }) {
   const [social, setSocial] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isAvatarRemoved, setIsAvatarRemoved] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [savedCoupon, setSavedCoupon] = useState(null);
+  const [couponSaving, setCouponSaving] = useState(false);
+  const [couponCopied, setCouponCopied] = useState(false);
 
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
@@ -56,6 +64,19 @@ export function ProfileEditModal({ isOpen, onClose }) {
     }
   };
 
+  // The coupon lives on the affiliate hub endpoint (it also auto-issues one
+  // when missing), not on the profile payload.
+  useEffect(() => {
+    if (!isOpen || Number(user?.role_id) !== 2) return;
+    getAffiliateProfile()
+      .then((res) => {
+        setSavedCoupon(res?.data?.coupon || null);
+        setCouponInput(res?.data?.coupon || "");
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen || !profile) return;
 
@@ -81,6 +102,34 @@ export function ProfileEditModal({ isOpen, onClose }) {
     navigator.clipboard.writeText(`https://co2body.com/${affiliate_id}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+  };
+
+  const copyCoupon = (e) => {
+    e.stopPropagation();
+    if (!savedCoupon) return;
+    navigator.clipboard.writeText(savedCoupon);
+    setCouponCopied(true);
+    setTimeout(() => setCouponCopied(false), 1500);
+  };
+
+  const saveCoupon = async () => {
+    const code = couponInput.trim().toUpperCase();
+    if (!/^[a-zA-Z0-9_-]{4,24}$/.test(code)) {
+      toast.error("Use 4-24 letters, numbers, dashes or underscores.");
+      return;
+    }
+    if (code === savedCoupon) return;
+    try {
+      setCouponSaving(true);
+      const res = await claimAffiliateCoupon(code);
+      setSavedCoupon(res?.data?.coupon || code);
+      setCouponInput(res?.data?.coupon || code);
+      toast.success("Your coupon is live");
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Could not save your coupon.");
+    } finally {
+      setCouponSaving(false);
+    }
   };
 
   const handleUpload = (e) => {
@@ -247,13 +296,55 @@ console.log("profile:", profile)
               </button>
             </div>
 
-            <label className="text-sm">Affiliate ID</label>
+            <label className="text-sm">Affiliate Coupon</label>
+            <p className="text-xs text-gray-400 mb-1">
+              Share this code with your audience — it gives them $500 off any
+              device ($1,495 minimum order) on carbogenetics.com and credits
+              the sale to you. Edit it to any code you like.
+            </p>
+            <div className="flex items-center border rounded-md mb-4">
+              <input
+                value={couponInput}
+                onChange={(e) => setCouponInput(e.target.value)}
+                placeholder={savedCoupon ? "" : "Being set up — check back shortly"}
+                className="flex-1 min-w-0 px-3 py-2 text-sm uppercase"
+              />
+              <button
+                type="button"
+                onClick={copyCoupon}
+                className="px-3 w-[45px] shrink-0"
+                title="Copy coupon"
+              >
+                {couponCopied ? (
+                  <img src="/icons/ic-check.svg" />
+                ) : (
+                  <img src="/icons/ic-copy.svg" />
+                )}
+              </button>
+              {couponInput.trim().toUpperCase() !== (savedCoupon || "") && (
+                <button
+                  type="button"
+                  onClick={saveCoupon}
+                  disabled={couponSaving}
+                  className="px-3 py-1.5 me-2 shrink-0 text-sm rounded-md bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  {couponSaving ? "Saving..." : "Save"}
+                </button>
+              )}
+            </div>
+
+            <label className="text-sm">Old-System Affiliate ID</label>
+            <p className="text-xs text-gray-400 mb-1">
+              Only for affiliates transferring from the old carbogenetics.com
+              affiliate program. If you signed up here, you don't need this —
+              your affiliate account is linked automatically and this shows
+              your linked code.
+            </p>
             <input
-              type="number"
-              min={0}
-              {...register("other_affiliate_id", { valueAsNumber: true })}
+              type="text"
+              {...register("other_affiliate_id")}
               disabled={profile?.other_affiliate_id !== null && profile?.other_affiliate_id !== undefined}
-              className={`w-full border px-3 py-2 rounded-md mb-4`}
+              className={`w-full border px-3 py-2 rounded-md mb-4 disabled:bg-gray-100 disabled:text-gray-500`}
             />
 
             <label className="text-sm">Amazon Link to Your Personal Review of the Book</label>
