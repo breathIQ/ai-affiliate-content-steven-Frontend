@@ -266,7 +266,8 @@ export default function Onboarding() {
                   Share it with your audience — it gives them{" "}
                   {hub.coupon_discount || "$500 off"} any device (
                   {hub.coupon_minimum || "$1,495 minimum order"}) on
-                  carbogenetics.com, and the sale is credited to you.
+                  carbogenetics.com, and the sale is credited to you. Discount
+                  amounts are subject to change with product pricing.
                 </p>
               </div>
             )}

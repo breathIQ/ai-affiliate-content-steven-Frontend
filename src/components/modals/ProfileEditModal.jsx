@@ -300,7 +300,8 @@ console.log("profile:", profile)
             <p className="text-xs text-gray-400 mb-1">
               Share this code with your audience — it gives them $500 off any
               device ($1,495 minimum order) on carbogenetics.com and credits
-              the sale to you. Edit it to any code you like.
+              the sale to you. Edit it to any code you like. Discount amounts
+              are subject to change with product pricing.
             </p>
             <div className="flex items-center border rounded-md mb-4">
               <input
