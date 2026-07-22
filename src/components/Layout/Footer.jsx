@@ -7,6 +7,7 @@ const Footer = () => {
             <div className="max-w-7xl mx-auto flex items-center justify-between text-[#6E6C81] text-[14px]">
                 <div>&copy; {new Date().getFullYear()} CO2Body (The Carbonated Body), Carbogenetics LLC. All Rights Reserved</div>
                 <div className="flex gap-4">
+                    <Link to="/support" className="hover:underline">Support</Link>
                     <Link to="/terms" className="hover:underline">Terms & Conditions</Link>
                     <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
                 </div>

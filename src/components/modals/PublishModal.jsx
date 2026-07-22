@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { CheckmarkIcon } from "react-hot-toast";
-import { getSocialMediaStatus, instagramAccountLink, tiktokAccountLink } from "../../services/socialMediaAuth.api";
+import { getSocialMediaStatus, instagramAccountLink, tiktokAccountLink, youtubeAccountLink, xAccountLink } from "../../services/socialMediaAuth.api";
 import toast from "react-hot-toast";
 import { FaInfoCircle } from "react-icons/fa";
 import { useForm } from "react-hook-form";
@@ -11,6 +11,8 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
     instagram: false,
     instagram_story: false,
     tiktok: false,
+    youtube: false,
+    x: false,
   });
   const [mediaStatus, setMediaStatus] = useState({});
   // const [enabledContentDisclouserSwitch, setEnabledContentDisclouserSwitch] = useState(true);
@@ -35,6 +37,10 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
 
   const instagramStatus = mediaStatus?.instagram;
   const tiktokStatus = mediaStatus?.tiktok;
+  // Only present once the backend YouTube integration is configured.
+  const youtubeStatus = mediaStatus?.youtube;
+  // Only present once the backend X integration is configured.
+  const xStatus = mediaStatus?.x;
 
   // console.log("mediaStatus:", mediaStatus);
 
@@ -56,6 +62,28 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
     } catch (err) {
       toast.error(
         err?.response?.data?.message || "Failed to link TikTok account"
+      );
+    }
+  };
+
+  const youtubeLinkAccount = async () => {
+    try {
+      const res = await youtubeAccountLink();
+      window.location.href = res.data;
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to link YouTube account"
+      );
+    }
+  };
+
+  const xLinkAccount = async () => {
+    try {
+      const res = await xAccountLink();
+      window.location.href = res.data;
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to link X account"
       );
     }
   };
@@ -86,8 +114,13 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
 
   const submitForm = (data) => {
 
-    if (!platforms.instagram && !platforms.instagram_story && !platforms.tiktok) {
+    if (!platforms.instagram && !platforms.instagram_story && !platforms.tiktok && !platforms.youtube && !platforms.x) {
       toast.error("Please select at least one platform to publish");
+      return;
+    }
+
+    if (platforms.youtube && !hasVideo) {
+      toast.error("YouTube posts need a video. Add or generate a video first.");
       return;
     }
 
@@ -201,6 +234,9 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
     const s = String(t);
     return `#${s.replace(/^#/, "")}`;
   };
+
+  // YouTube accepts videos only; disable it for image-only posts.
+  const hasVideo = Array.isArray(preview?.media) && preview.media.some((m) => isVideoMedia(m));
 
   const fetchMediaStatus = async () => {
     try {
@@ -415,6 +451,91 @@ export default function PublishModal({ isOpen, onClose, onSubmit, preview }) {
                   </button>
                 )}
               </label>
+
+              {/* YouTube (videos only). Only shown once the backend integration
+                  is configured; disabled for image-only posts. Videos post as
+                  Shorts. */}
+              {youtubeStatus !== undefined && (
+                <label className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={platforms.youtube}
+                      disabled={!youtubeStatus?.connected || !hasVideo}
+                      className="accent-[#7239EA] w-[15.75px] h-[15.75px]"
+                      onChange={() =>
+                        setPlatforms((p) => ({
+                          ...p,
+                          youtube: !p.youtube,
+                        }))
+                      }
+                    />
+                    <span>
+                      YouTube
+                      <span className="block text-xs text-gray-500">
+                        {hasVideo ? "Posts as a Short" : "Video posts only"}
+                      </span>
+                    </span>
+                  </div>
+
+                  {youtubeStatus?.connected ? (
+                    <div className="flex items-center border px-2 py-1 rounded-md gap-1 text-sm">
+                      {youtubeStatus.username}
+                      <CheckmarkIcon className="text-green-500" size={14} />
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="text-sm border px-2 py-1 rounded-md flex items-center gap-1 cursor-pointer"
+                      onClick={youtubeLinkAccount}
+                    >
+                      Connect YouTube
+                    </button>
+                  )}
+                </label>
+              )}
+
+              {/* X (Twitter). Only shown once the backend integration is
+                  configured. Posts the media with a 280-char caption. */}
+              {xStatus !== undefined && (
+                <label className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={platforms.x}
+                      disabled={!xStatus?.connected}
+                      className="accent-[#7239EA] w-[15.75px] h-[15.75px]"
+                      onChange={() =>
+                        setPlatforms((p) => ({
+                          ...p,
+                          x: !p.x,
+                        }))
+                      }
+                    />
+                    <span>
+                      X
+                      <span className="block text-xs text-gray-500">
+                        Caption trimmed to 280 characters
+                      </span>
+                    </span>
+                  </div>
+
+                  {xStatus?.connected ? (
+                    <div className="flex items-center border px-2 py-1 rounded-md gap-1 text-sm">
+                      @{xStatus.username}
+                      <CheckmarkIcon className="text-green-500" size={14} />
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="text-sm border px-2 py-1 rounded-md flex items-center gap-1 cursor-pointer"
+                      onClick={xLinkAccount}
+                    >
+                      Connect X
+                    </button>
+                  )}
+                </label>
+              )}
 
             </div>
           </div>

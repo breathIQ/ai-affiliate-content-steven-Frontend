@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Layout from "../../components/Layout/Layout";
 import DashboardOverview from "../../components/DashboardOverview";
 import RecentPostsTable from "../../components/RecentPostsTable";
+import ExtensionInstallCard from "../../components/ExtensionInstallCard";
 import { getUserDashboardData } from "../../services/userDashboard.api";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -73,6 +74,7 @@ function UserDashboard() {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto">
+        <ExtensionInstallCard />
         <DashboardOverview data={dashboardData} />
 
         <div className=" pt-6">

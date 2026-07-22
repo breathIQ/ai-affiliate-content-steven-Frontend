@@ -13,6 +13,7 @@ import ResetPassword from "../pages/auth/ResetPassword"
 import NotFound from "../pages/NotFound"
 import Privacy from "../pages/common/Privacy"
 import Terms from "../pages/common/Terms"
+import Support from "../pages/common/Support"
 import AffiliateUserLandingPage from "../pages/AffiliateUserLandingPage"
 import Billing from "../pages/user/Billing"
 import Avatars from "../pages/user/Avatars"
@@ -51,6 +52,11 @@ const allRoutes = [
     {
         component:<Privacy/> ,
         path:"/privacy",
+        role: "public"
+    },
+    {
+        component:<Support/> ,
+        path:"/support",
         role: "public"
     },
     {

@@ -19,6 +19,7 @@ export default function TopNavTabs() {
     { name: "Files", path: "/admin/files" },
     { name: "Campaigns", path: "/admin/campaign-content" },
     { name: "Reviews", path: "/admin/campaign-review" },
+    { name: "Support", path: "/support" },
   ];
 
   const userTabs = [
@@ -29,6 +30,7 @@ export default function TopNavTabs() {
     { name: "Avatars", path: "/u/avatars" },
     { name: "Billing", path: "/u/billing" },
     { name: "Affiliate", path: "/u/affiliate" },
+    { name: "Support", path: "/support" },
     // { name: "Schedule", path: "/u/schedule" },
   ];
 

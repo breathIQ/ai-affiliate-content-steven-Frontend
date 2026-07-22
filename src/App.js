@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import allRoutes from './routes/routes';
 import { Toaster } from 'react-hot-toast';
 import ProtectedRoute from './routes/ProtectedRoute';
+import FloatingSupport from './components/FloatingSupport';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             )
             })}
         </Routes>
+        <FloatingSupport />
       </BrowserRouter>
     </>
   );

@@ -5,8 +5,13 @@ import {
   getProfileByRole,
   updateProfileByRole,
 } from "../../services/profile.service";
-import { instagramAccountLink } from "../../services/socialMediaAuth.api";
-import { tiktokAccountLink } from "../../services/socialMediaAuth.api";
+import {
+  instagramAccountLink,
+  tiktokAccountLink,
+  youtubeAccountLink,
+  xAccountLink,
+  disconnectSocialAccount,
+} from "../../services/socialMediaAuth.api";
 import {
   getAffiliateProfile,
   claimAffiliateCoupon,
@@ -62,6 +67,67 @@ export function ProfileEditModal({ isOpen, onClose }) {
         err?.response?.data?.message || "Failed to link TikTok account"
       );
     }
+  };
+
+  const youtubeLinkAccount = async () => {
+    try {
+      const res = await youtubeAccountLink();
+      window.location.href = res.data;
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to link YouTube account");
+    }
+  };
+
+  const xLinkAccount = async () => {
+    try {
+      const res = await xAccountLink();
+      window.location.href = res.data;
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to link X account");
+    }
+  };
+
+  const [disconnecting, setDisconnecting] = useState(null);
+  const disconnect = async (providerKey, label) => {
+    setDisconnecting(providerKey);
+    try {
+      await disconnectSocialAccount(providerKey);
+      toast.success(`${label} disconnected. You can connect a different account now.`);
+      setSocial((s) => ({ ...(s || {}), [providerKey]: { connected: false, username: null } }));
+      loadProfile();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || `Failed to disconnect ${label}`);
+    } finally {
+      setDisconnecting(null);
+    }
+  };
+
+  // Providers rendered in the Social Accounts section. YouTube and X only
+  // appear when the backend reports them (i.e. their integration is configured).
+  const SOCIAL_PROVIDERS = [
+    { key: "instagram", label: "Instagram", handle: false, link: instagramLinkAccount },
+    { key: "tiktok", label: "TikTok", handle: true, link: tiktokLinkAccount },
+    { key: "youtube", label: "YouTube", handle: false, link: youtubeLinkAccount },
+    { key: "x", label: "X", handle: true, link: xLinkAccount },
+  ];
+
+  const providerIcon = (key) => {
+    if (key === "instagram") return <img src="/icons/insta.svg" className="w-5 h-5" alt="" />;
+    if (key === "tiktok") return <img src="/icons/tiktok.svg" className="w-5 h-5" alt="" />;
+    if (key === "youtube")
+      return (
+        <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden>
+          <path fill="#FF0000" d="M23 12s0-3.2-.4-4.7a2.5 2.5 0 0 0-1.8-1.8C19.3 5 12 5 12 5s-7.3 0-8.8.5A2.5 2.5 0 0 0 1.4 7.3C1 8.8 1 12 1 12s0 3.2.4 4.7a2.5 2.5 0 0 0 1.8 1.8C4.7 19 12 19 12 19s7.3 0 8.8-.5a2.5 2.5 0 0 0 1.8-1.8C23 15.2 23 12 23 12z" />
+          <path fill="#fff" d="M9.75 15.5v-7L15.5 12z" />
+        </svg>
+      );
+    if (key === "x")
+      return (
+        <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden>
+          <path fill="#000" d="M18.244 2H21.5l-7.5 8.57L22.5 22h-6.9l-4.71-6.16L5.5 22H2.24l8-9.17L1.5 2h7.06l4.26 5.63L18.244 2zm-1.21 18h1.83L7.05 3.9H5.1L17.03 20z" />
+        </svg>
+      );
+    return null;
   };
 
   // The coupon lives on the affiliate hub endpoint (it also auto-issues one
@@ -390,40 +456,51 @@ console.log("profile:", profile)
         {social && (
           <>
             <p className="text-sm font-medium mb-2">Social Accounts</p>
-            <div className="flex gap-3 mb-4">
-              <div className={`flex items-center w-full justify-center gap-2 border rounded-md px-3 py-2 text-sm ${social.instagram?.connected ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                onClick={() => {
-                  if (!social.instagram?.connected) {
-                    instagramLinkAccount();
-                  }
-                }}>
-                <img src="/icons/insta.svg" />
-                {social.instagram?.connected ? (
-                  <span className="flex">
-                    {social.instagram.username}
-                    <CheckmarkIcon size={14} className="ml-1 text-green-500" />
-                  </span>
-                ) : (
-                  "Connect Instagram"
-                )}
-              </div>
+            <div className="space-y-2 mb-4">
+              {SOCIAL_PROVIDERS.filter((p) => social[p.key] !== undefined).map((p) => {
+                const acc = social[p.key];
+                const isConnected = Boolean(acc?.connected);
+                return (
+                  <div
+                    key={p.key}
+                    className="flex items-center justify-between gap-2 border rounded-md px-3 py-2 text-sm"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      {providerIcon(p.key)}
+                      {isConnected ? (
+                        <span className="flex items-center min-w-0">
+                          <span className="truncate">
+                            {p.handle ? "@" : ""}
+                            {acc.username}
+                          </span>
+                          <CheckmarkIcon size={14} className="ml-1 text-green-500 flex-shrink-0" />
+                        </span>
+                      ) : (
+                        <span className="text-gray-500">{p.label} not connected</span>
+                      )}
+                    </div>
 
-              <div className={`flex items-center w-full justify-center gap-2 border rounded-md px-3 py-2 text-sm ${social.tiktok?.connected ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                onClick={() => {
-                  if (!social.tiktok?.connected) {
-                    tiktokLinkAccount();
-                  }
-                }}>
-                <img src="/icons/tiktok.svg" />
-                {social.tiktok?.connected ? (
-                  <span className="flex">
-                    {social.tiktok.username}
-                    <CheckmarkIcon size={14} className="ml-1 text-green-500" />
-                  </span>
-                ) : (
-                  "Connect TikTok"
-                )}
-              </div>
+                    {isConnected ? (
+                      <button
+                        type="button"
+                        onClick={() => disconnect(p.key, p.label)}
+                        disabled={disconnecting === p.key}
+                        className="text-xs font-medium text-red-500 hover:text-red-700 flex-shrink-0 disabled:opacity-60"
+                      >
+                        {disconnecting === p.key ? "Disconnecting…" : "Disconnect"}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={p.link}
+                        className="text-xs font-medium text-purple-600 hover:text-purple-800 flex-shrink-0"
+                      >
+                        Connect {p.label}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </>
         )}

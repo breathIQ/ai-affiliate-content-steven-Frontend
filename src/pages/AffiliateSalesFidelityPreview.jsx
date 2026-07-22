@@ -213,6 +213,14 @@ export default function AffiliateSalesFidelityPreview() {
         </section>
 
       </main>
+      <footer style={{ borderTop: "1px solid rgba(127,127,127,0.2)", padding: "28px 20px 40px", textAlign: "center", fontSize: 14, color: "inherit" }}>
+        <div style={{ marginBottom: 8, display: "flex", gap: 18, justifyContent: "center", flexWrap: "wrap" }}>
+          <Link to="/support" style={{ color: "inherit", textDecoration: "underline" }}>Support</Link>
+          <Link to="/terms" style={{ color: "inherit", textDecoration: "underline" }}>Terms &amp; Conditions</Link>
+          <Link to="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>Privacy Policy</Link>
+        </div>
+        <div style={{ opacity: 0.6 }}>© {new Date().getFullYear()} CO2Body (The Carbonated Body), Carbogenetics LLC. All Rights Reserved</div>
+      </footer>
       <Link className="fidelity-floating-cta" to="/signup" aria-label="Get your affiliate link">
         <span className="fidelity-floating-label">Get your affiliate link</span><span className="fidelity-floating-arrow" aria-hidden="true">→</span>
       </Link>

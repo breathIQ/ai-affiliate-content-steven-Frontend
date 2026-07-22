@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { FiCopy, FiCheck } from "react-icons/fi";
+import ExtensionInstallCard from "../../components/ExtensionInstallCard";
 import { getUserProfile } from "../../services/profile.api";
 import {
   getAffiliateProfile,
@@ -376,6 +377,9 @@ export default function Onboarding() {
             >
               Go to my dashboard
             </button>
+
+            {/* Self-hides if already installed, dismissed, or on mobile. */}
+            <ExtensionInstallCard />
           </>
         )}
 

@@ -20,7 +20,22 @@ export const instagramAccountLink = async () => {
   return res.data;
 }
 
+export const youtubeAccountLink = async () => {
+  const res = await API.get("/user/youtube/link");
+  return res.data;
+}
+
+export const xAccountLink = async () => {
+  const res = await API.get("/user/x/link");
+  return res.data;
+}
+
 export const getSocialMediaStatus = async () => {
   const res = await API.get("/user/social/accounts");
+  return res.data;
+};
+
+export const disconnectSocialAccount = async (provider) => {
+  const res = await API.delete(`/user/social/accounts/${provider}`);
   return res.data;
 };
