@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
-import { getChapter, draftPostText, generateAIPost, getChapterAngles } from "../../services/post.api";
+import { getChapter, draftPostText, generateAIPost, getChapterAngles, getSinglePost } from "../../services/post.api";
 import { draftScript, generateVideo, getVideoGenerationStatus, getAvatars, getVoiceClones } from "../../services/heygen.api";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import PublishSettingsFields from "../PublishSettingsFields";
 
@@ -103,6 +103,10 @@ export default function GenerateContentModal({ setGeneratedData }) {
   const [drafting, setDrafting] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
   const [videoGeneration, setVideoGeneration] = useState(null);
+  // Async image generation (server renders in the background like video):
+  // { post_id, status: 'generating' | 'failed' }
+  const [imageGeneration, setImageGeneration] = useState(null);
+  const navigate = useNavigate();
   const pollRef = useRef(null);
 
   // Publish-without-review: lets the user skip the post-render review step
@@ -276,6 +280,7 @@ export default function GenerateContentModal({ setGeneratedData }) {
     setShowFeedback(false);
     setFeedback("");
     setVideoGeneration(null);
+    setImageGeneration(null);
     setSelectedAvatar(null);
     setAvatarSearch("");
     setAvatarPickerOpen(false);
@@ -538,9 +543,21 @@ export default function GenerateContentModal({ setGeneratedData }) {
           return;
         }
 
-        // Auto-publish succeeded server-side: the post already exists (and
-        // is publishing/scheduled), so skip the review flow entirely -
-        // handing res.data to Library would auto-save a duplicate draft.
+        // Async flow: the server creates the post up front and renders the
+        // images in the background (same pattern as video). Poll the post
+        // until the images land or it fails.
+        if (res.data?.post_id && res.data?.status === "generating") {
+          setImageGeneration({ post_id: res.data.post_id, status: "generating" });
+          setStep("generating");
+          pollRef.current = setTimeout(
+            () => pollImagePost(res.data.post_id, publishAction),
+            POLL_INTERVAL_MS
+          );
+          return;
+        }
+
+        // Fallback for the old synchronous response shape (kept so the UI
+        // still works if the API is ever rolled back).
         if (publishAction !== "review" && res.data?.post_id) {
           toast.success(
             publishAction === "schedule"
@@ -552,8 +569,6 @@ export default function GenerateContentModal({ setGeneratedData }) {
         }
 
         if (publishAction !== "review") {
-          // Server fell back to review (no usable images or the publish
-          // step failed) - the normal flow below auto-saves as a draft.
           toast.error("The post couldn't be auto-published - review it below instead.");
         }
 
@@ -604,6 +619,44 @@ export default function GenerateContentModal({ setGeneratedData }) {
       toast.error(err?.response?.data?.message || "Something went wrong");
     } finally {
       setFinalizing(false);
+    }
+  };
+
+  /* Poll the post the server created at image-generation kickoff. Done when
+     the status leaves pending_render: draft/scheduled/processing/published
+     all mean the images landed; failed means credits were refunded and the
+     error was auto-reported to the admin team. */
+  const pollImagePost = async (postId, publishAction) => {
+    try {
+      const res = await getSinglePost(postId);
+      const post = res?.data;
+      const status = post?.status;
+
+      if (status === "failed") {
+        setImageGeneration({ post_id: postId, status: "failed" });
+        stopPolling();
+        return;
+      }
+
+      if (status && status !== "pending_render" && (post?.media?.length || 0) > 0) {
+        stopPolling();
+        toast.success(
+          publishAction === "schedule"
+            ? "Images generated - your post is scheduled."
+            : publishAction === "publish_now"
+              ? "Images generated - your post is publishing now."
+              : "Your images are ready."
+        );
+        handleClose();
+        navigate(`/u/post/view/${postId}`);
+        return;
+      }
+
+      pollRef.current = setTimeout(() => pollImagePost(postId, publishAction), POLL_INTERVAL_MS);
+    } catch (err) {
+      // Transient network/read errors: keep polling, the render continues
+      // server-side regardless.
+      pollRef.current = setTimeout(() => pollImagePost(postId, publishAction), POLL_INTERVAL_MS);
     }
   };
 
@@ -1472,31 +1525,69 @@ export default function GenerateContentModal({ setGeneratedData }) {
                 via handOffCompletedVideo(), so it's never shown here) */}
             {step === "generating" && (
               <div className="px-6 py-8">
-                {videoGeneration?.status !== "failed" && (
-                  <div className="text-center py-8">
-                    <div className="animate-spin h-8 w-8 border-2 border-gray-300 border-t-[#F8285A] rounded-full mx-auto mb-4" />
-                    <p className="text-sm text-gray-600">
-                      {videoGeneration?.status === "generating" || videoGeneration?.status === "thinking"
-                        ? "Generating your video..."
-                        : "Rendering final video..."}
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">This can take a few minutes.</p>
-                  </div>
-                )}
+                {imageGeneration
+                  ? (
+                    <>
+                      {imageGeneration.status !== "failed" && (
+                        <div className="text-center py-8">
+                          <div className="animate-spin h-8 w-8 border-2 border-gray-300 border-t-[#F8285A] rounded-full mx-auto mb-4" />
+                          <p className="text-sm text-gray-600">Generating your images...</p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            This can take a few minutes. It keeps rendering on our servers
+                            even if you close this window - the finished post will appear
+                            in your Library.
+                          </p>
+                        </div>
+                      )}
 
-                {videoGeneration?.status === "failed" && (
-                  <div>
-                    <p className="text-sm text-red-600 mb-4">
-                      {videoGeneration.error_message || "Video generation failed. Your credits have been refunded."}
-                    </p>
-                    <button
-                      onClick={handleClose}
-                      className="border border-gray-300 text-gray-700 py-[8px] px-[14px] rounded-lg text-sm"
-                    >
-                      Close
-                    </button>
-                  </div>
-                )}
+                      {imageGeneration.status === "failed" && (
+                        <div>
+                          <p className="text-sm text-red-600 mb-2">
+                            Image generation failed. Any credits held for it have been refunded.
+                          </p>
+                          <p className="text-xs text-gray-500 mb-4">
+                            The error has been reported to the admin team. You will get an
+                            email as soon as it is resolved.
+                          </p>
+                          <button
+                            onClick={handleClose}
+                            className="border border-gray-300 text-gray-700 py-[8px] px-[14px] rounded-lg text-sm"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )
+                  : (
+                    <>
+                      {videoGeneration?.status !== "failed" && (
+                        <div className="text-center py-8">
+                          <div className="animate-spin h-8 w-8 border-2 border-gray-300 border-t-[#F8285A] rounded-full mx-auto mb-4" />
+                          <p className="text-sm text-gray-600">
+                            {videoGeneration?.status === "generating" || videoGeneration?.status === "thinking"
+                              ? "Generating your video..."
+                              : "Rendering final video..."}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">This can take a few minutes.</p>
+                        </div>
+                      )}
+
+                      {videoGeneration?.status === "failed" && (
+                        <div>
+                          <p className="text-sm text-red-600 mb-4">
+                            {videoGeneration.error_message || "Video generation failed. Your credits have been refunded."}
+                          </p>
+                          <button
+                            onClick={handleClose}
+                            className="border border-gray-300 text-gray-700 py-[8px] px-[14px] rounded-lg text-sm"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
               </div>
             )}
           </div>

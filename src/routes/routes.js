@@ -26,6 +26,7 @@ import Automations from "../pages/user/Automations"
 import Generate from "../pages/user/Generate"
 import ApiBalances from "../pages/admin/ApiBalances"
 import Transactions from "../pages/admin/Transactions"
+import ErrorReports from "../pages/admin/ErrorReports"
 import UserDetail from "../pages/admin/UserDetail"
 import AffiliateSalesPreview from "../pages/AffiliateSalesPreview"
 import AffiliateSalesFidelityPreview from "../pages/AffiliateSalesFidelityPreview"
@@ -72,6 +73,7 @@ const allRoutes = [
     { component: <Users />, path: "/admin/users", role: 2 },
     { component: <UserDetail />, path: "/admin/users/:id", role: 2 },
     { component: <Transactions />, path: "/admin/transactions", role: 2 },
+    { component: <ErrorReports />, path: "/admin/errors", role: 2 },
     { component: <FileUpload />, path: "/admin/files", role: 2 },
     { component: <CampaignReviewQueue />, path: "/admin/campaign-review", role: 2 },
     { component: <CampaignContent />, path: "/admin/campaign-content", role: 2 },

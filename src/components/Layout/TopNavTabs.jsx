@@ -16,6 +16,7 @@ export default function TopNavTabs() {
     { name: "API Credits", path: "/admin/api-balances" },
     { name: "Users", path: "/admin/users" },
     { name: "Transactions", path: "/admin/transactions" },
+    { name: "Errors", path: "/admin/errors" },
     { name: "Files", path: "/admin/files" },
     { name: "Campaigns", path: "/admin/campaign-content" },
     { name: "Reviews", path: "/admin/campaign-review" },
