@@ -4,10 +4,14 @@ import {
   FiCheckCircle,
   FiDollarSign,
   FiMessageSquare,
+  FiMessageCircle,
   FiPhone,
+  FiPower,
   FiRefreshCw,
+  FiSettings,
   FiStar,
   FiTrendingUp,
+  FiUploadCloud,
   FiUserPlus,
   FiUsers,
 } from "react-icons/fi";
@@ -48,6 +52,40 @@ const pipeline = [
   { icon: FiStar, title: "Review Received", text: "5-star review generated" },
   { icon: FiUsers, title: "Referral", text: "Happy customers refer others" },
   { icon: FiRefreshCw, title: "Repeat Service Reminder", text: "Stay top of mind" },
+];
+
+const setupSteps = [
+  {
+    icon: FiUploadCloud,
+    title: "Connect Your Customer List",
+    body: "Import your contacts or connect your existing software.",
+    items: ["CSV", "CRM", "Google Sheets", "Website Leads"],
+  },
+  {
+    icon: FiSettings,
+    title: "Select Your Automations",
+    body: "Choose which follow-up campaigns you want to run.",
+    items: [
+      "Review Requests",
+      "Estimate Follow-ups",
+      "Missed Calls",
+      "Referral Campaigns",
+      "Repeat Service",
+      "Customer Reactivation",
+    ],
+  },
+  {
+    icon: FiMessageCircle,
+    title: "Personalize Your Messages",
+    body: "Edit the emails and texts customers will receive.",
+    items: ["Email Preview", "Friendly and warm", "Short and conversational", "AI suggestions"],
+  },
+  {
+    icon: FiPower,
+    title: "Activate Strategym",
+    body: "Your automations begin running automatically.",
+    items: ["Automation Enabled", "Campaign Started", "Review Request Sent", "Estimate Reminder Sent"],
+  },
 ];
 
 export default function StrategymLanding() {
@@ -200,6 +238,53 @@ export default function StrategymLanding() {
               />
             </figure>
           </div>
+        </section>
+
+        <section className="strategym-how" aria-labelledby="strategym-how-title">
+          <header className="strategym-how-header">
+            <p>How it works</p>
+            <h2 id="strategym-how-title">Five minutes of setup. Years of follow-up.</h2>
+            <span>
+              Once your business is connected, Strategym works quietly in the background—
+              following up with leads, customers, estimates, referrals, and review requests
+              automatically.
+            </span>
+          </header>
+
+          <div className="strategym-setup-flow">
+            {setupSteps.map(({ icon: Icon, title, body, items }, index) => (
+              <article className={`strategym-setup-card strategym-setup-card-${index + 1}`} key={title}>
+                <span className="strategym-setup-icon" aria-hidden="true">
+                  <Icon />
+                </span>
+                <h3>{title}</h3>
+                <p>{body}</p>
+                <div className="strategym-setup-details">
+                  {items.map((item) => (
+                    <span key={item}>
+                      <FiCheckCircle aria-hidden="true" />
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <figure className="strategym-how-dashboard">
+            <img
+              src="/strategym/strategym-how-dashboard.webp"
+              alt="Strategym performance dashboard showing reviews, revenue, appointments, referrals, campaign performance, automation success, and recent customer activity"
+              width="488"
+              height="560"
+              loading="lazy"
+            />
+          </figure>
+
+          <p className="strategym-how-outcome">
+            <FiTrendingUp aria-hidden="true" />
+            Less work. More reviews. More referrals. More revenue.
+          </p>
         </section>
       </div>
     </main>
