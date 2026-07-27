@@ -750,6 +750,215 @@
   }
 }
 
+@media (min-width: 821px) {
+  .strategym-hero {
+    min-height: 0;
+    aspect-ratio: 1672 / 941;
+    grid-template-rows: auto 1fr auto auto;
+    padding: 44px 3.7% 34px;
+  }
+
+  .strategym-wordmark {
+    margin-bottom: 34px;
+  }
+
+  .strategym-copy h1 {
+    font-size: clamp(3.8rem, 5vw, 5.35rem);
+  }
+
+  .strategym-review-art {
+    grid-column: 7 / 13;
+    align-self: stretch;
+    margin: -16px -6% -10px 0;
+  }
+
+  .strategym-review-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: right center;
+  }
+
+  .strategym-benefits {
+    align-self: center;
+    margin-top: 18px;
+  }
+
+  .strategym-stat {
+    grid-column: 6 / 8;
+    width: clamp(165px, 12vw, 200px);
+    align-self: end;
+    justify-self: start;
+    margin-bottom: 34px;
+    transform: translateX(-2vw);
+  }
+
+  .strategym-automation {
+    display: grid;
+    min-height: 0;
+    aspect-ratio: 1714 / 918;
+    grid-template-columns: 39% 61%;
+    grid-template-rows: 1fr;
+    gap: 0;
+    padding: 44px 3.2% 36px;
+    background:
+      linear-gradient(90deg, #fff 0 38%, rgb(255 255 255 / 82%) 43%, transparent 54%),
+      radial-gradient(circle at 74% 16%, rgb(30 187 64 / 9%), transparent 36%),
+      #fff;
+  }
+
+  .strategym-automation-left {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    padding-right: 54px;
+  }
+
+  .strategym-eyebrow {
+    margin: 0 0 22px;
+    font-size: clamp(0.95rem, 1.35vw, 1.3rem);
+  }
+
+  .strategym-automation h2 {
+    font-size: clamp(3.35rem, 4vw, 4.35rem);
+    line-height: 1.03;
+  }
+
+  .strategym-automation-copy {
+    margin-top: 24px;
+    font-size: clamp(0.92rem, 1.2vw, 1.16rem);
+    line-height: 1.68;
+  }
+
+  .strategym-followups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .strategym-followups > div {
+    min-height: 64px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgb(15 75 32 / 5%);
+  }
+
+  .strategym-followups strong {
+    font-size: clamp(0.7rem, 0.86vw, 0.9rem);
+    line-height: 1.25;
+  }
+
+  .strategym-automation-right {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    grid-template-rows: 82px 245px 1fr;
+    align-self: stretch;
+  }
+
+  .strategym-pipeline-heading {
+    display: flex;
+    grid-row: 1;
+    flex-direction: column;
+    justify-content: start;
+    margin: 0;
+    text-align: center;
+  }
+
+  .strategym-pipeline-heading strong {
+    font-size: clamp(1.1rem, 1.45vw, 1.4rem);
+  }
+
+  .strategym-pipeline-heading span {
+    margin-top: 4px;
+    font-size: clamp(0.8rem, 1.05vw, 1rem);
+  }
+
+  .strategym-pipeline {
+    position: relative;
+    display: grid;
+    grid-row: 2;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 10px;
+    align-items: start;
+    margin: 0;
+    padding: 0 0 22px;
+    list-style: none;
+  }
+
+  .strategym-pipeline::before {
+    position: absolute;
+    right: 0;
+    bottom: 40px;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #31bd50, #55dc70);
+    box-shadow: 0 0 14px rgb(41 193 77 / 70%);
+    content: "";
+    transform: rotate(-7deg);
+    transform-origin: left center;
+  }
+
+  .strategym-pipeline li {
+    position: relative;
+    z-index: 1;
+    min-height: 156px;
+    padding: 14px 8px 12px;
+    border: 1px solid #dbe6dd;
+    border-radius: 14px;
+    background: rgb(255 255 255 / 96%);
+    box-shadow: 0 14px 32px rgb(15 65 29 / 10%);
+    text-align: center;
+  }
+
+  .strategym-pipeline li:nth-child(1) { transform: translateY(62px); }
+  .strategym-pipeline li:nth-child(2) { transform: translateY(48px); }
+  .strategym-pipeline li:nth-child(3) { transform: translateY(35px); }
+  .strategym-pipeline li:nth-child(4) { transform: translateY(24px); }
+  .strategym-pipeline li:nth-child(5) { transform: translateY(14px); }
+  .strategym-pipeline li:nth-child(6) { transform: translateY(5px); }
+  .strategym-pipeline li:nth-child(7) { transform: translateY(-4px); }
+
+  .strategym-pipeline .strategym-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .strategym-pipeline .strategym-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .strategym-pipeline strong {
+    margin-top: 9px;
+    font-size: clamp(0.62rem, 0.76vw, 0.76rem);
+    line-height: 1.18;
+  }
+
+  .strategym-pipeline small {
+    margin-top: 7px;
+    font-size: clamp(0.55rem, 0.65vw, 0.66rem);
+    line-height: 1.35;
+  }
+
+  .strategym-dashboard-art {
+    grid-row: 3;
+    align-self: end;
+    margin: 0;
+    border: 1px solid #dce5de;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 24px 55px rgb(15 66 29 / 13%);
+  }
+
+  .strategym-dashboard-art img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .strategym-page *,
   .strategym-page *::before,

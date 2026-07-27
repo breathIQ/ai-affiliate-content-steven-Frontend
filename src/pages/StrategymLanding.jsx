@@ -143,59 +143,63 @@ export default function StrategymLanding() {
         </section>
 
         <section className="strategym-automation" aria-labelledby="automation-title">
-          <p className="strategym-eyebrow">Follow-up automation</p>
-          <h2 id="automation-title">
-            Every lead.
-            <span>Every customer.</span>
-            <em>Never forgotten.</em>
-          </h2>
-          <p className="strategym-automation-copy">
-            Turn every conversation into another opportunity. Strategym automatically follows up
-            with new leads, pending estimates, completed jobs, referral opportunities, missed
-            calls, and past customers—so your business keeps generating reviews, repeat work, and
-            new revenue without extra effort.
-          </p>
+          <div className="strategym-automation-left">
+            <p className="strategym-eyebrow">Follow-up automation</p>
+            <h2 id="automation-title">
+              Every lead.
+              <span>Every customer.</span>
+              <em>Never forgotten.</em>
+            </h2>
+            <p className="strategym-automation-copy">
+              Turn every conversation into another opportunity. Strategym automatically follows up
+              with new leads, pending estimates, completed jobs, referral opportunities, missed
+              calls, and past customers—so your business keeps generating reviews, repeat work, and
+              new revenue without extra effort.
+            </p>
 
-          <div className="strategym-followups">
-            {followUps.map(({ icon: Icon, label }) => (
-              <div key={label}>
-                <span className="strategym-icon" aria-hidden="true">
-                  <Icon />
-                </span>
-                <strong>{label}</strong>
-                <span aria-hidden="true">→</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="strategym-pipeline-heading">
-            <strong>Every step. Automated.</strong>
-            <span>More reviews. More referrals. More revenue.</span>
-          </div>
-
-          <ol className="strategym-pipeline">
-            {pipeline.map(({ icon: Icon, title, text }) => (
-              <li key={title}>
-                <span className="strategym-icon" aria-hidden="true">
-                  <Icon />
-                </span>
-                <div>
-                  <strong>{title}</strong>
-                  <small>{text}</small>
+            <div className="strategym-followups">
+              {followUps.map(({ icon: Icon, label }) => (
+                <div key={label}>
+                  <span className="strategym-icon" aria-hidden="true">
+                    <Icon />
+                  </span>
+                  <strong>{label}</strong>
+                  <span aria-hidden="true">→</span>
                 </div>
-              </li>
-            ))}
-          </ol>
+              ))}
+            </div>
+          </div>
 
-          <figure className="strategym-dashboard-art">
-            <img
-              src="/strategym/strategym-dashboard-mobile.webp"
-              alt="Strategym dashboard showing leads, booked jobs, reviews, revenue, automated follow-up campaigns, and customer pipeline"
-              width="1014"
-              height="568"
-              loading="lazy"
-            />
-          </figure>
+          <div className="strategym-automation-right">
+            <div className="strategym-pipeline-heading">
+              <strong>Every step. Automated.</strong>
+              <span>More reviews. More referrals. More revenue.</span>
+            </div>
+
+            <ol className="strategym-pipeline">
+              {pipeline.map(({ icon: Icon, title, text }) => (
+                <li key={title}>
+                  <span className="strategym-icon" aria-hidden="true">
+                    <Icon />
+                  </span>
+                  <div>
+                    <strong>{title}</strong>
+                    <small>{text}</small>
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+            <figure className="strategym-dashboard-art">
+              <img
+                src="/strategym/strategym-dashboard-mobile.webp"
+                alt="Strategym dashboard showing leads, booked jobs, reviews, revenue, automated follow-up campaigns, and customer pipeline"
+                width="1014"
+                height="568"
+                loading="lazy"
+              />
+            </figure>
+          </div>
         </section>
       </div>
     </main>
