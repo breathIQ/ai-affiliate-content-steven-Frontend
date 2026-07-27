@@ -192,10 +192,10 @@ export default function StrategymLanding() {
 
             <figure className="strategym-dashboard-art">
               <img
-                src="/strategym/strategym-dashboard-mobile.webp"
+                src="/strategym/strategym-dashboard-clean.webp"
                 alt="Strategym dashboard showing leads, booked jobs, reviews, revenue, automated follow-up campaigns, and customer pipeline"
                 width="1014"
-                height="568"
+                height="513"
                 loading="lazy"
               />
             </figure>
