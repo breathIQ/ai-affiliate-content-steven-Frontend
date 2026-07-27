@@ -80,24 +80,7 @@ export default function StrategymLanding() {
 
   return (
     <main className="strategym-page">
-      <div className="strategym-desktop" aria-hidden="true">
-        <img
-          src="/strategym/strategym-section-1-desktop.png"
-          alt=""
-          width="1672"
-          height="941"
-          fetchPriority="high"
-        />
-        <img
-          src="/strategym/strategym-section-2-desktop.png"
-          alt=""
-          width="1714"
-          height="918"
-          loading="lazy"
-        />
-      </div>
-
-      <div className="strategym-mobile">
+      <div className="strategym-content">
         <section className="strategym-hero" aria-labelledby="strategym-title">
           <p className="strategym-wordmark">Strategym</p>
           <div className="strategym-copy">
@@ -114,10 +97,10 @@ export default function StrategymLanding() {
 
           <figure className="strategym-review-art">
             <img
-              src="/strategym/strategym-reviews-mobile.webp"
+              src="/strategym/strategym-reviews-clean.png"
               alt="Strategym review request shown on a phone beside three five-star Google reviews for a local business"
-              width="832"
-              height="765"
+              width="1308"
+              height="1210"
             />
           </figure>
 

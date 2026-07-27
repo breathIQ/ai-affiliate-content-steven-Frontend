@@ -13,43 +13,376 @@
   font-family: "Poppins", Arial, sans-serif;
 }
 
-.strategym-desktop {
-  display: block;
+.strategym-content {
   width: 100%;
-  background: #fff;
 }
 
-.strategym-desktop img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
+@media (min-width: 821px) {
+  .strategym-hero,
+  .strategym-automation {
+    display: grid;
+    width: min(100%, 1714px);
+    min-height: 900px;
+    margin-inline: auto;
+    padding: 54px 3.8% 42px;
+    background:
+      radial-gradient(circle at 70% 22%, rgb(26 168 58 / 8%), transparent 32%),
+      linear-gradient(110deg, #fff 0 48%, #f8fcf8 78%, #fff 100%);
+  }
 
-.strategym-mobile {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
+  .strategym-hero {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto auto auto auto;
+    column-gap: 28px;
+  }
+
+  .strategym-wordmark {
+    grid-column: 1 / 13;
+    margin: 0 0 42px;
+    color: #090d0c;
+    font-size: clamp(1.35rem, 2vw, 2rem);
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+  }
+
+  .strategym-copy {
+    z-index: 2;
+    grid-column: 1 / 6;
+    grid-row: 2;
+  }
+
+  .strategym-copy h1,
+  .strategym-automation h2 {
+    margin: 0;
+    color: var(--strategym-green-dark);
+    font-size: clamp(4rem, 5.2vw, 5.7rem);
+    font-weight: 800;
+    letter-spacing: -0.055em;
+    line-height: 1.03;
+  }
+
+  .strategym-copy h1 span,
+  .strategym-automation h2 span,
+  .strategym-automation h2 em {
+    display: block;
+  }
+
+  .strategym-copy h1 span {
+    color: var(--strategym-green);
+  }
+
+  .strategym-lede {
+    max-width: 610px;
+    margin: 24px 0 0;
+    color: #252b29;
+    font-size: clamp(1.05rem, 1.35vw, 1.35rem);
+    line-height: 1.65;
+  }
+
+  .strategym-lede strong {
+    color: var(--strategym-green-dark);
+  }
+
+  .strategym-review-art {
+    position: relative;
+    grid-column: 6 / 13;
+    grid-row: 2 / 5;
+    align-self: center;
+    margin: -28px -6% 0 -5%;
+    overflow: hidden;
+  }
+
+  .strategym-review-art img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .strategym-stat {
+    display: grid;
+    grid-column: 6 / 8;
+    grid-row: 3;
+    z-index: 3;
+    align-self: center;
+    padding: 18px;
+    border: 1px solid #d8eadb;
+    background: rgb(255 255 255 / 90%);
+    box-shadow: 0 15px 40px rgb(13 92 33 / 9%);
+  }
+
+  .strategym-stat span {
+    color: var(--strategym-muted);
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  .strategym-stat strong {
+    color: var(--strategym-green);
+    font-size: clamp(2.6rem, 4vw, 4rem);
+    line-height: 1.05;
+  }
+
+  .strategym-stat small {
+    color: var(--strategym-green-dark);
+    font-weight: 600;
+  }
+
+  .strategym-benefits {
+    display: grid;
+    grid-column: 1 / 6;
+    grid-row: 3;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    align-self: end;
+    margin-top: 38px;
+    padding-top: 22px;
+    border-top: 1px solid #c8e0cd;
+  }
+
+  .strategym-benefits article {
+    padding: 0 22px;
+    border-right: 1px solid #dce9de;
+  }
+
+  .strategym-benefits article:first-child {
+    padding-left: 0;
+  }
+
+  .strategym-benefits article:last-child {
+    border-right: 0;
+  }
+
+  .strategym-icon {
+    display: inline-flex;
+    width: 54px;
+    height: 54px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--strategym-green);
+    background: var(--strategym-green-soft);
+  }
+
+  .strategym-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .strategym-benefits h2 {
+    margin: 14px 0 0;
+    color: var(--strategym-green-dark);
+    font-size: 0.95rem;
+  }
+
+  .strategym-benefits p {
+    margin: 6px 0 0;
+    color: var(--strategym-muted);
+    font-size: 0.78rem;
+    line-height: 1.55;
+  }
+
+  .strategym-trust {
+    grid-column: 1 / 6;
+    grid-row: 4;
+    align-self: end;
+    padding-top: 34px;
+    border-top: 1px solid #c8e0cd;
+  }
+
+  .strategym-trust > p {
+    margin: 0 0 14px;
+    color: var(--strategym-green-dark);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .strategym-trust > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    color: var(--strategym-green-dark);
+  }
+
+  .strategym-trust div span:first-child {
+    color: var(--strategym-green);
+    font-size: 1.25rem;
+  }
+
+  .strategym-outcome {
+    display: flex;
+    z-index: 4;
+    grid-column: 7 / 13;
+    grid-row: 4;
+    gap: 16px;
+    align-self: end;
+    align-items: center;
+    margin: 0;
+    padding: 22px 26px;
+    color: var(--strategym-muted);
+    background: rgb(255 255 255 / 88%);
+    border-top: 1px solid #c8e0cd;
+  }
+
+  .strategym-outcome svg {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    color: var(--strategym-green);
+  }
+
+  .strategym-outcome strong {
+    display: block;
+    color: var(--strategym-green-dark);
+    font-size: 1.15rem;
+  }
+
+  .strategym-automation {
+    grid-template-columns: minmax(420px, 0.78fr) minmax(620px, 1.22fr);
+    grid-template-rows: auto auto auto 1fr;
+    gap: 22px 64px;
+    min-height: 920px;
+    border-top: 1px solid #e2eee4;
+  }
+
+  .strategym-eyebrow {
+    grid-column: 1;
+    margin: 0;
+    color: var(--strategym-green);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .strategym-automation h2 {
+    grid-column: 1;
+    font-size: clamp(3.6rem, 4.5vw, 5rem);
+  }
+
+  .strategym-automation h2 em {
+    color: var(--strategym-green);
+    font-style: normal;
+  }
+
+  .strategym-automation-copy {
+    grid-column: 1;
+    margin: 0;
+    color: #3d4542;
+    font-size: 1.05rem;
+    line-height: 1.72;
+  }
+
+  .strategym-followups {
+    display: grid;
+    grid-column: 1;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    align-self: start;
+  }
+
+  .strategym-followups > div {
+    display: grid;
+    min-height: 72px;
+    grid-template-columns: 46px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 16px;
+    border: 1px solid #dce5de;
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  .strategym-followups .strategym-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .strategym-pipeline-heading {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: center;
+  }
+
+  .strategym-pipeline-heading strong,
+  .strategym-pipeline-heading span {
+    display: block;
+  }
+
+  .strategym-pipeline-heading strong {
+    color: var(--strategym-green-dark);
+    font-size: 1.35rem;
+  }
+
+  .strategym-pipeline-heading span {
+    color: var(--strategym-muted);
+  }
+
+  .strategym-pipeline {
+    display: grid;
+    grid-column: 2;
+    grid-row: 2 / 4;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    align-self: end;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .strategym-pipeline li {
+    min-height: 150px;
+    padding: 16px 10px;
+    border: 1px solid #dce5de;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 14px 36px rgb(19 73 35 / 8%);
+    text-align: center;
+  }
+
+  .strategym-pipeline .strategym-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .strategym-pipeline strong,
+  .strategym-pipeline small {
+    display: block;
+  }
+
+  .strategym-pipeline strong {
+    margin-top: 10px;
+    font-size: 0.78rem;
+  }
+
+  .strategym-pipeline small {
+    margin-top: 7px;
+    color: var(--strategym-muted);
+    font-size: 0.66rem;
+    line-height: 1.45;
+  }
+
+  .strategym-dashboard-art {
+    grid-column: 2;
+    grid-row: 4;
+    align-self: end;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid #dce5de;
+    border-radius: 18px;
+    box-shadow: 0 22px 55px rgb(17 68 31 / 12%);
+  }
+
+  .strategym-dashboard-art img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
 }
 
 @media (max-width: 820px) {
-  .strategym-desktop {
-    display: none;
-  }
-
-  .strategym-mobile {
-    position: static;
-    width: auto;
-    height: auto;
-    overflow: visible;
-    clip: auto;
-    clip-path: none;
-    white-space: normal;
-  }
-
   .strategym-hero,
   .strategym-automation {
     padding: 32px 20px 48px;
@@ -105,18 +438,6 @@
     margin: 28px -20px 0;
     overflow: hidden;
     background: #f8fbf8;
-  }
-
-  .strategym-review-art::after {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 15%;
-    height: 31%;
-    background: linear-gradient(90deg, #fff 58%, rgb(255 255 255 / 0));
-    content: "";
-    pointer-events: none;
-    z-index: 2;
   }
 
   .strategym-review-art img {
