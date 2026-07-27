@@ -896,7 +896,23 @@
     background: linear-gradient(90deg, #31bd50, #55dc70);
     box-shadow: 0 0 14px rgb(41 193 77 / 70%);
     content: "";
-    transform: rotate(-7deg);
+    transform: rotate(-11deg);
+    transform-origin: left center;
+  }
+
+  .strategym-pipeline::after {
+    position: absolute;
+    z-index: 2;
+    right: 2%;
+    bottom: 13px;
+    left: 2%;
+    height: 3px;
+    background: linear-gradient(90deg, #43de67, #70e88a 88%, transparent);
+    box-shadow:
+      0 0 8px rgb(49 205 84 / 75%),
+      0 0 18px rgb(66 220 101 / 35%);
+    content: "";
+    transform: rotate(-11deg);
     transform-origin: left center;
   }
 
@@ -912,13 +928,44 @@
     text-align: center;
   }
 
-  .strategym-pipeline li:nth-child(1) { transform: translateY(62px); }
-  .strategym-pipeline li:nth-child(2) { transform: translateY(48px); }
-  .strategym-pipeline li:nth-child(3) { transform: translateY(35px); }
-  .strategym-pipeline li:nth-child(4) { transform: translateY(24px); }
-  .strategym-pipeline li:nth-child(5) { transform: translateY(14px); }
-  .strategym-pipeline li:nth-child(6) { transform: translateY(5px); }
-  .strategym-pipeline li:nth-child(7) { transform: translateY(-4px); }
+  .strategym-pipeline li::after {
+    position: absolute;
+    z-index: 3;
+    right: 50%;
+    bottom: -36px;
+    width: 17px;
+    height: 17px;
+    border: 3px solid #72ed8d;
+    border-radius: 50%;
+    background: #fafffb;
+    box-shadow:
+      0 0 0 6px rgb(95 229 124 / 16%),
+      0 0 14px rgb(52 214 87 / 85%);
+    content: "";
+    transform: translateX(50%);
+  }
+
+  .strategym-pipeline li:last-child::before {
+    position: absolute;
+    top: -44px;
+    right: -23px;
+    color: #29c84f;
+    content: "↗";
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    text-shadow:
+      0 0 8px rgb(45 211 82 / 55%),
+      0 0 18px rgb(45 211 82 / 28%);
+  }
+
+  .strategym-pipeline li:nth-child(1) { transform: translateY(112px); }
+  .strategym-pipeline li:nth-child(2) { transform: translateY(90px); }
+  .strategym-pipeline li:nth-child(3) { transform: translateY(69px); }
+  .strategym-pipeline li:nth-child(4) { transform: translateY(50px); }
+  .strategym-pipeline li:nth-child(5) { transform: translateY(32px); }
+  .strategym-pipeline li:nth-child(6) { transform: translateY(15px); }
+  .strategym-pipeline li:nth-child(7) { transform: translateY(0); }
 
   .strategym-pipeline .strategym-icon {
     width: 42px;
