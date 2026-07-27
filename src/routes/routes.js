@@ -30,6 +30,7 @@ import ErrorReports from "../pages/admin/ErrorReports"
 import UserDetail from "../pages/admin/UserDetail"
 import AffiliateSalesPreview from "../pages/AffiliateSalesPreview"
 import AffiliateSalesFidelityPreview from "../pages/AffiliateSalesFidelityPreview"
+import StrategymLanding from "../pages/StrategymLanding"
 
 
 const allRoutes = [
@@ -38,6 +39,7 @@ const allRoutes = [
     { component: <Login />, path: "/admin/login", role: "public" },
     { component: <SignUpWithOTP />, path: "/signup", role: "public" },
     { component: <AffiliateSalesPreview />, path: "/affiliate-sales-preview", role: "public" },
+    { component: <StrategymLanding />, path: "/strategym", role: "public" },
     { component: <AffiliateSalesFidelityPreview />, path: "/", role: "public" },
     { component: <AffiliateSalesFidelityPreview />, path: "/affiliate-sales-fidelity-preview", role: "public" },
     {

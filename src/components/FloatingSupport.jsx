@@ -12,7 +12,7 @@ export default function FloatingSupport() {
   const { pathname } = useLocation();
 
   // Redundant on the dedicated support page.
-  if (pathname === "/support") return null;
+  if (pathname === "/support" || pathname.startsWith("/strategym")) return null;
 
   return (
     <>
