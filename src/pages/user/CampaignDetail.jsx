@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "../../components/Layout/Layout";
 import toast from "react-hot-toast";
-import { getAutomations } from "../../services/campaign.api";
+import { getAutomations, saveAutomationSettings } from "../../services/campaign.api";
 import { getChapter } from "../../services/post.api";
 import { getArticles } from "../../services/article.api";
 import { getAvatars } from "../../services/heygen.api";
@@ -19,6 +19,28 @@ const PLATFORM_ICONS = {
   instagram_story: "/icons/insta.svg",
   tiktok: "/icons/ic-tiktok.svg",
 };
+
+// Same vocabulary the backend validates (automation-ai.ts).
+const TEXT_MODELS = [
+  { value: "", label: "Default (Claude)" },
+  { value: "chatgpt", label: "ChatGPT" },
+  { value: "claude", label: "Claude" },
+  { value: "gemini", label: "Gemini" },
+];
+const IMAGE_ENGINES = [
+  { value: "", label: "Default (OpenAI)" },
+  { value: "openai", label: "OpenAI (lower cost)" },
+  { value: "gemini", label: "Gemini (best on-image text)" },
+];
+const IMAGE_STYLES = [
+  { value: "", label: "Default (Cinematic)" },
+  { value: "cinematic", label: "Cinematic Infographic" },
+  { value: "minimal", label: "Clean & Minimal" },
+  { value: "scientific", label: "Scientific Diagram" },
+  { value: "warm", label: "Warm & Human" },
+  { value: "bold", label: "Bold & Vibrant" },
+  { value: "photo", label: "Hyper-Realistic Photo" },
+];
 
 // One campaign (a named series of automations): every post it will publish,
 // in chronological order, with the platforms and accounts it goes to; the
@@ -62,6 +84,45 @@ const CampaignDetail = () => {
     setAutomations((list) => list.map((x) => (x.id === updated.id ? updated : x)));
   const dropAutomation = (removed) =>
     setAutomations((list) => list.filter((x) => x.id !== removed.id));
+
+  // Campaign content settings, prefilled from the first automation's defaults
+  // (settings apply to every automation in the campaign on save).
+  const [settings, setSettings] = useState({ text_model: "", image_engine: "", image_style: "", avatar_id: "" });
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  useEffect(() => {
+    if (settingsLoaded || automations.length === 0) return;
+    const d = automations[0]?.defaults || {};
+    setSettings({
+      text_model: d.text_model || "",
+      image_engine: d.image_engine || "",
+      image_style: d.image_style || "",
+      avatar_id: d.avatar_id || "",
+    });
+    setSettingsLoaded(true);
+  }, [automations, settingsLoaded]);
+
+  const saveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const results = [];
+      for (const a of automations) {
+        const res = await saveAutomationSettings(a.id, settings);
+        if (res?.success) results.push(res.data);
+      }
+      if (results.length) {
+        setAutomations((list) => list.map((x) => results.find((r) => r.id === x.id) || x));
+      }
+      toast.success(
+        `Settings applied to ${results.length} automation${results.length === 1 ? "" : "s"} in this campaign.`
+      );
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Could not save the settings");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   // The account a platform publishes to (stories go through the instagram
   // connection).
@@ -120,6 +181,78 @@ const CampaignDetail = () => {
         {automations.length === 0 && (
           <div className="bg-white border rounded-xl p-8 text-center text-gray-500">
             No automations belong to this campaign anymore.
+          </div>
+        )}
+
+        {automations.length > 0 && (
+          <div className="bg-white border rounded-xl p-4 mb-6">
+            <h2 className="font-semibold text-gray-800 mb-1">Campaign settings</h2>
+            <p className="text-xs text-gray-500 mb-3">
+              Applied to every post this campaign generates from now on.
+              Individual steps can still override them.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <label className="text-xs text-gray-600">
+                Writing AI (captions &amp; scripts)
+                <select
+                  value={settings.text_model}
+                  onChange={(e) => setSettings({ ...settings, text_model: e.target.value })}
+                  className="mt-1 w-full border rounded-lg text-sm px-2 py-2 focus:outline-none"
+                >
+                  {TEXT_MODELS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-xs text-gray-600">
+                Image AI
+                <select
+                  value={settings.image_engine}
+                  onChange={(e) => setSettings({ ...settings, image_engine: e.target.value })}
+                  className="mt-1 w-full border rounded-lg text-sm px-2 py-2 focus:outline-none"
+                >
+                  {IMAGE_ENGINES.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-xs text-gray-600">
+                Image style
+                <select
+                  value={settings.image_style}
+                  onChange={(e) => setSettings({ ...settings, image_style: e.target.value })}
+                  className="mt-1 w-full border rounded-lg text-sm px-2 py-2 focus:outline-none"
+                >
+                  {IMAGE_STYLES.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-xs text-gray-600">
+                Video avatar
+                <select
+                  value={settings.avatar_id}
+                  onChange={(e) => setSettings({ ...settings, avatar_id: e.target.value })}
+                  className="mt-1 w-full border rounded-lg text-sm px-2 py-2 focus:outline-none"
+                >
+                  <option value="">None (videos need one)</option>
+                  {avatars.slice(0, 80).map((a) => (
+                    <option key={a.avatar_id} value={a.avatar_id}>
+                      {a.avatar_name || a.name || a.avatar_id}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="flex justify-end mt-3">
+              <button
+                onClick={saveSettings}
+                disabled={savingSettings}
+                className="bg-purple-700 text-white px-4 py-2 rounded-lg text-sm disabled:opacity-60"
+              >
+                {savingSettings ? "Saving..." : "Save settings"}
+              </button>
+            </div>
           </div>
         )}
 

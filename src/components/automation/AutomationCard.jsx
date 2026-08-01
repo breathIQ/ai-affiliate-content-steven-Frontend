@@ -136,6 +136,9 @@ export default function AutomationCard({ automation: a, chapters, articles, avat
             Starts {a.start_date ? new Date(a.start_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "?"}
             {" · "}{(a.platforms || []).join(", ")} · {(a.steps || []).length} steps
             {a.defaults?.avatar_id && <> · Avatar: {avatarName(avatars, a.defaults.avatar_id)}</>}
+            {a.defaults?.text_model && <> · Writer: {a.defaults.text_model}</>}
+            {a.defaults?.image_engine && <> · Images: {a.defaults.image_engine}</>}
+            {a.defaults?.image_style && <> · Style: {a.defaults.image_style}</>}
           </p>
         </div>
         <div className="flex items-center gap-2">

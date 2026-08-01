@@ -72,6 +72,13 @@ export const draftAutomationWithAi = async (prompt) => {
   return res.data;
 };
 
+// Content settings (text model, image engine, image style, avatar) stored in
+// the automation's defaults; empty string clears a key back to the default.
+export const saveAutomationSettings = async (id, settings) => {
+  const res = await API.post(`/user/automations/${id}/settings`, settings);
+  return res.data;
+};
+
 // AI mass-edit: describe a change ("make all videos 30 seconds") and the
 // remaining pending steps are revised in place. Steps that already ran are
 // never touched.
