@@ -65,6 +65,13 @@ export const createAutomation = async (data) => {
   return res.data;
 };
 
+// Natural-language builder: describe the plan, get back a paused automation
+// drafted by AI (review, then Start). Drafting can take a minute or two.
+export const draftAutomationWithAi = async (prompt) => {
+  const res = await API.post("/user/automations/ai-draft", { prompt });
+  return res.data;
+};
+
 export const updateAutomation = async (id, data) => {
   const res = await API.put(`/user/automations/${id}`, data);
   return res.data;

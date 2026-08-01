@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import {
   getAutomations,
   createAutomation,
+  draftAutomationWithAi,
   setAutomationStatus,
   deleteAutomation,
 } from "../../services/campaign.api";
@@ -123,6 +124,34 @@ const Automations = () => {
     toast.success("Automation created. It will run on schedule.");
   };
 
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiDrafting, setAiDrafting] = useState(false);
+
+  const draftWithAi = async () => {
+    if (!aiPrompt.trim()) {
+      toast.error("Describe the posting plan first.");
+      return;
+    }
+    setAiDrafting(true);
+    try {
+      const res = await draftAutomationWithAi(aiPrompt.trim());
+      if (!res?.success) {
+        toast.error(res?.message || "Could not draft the automation");
+        return;
+      }
+      setAutomations((list) => [res.data, ...list]);
+      setAiPrompt("");
+      toast.success(
+        "Draft created as PAUSED. Review the schedule below, then press Resume to start it.",
+        { duration: 8000 }
+      );
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Could not draft the automation");
+    } finally {
+      setAiDrafting(false);
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -148,6 +177,37 @@ const Automations = () => {
         <p className="text-sm text-gray-500 mb-6">
           Schedule a sequence of posts that generate and publish themselves automatically — no review.
         </p>
+
+        {!creating && (
+          <div className="bg-white border rounded-xl p-4 mb-4">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg">✨</span>
+              <h2 className="font-semibold text-gray-800">Build with AI</h2>
+            </div>
+            <p className="text-xs text-gray-500 mb-3">
+              Describe the posting plan in plain words and AI will build the
+              day-by-day schedule. It is created paused so you can review every
+              step before starting it.
+            </p>
+            <textarea
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              rows={3}
+              disabled={aiDrafting}
+              placeholder='e.g. "Two posts per day going through all 33 chapters in order: a 3-slide carousel in the morning and a HeyGen video in the evening, on Instagram and TikTok."'
+              className="w-full border rounded-lg text-sm p-3 focus:outline-none focus:ring-1 focus:ring-purple-500"
+            />
+            <div className="flex justify-end mt-2">
+              <button
+                onClick={draftWithAi}
+                disabled={aiDrafting}
+                className="bg-purple-700 text-white px-4 py-2 rounded-lg text-sm disabled:opacity-60"
+              >
+                {aiDrafting ? "Drafting (can take a minute)..." : "Draft with AI"}
+              </button>
+            </div>
+          </div>
+        )}
 
         {creating && (
           <AutomationBuilder
