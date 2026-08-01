@@ -72,6 +72,14 @@ export const draftAutomationWithAi = async (prompt) => {
   return res.data;
 };
 
+// AI mass-edit: describe a change ("make all videos 30 seconds") and the
+// remaining pending steps are revised in place. Steps that already ran are
+// never touched.
+export const aiEditAutomation = async (id, prompt) => {
+  const res = await API.post(`/user/automations/${id}/ai-edit`, { prompt });
+  return res.data;
+};
+
 export const updateAutomation = async (id, data) => {
   const res = await API.put(`/user/automations/${id}`, data);
   return res.data;
