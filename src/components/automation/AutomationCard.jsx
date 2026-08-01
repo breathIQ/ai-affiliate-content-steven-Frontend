@@ -135,7 +135,11 @@ export default function AutomationCard({ automation: a, chapters, articles, avat
           <p className="text-xs text-gray-500 mt-0.5">
             Starts {a.start_date ? new Date(a.start_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "?"}
             {" · "}{(a.platforms || []).join(", ")} · {(a.steps || []).length} steps
-            {a.defaults?.avatar_id && <> · Avatar: {avatarName(avatars, a.defaults.avatar_id)}</>}
+            {Array.isArray(a.defaults?.avatar_ids) && a.defaults.avatar_ids.length > 0 ? (
+              <> · Avatars: {a.defaults.avatar_ids.map((id) => avatarName(avatars, id)).join(", ")} (random per video)</>
+            ) : (
+              a.defaults?.avatar_id && <> · Avatar: {avatarName(avatars, a.defaults.avatar_id)}</>
+            )}
             {a.defaults?.text_model && <> · Writer: {a.defaults.text_model}</>}
             {a.defaults?.image_engine && <> · Images: {a.defaults.image_engine}</>}
             {a.defaults?.image_style && <> · Style: {a.defaults.image_style}</>}

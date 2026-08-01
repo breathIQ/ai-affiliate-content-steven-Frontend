@@ -13,6 +13,7 @@ import AutomationCard, {
   stepSubject,
   stepSettings,
 } from "../../components/automation/AutomationCard";
+import AvatarPickerModal from "../../components/automation/AvatarPickerModal";
 
 const PLATFORM_ICONS = {
   instagram: "/icons/insta.svg",
@@ -87,9 +88,10 @@ const CampaignDetail = () => {
 
   // Campaign content settings, prefilled from the first automation's defaults
   // (settings apply to every automation in the campaign on save).
-  const [settings, setSettings] = useState({ text_model: "", image_engine: "", image_style: "", avatar_id: "" });
+  const [settings, setSettings] = useState({ text_model: "", image_engine: "", image_style: "", avatar_ids: [] });
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
 
   useEffect(() => {
     if (settingsLoaded || automations.length === 0) return;
@@ -98,7 +100,11 @@ const CampaignDetail = () => {
       text_model: d.text_model || "",
       image_engine: d.image_engine || "",
       image_style: d.image_style || "",
-      avatar_id: d.avatar_id || "",
+      avatar_ids: Array.isArray(d.avatar_ids) && d.avatar_ids.length
+        ? d.avatar_ids
+        : d.avatar_id
+          ? [d.avatar_id]
+          : [],
     });
     setSettingsLoaded(true);
   }, [automations, settingsLoaded]);
@@ -228,21 +234,55 @@ const CampaignDetail = () => {
                   ))}
                 </select>
               </label>
-              <label className="text-xs text-gray-600">
-                Video avatar
-                <select
-                  value={settings.avatar_id}
-                  onChange={(e) => setSettings({ ...settings, avatar_id: e.target.value })}
-                  className="mt-1 w-full border rounded-lg text-sm px-2 py-2 focus:outline-none"
-                >
-                  <option value="">None (videos need one)</option>
-                  {avatars.slice(0, 80).map((a) => (
-                    <option key={a.avatar_id} value={a.avatar_id}>
-                      {a.avatar_name || a.name || a.avatar_id}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div className="text-xs text-gray-600">
+                Video avatars (random pick per video)
+                {(() => {
+                  const chosen = settings.avatar_ids
+                    .map((id) => avatars.find((a) => a.avatar_id === id))
+                    .filter(Boolean);
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => setAvatarPickerOpen(true)}
+                      className="mt-1 w-full border rounded-lg text-sm px-2 py-1.5 flex items-center gap-2 hover:border-purple-400 text-left"
+                    >
+                      {chosen.length ? (
+                        <span className="flex -space-x-2">
+                          {chosen.slice(0, 4).map((a) =>
+                            a.preview_image_url ? (
+                              <img
+                                key={a.avatar_id}
+                                src={a.preview_image_url}
+                                alt={a.avatar_name}
+                                className="w-7 h-9 object-cover rounded border border-white"
+                              />
+                            ) : (
+                              <span
+                                key={a.avatar_id}
+                                className="w-7 h-9 rounded bg-gray-100 border border-white flex items-center justify-center text-gray-400"
+                              >
+                                ?
+                              </span>
+                            )
+                          )}
+                        </span>
+                      ) : (
+                        <span className="w-7 h-9 rounded bg-gray-100 flex items-center justify-center text-gray-400">
+                          ?
+                        </span>
+                      )}
+                      <span className="truncate text-gray-800">
+                        {chosen.length === 0
+                          ? "None (videos need one)"
+                          : chosen.length === 1
+                            ? chosen[0].avatar_name || chosen[0].avatar_id
+                            : `${chosen.length} avatars`}
+                      </span>
+                      <span className="ml-auto text-gray-400">▾</span>
+                    </button>
+                  );
+                })()}
+              </div>
             </div>
             <div className="flex justify-end mt-3">
               <button
@@ -297,6 +337,15 @@ const CampaignDetail = () => {
               ))}
             </div>
           </div>
+        )}
+
+        {avatarPickerOpen && (
+          <AvatarPickerModal
+            avatars={avatars}
+            selectedIds={settings.avatar_ids}
+            onDone={(ids) => setSettings({ ...settings, avatar_ids: ids })}
+            onClose={() => setAvatarPickerOpen(false)}
+          />
         )}
 
         {automations.length > 0 && (
