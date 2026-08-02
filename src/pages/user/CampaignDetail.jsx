@@ -88,7 +88,7 @@ const CampaignDetail = () => {
 
   // Campaign content settings, prefilled from the first automation's defaults
   // (settings apply to every automation in the campaign on save).
-  const [settings, setSettings] = useState({ text_model: "", image_engine: "", image_style: "", avatar_ids: [] });
+  const [settings, setSettings] = useState({ text_model: "", image_engine: "", image_style: "", avatar_ids: [], start_date: "" });
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
@@ -105,6 +105,9 @@ const CampaignDetail = () => {
         : d.avatar_id
           ? [d.avatar_id]
           : [],
+      start_date: automations[0]?.start_date
+        ? new Date(automations[0].start_date).toISOString().slice(0, 10)
+        : "",
     });
     setSettingsLoaded(true);
   }, [automations, settingsLoaded]);
@@ -197,7 +200,19 @@ const CampaignDetail = () => {
               Applied to every post this campaign generates from now on.
               Individual steps can still override them.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              <label className="text-xs text-gray-600">
+                Start date
+                <input
+                  type="date"
+                  value={settings.start_date}
+                  onChange={(e) => setSettings({ ...settings, start_date: e.target.value })}
+                  className="mt-1 w-full border rounded-lg text-sm px-2 py-[7px] focus:outline-none"
+                />
+                <span className="block text-[10px] text-gray-400 mt-0.5">
+                  Day 1 of the schedule. Locked once posts have gone out.
+                </span>
+              </label>
               <label className="text-xs text-gray-600">
                 Writing AI (captions &amp; scripts)
                 <select
