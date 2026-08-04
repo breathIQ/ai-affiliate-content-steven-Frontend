@@ -95,6 +95,27 @@ export default function AvatarPickerModal({ avatars, selectedIds = [], onDone, o
           )}
         </div>
 
+        {(() => {
+          // Many catalog entries are different LOOKS of the same person
+          // ("Sofia", "Sofia - Studio Host..."). Picking five Sofias reads as
+          // variety in the grid but is the same face in every video - warn.
+          const personOf = (a) => ((a.avatar_name || "").split(/[-(]/)[0].trim().toLowerCase() || a.avatar_id);
+          const pickedAvatars = avatars.filter((a) => picked.has(a.avatar_id));
+          const counts = {};
+          pickedAvatars.forEach((a) => {
+            const p = personOf(a);
+            counts[p] = (counts[p] || 0) + 1;
+          });
+          const dupes = Object.entries(counts).filter(([, n]) => n > 1);
+          if (!dupes.length) return null;
+          return (
+            <div className="px-5 py-2 border-t bg-amber-50 text-[11px] text-amber-700">
+              Heads up: {dupes.map(([p, n]) => `${n} of your picks are the same person (${p})`).join("; ")}.
+              Different looks of one avatar are still the same face on screen.
+            </div>
+          );
+        })()}
+
         <div className="flex items-center justify-between px-5 py-3 border-t">
           <button
             onClick={() => setPicked(new Set())}
