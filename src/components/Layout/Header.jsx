@@ -43,6 +43,7 @@ const Header = () => {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-3 ms-2">
+          <a href="https://carbogenetics.com/affiliate/brands" className="text-sm font-semibold text-white">Affiliate brands</a>
           {/* Profile */}
           <div ref={profileRef} className="relative w-[36px] h-[36px]">
             <img

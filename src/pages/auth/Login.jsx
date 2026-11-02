@@ -153,6 +153,7 @@ export default function Login() {
       {/* Left - Form Section */}
       <div className="flex items-center justify-center px-6 py-20">
         <div className="w-full max-w-md bg-white rounded-xl shadow-lg border border-gray-100 p-8 transition-all duration-300">
+          {!isadmin && <p className="mb-5 text-center"><a className="font-semibold text-blue-600 underline" href="/affiliate-connect.html">Use shared affiliate sign-in</a></p>}
           {view === "login" ? (
             /* --- LOGIN VIEW --- */
             <>
